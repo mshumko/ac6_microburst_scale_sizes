@@ -89,7 +89,8 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
             self.burstIdt)
         self.peakInd = np.nan*np.ones(len(startInd), dtype=int)
         for i, (st, ed) in enumerate(zip(startInd, endInd)):
-            self.peakInd[i] = st+np.argmax(self.d[ch][validIdt][st:ed])
+            self.peakInd[i] = self.d[ch][st]+np.argmax(self.d[ch][st:ed])
+        self.peakInd = self.peakInd.astype(int)
         return
 
 

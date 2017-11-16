@@ -8,11 +8,15 @@ import os
 
 sys.path.insert(0, '/home/mike/research/mission-tools/ac6')
 sys.path.insert(0, '/home/mike/research/microburst-detection/burst_parameter')
+sys.path.insert(0, '/home/mike/research/microburst-detection/wavelets')
+sys.path.insert(0, '/home/mike/research/mission-tools/misc')
 
 import read_ac_data
 import burst_parameter
+import waveletAnalysis
+import locate_consecutive_numbers
 
-class FindMicrobursts:
+class FindMicrobursts(waveletAnalysis.WaveletDetector):
     def __init__(self, sc_id, date):
         self.sc_id = sc_id
         self.date = date
@@ -20,7 +24,7 @@ class FindMicrobursts:
         self.getMicroburstIdx() # Calculate microburst indicies
         return
 
-    def getMicroburstIdx(self, thresh=10, method='obrien'):
+    def getMicroburstIdx(self, thresh=5, method='wavelet'):
         """
         Use either obrien or wavelet method to calculate the 
         microbrust indicies
@@ -28,9 +32,9 @@ class FindMicrobursts:
         if method == 'obrien':
             self._getBurstParam()
         else:
-            raise NotImplemented('Wavelet method not implemented yet!')
+            self._getWavelet()
 
-        self.burstIdt = np.where(self.burstParam > thresh)[0]
+        #self.burstIdt = np.where(self.burstParam > thresh)[0]
         #self._checkMicroburstFlag()
         return
 
@@ -58,13 +62,34 @@ class FindMicrobursts:
             dType='10Hz', plot=False)
         return
 
-    def _getBurstParam(self, ch='dos1rate', n=0.1, a=0.5):
+    def _getBurstParam(self, ch='dos1rate', n=0.1, a=0.3):
         """
         Calculate the burst parameter on the day. This is a CPU intensive task so
         parallize it?
         """
         self.burstParam = burst_parameter.obrien_burst_param(
             self.d[ch], 0.1, N_WIDTH=n, A_WIDTH=a)
+        return
+
+    def _getWavelet(self, ch='dos1rate', thresh=0.1):
+        """
+        This function handles the creation and manipulation of the wavelet
+        detector.
+        """
+        # Feed the counts into the wavelet microburst finder
+        validIdt = np.where(self.d[ch] != -1E31)[0]
+        waveletAnalysis.WaveletDetector.__init__(self, self.d[ch][validIdt], 
+            self.d['dateTime'][validIdt], 0.1, mother='DOG')
+        self.waveletTransform()
+        self.waveletFilter(self.s0, 1)
+        self.degenerateInvWaveletTransform()
+        self.burstIdt = np.where(self.dataFlt > thresh)[0]
+        # Find peaks
+        startInd, endInd = locate_consecutive_numbers.locateConsecutiveNumbers(
+            self.burstIdt)
+        self.peakInd = np.nan*np.ones(len(startInd), dtype=int)
+        for i, (st, ed) in enumerate(zip(startInd, endInd)):
+            self.peakInd[i] = st+np.argmax(self.d[ch][validIdt][st:ed])
         return
 
 
@@ -75,17 +100,15 @@ class TestFindMicrobursts(FindMicrobursts):
         FindMicrobursts.__init__(self, self.sc_id, self.date)  
 
         # Create empty plots
-        self.fig, self.ax = plt.subplots(3, sharex=True)
+        self.fig, self.ax = plt.subplots(2, sharex=True)
         return
 
     def plotTimeseries(self):
         validIdt = np.where(self.d['dos1rate'] != -1E31)[0]
         self.ax[0].plot(self.d['dateTime'][validIdt], self.d['dos1rate'][validIdt])
-        self.ax[1].plot(self.d['dateTime'], self.d['flag'])
-        self.ax[2].plot(self.d['dateTime'][self.burstIdt], self.d['dos1rate'][self.burstIdt])
+        self.ax[0].scatter(self.d['dateTime'][validIdt[self.peakInd]], self.d['dos1rate'][validIdt[self.peakInd]], c='r')
+        self.ax[1].plot(self.time, self.dataFlt)
         return
-    
-
 
 if __name__ == '__main__':
     sc_id = 'A'

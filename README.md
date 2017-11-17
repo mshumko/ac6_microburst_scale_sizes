@@ -3,7 +3,7 @@ This repo will house files and intermediate data used to:
     using the burst parameter or the wavelet detection algorithms.
     - Catalogue will contain time of largest amplitude,
         amplitude, L, MLT, lat, lon, alt, (pitch angle?),
-        Kp, and maybe DST.
+        in-track lag and distance, total distance, and maybe Kp and DST.
 2) Merge the catalogues from the two units to determine if the
     microburst observation was spatial (curtain) or temporal 
     (flash).

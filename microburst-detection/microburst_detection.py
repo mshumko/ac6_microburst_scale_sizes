@@ -3,7 +3,9 @@
 import matplotlib.pyplot as plt
 from datetime import datetime
 import numpy as np
+import copy
 import sys
+import csv
 import os
 
 sys.path.insert(0, '/home/mike/research/mission-tools/ac6')
@@ -17,17 +19,20 @@ import waveletAnalysis
 import locate_consecutive_numbers
 
 class FindMicrobursts(waveletAnalysis.WaveletDetector):
-    def __init__(self, sc_id, date):
+    def __init__(self, sc_id, date, runPipeline=True):
         self.sc_id = sc_id
         self.date = date
         self._loadData() # Read in the data
-        self.getMicroburstIdx() # Calculate microburst indicies
+        if runPipeline: # Run the microburst detector code and save data to CSV file
+            self.getMicroburstIdx()
+            self.saveData()
         return
 
     def getMicroburstIdx(self, thresh=5, method='wavelet'):
         """
         Use either obrien or wavelet method to calculate the 
-        microbrust indicies
+        microbrust indicies _getPeak() method will find the peak
+        amplitudes of microbursts
         """
         if method == 'obrien':
             self._getBurstParam()
@@ -38,12 +43,42 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
         #self._checkMicroburstFlag()
         return
 
+    def saveData(self, fPath=None):
+        """
+        This function will save microburst data to a CSV file.
+        Columns are: dateTime, dos1 amplitude (not baseline subtracted),
+        L, MLT, lat, lon, alt, Loss_Cone_Type, 
+        """
+        keys = ['dateTime', 'dos1rate', 'Lm_OPQ', 'MLT_OPQ', 'lat',
+            'lon', 'alt', 'Dist_In_Track', 'Lag_In_Track', 'Dist_Total','Loss_Cone_Type']
+        headerl1 = ['# Microburst catalogue created on {}'.format(
+            datetime.now())]
+        headerl2 = copy.copy(keys)
+        headerl2[0] = '# {}'.format(headerl2[0])
+
+        if fPath is None:
+            saveDir = os.path.abspath('./../microburst_catalogues/')
+            saveName = 'AC{}_{}_microbursts.txt'.format(self.sc_id, self.date.date())
+            fPath = os.path.join(saveDir, saveName)
+
+        with open(fPath, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(headerl1)
+            writer.writerow(headerl2)
+
+            line = [None]*len(keys)
+            for peakInd in self.peakInd:
+                for ic, key in enumerate(keys):
+                    line[ic] = self.d[key][peakInd]
+                writer.writerow(line)
+        return
+
     def _checkMicroburstFlag(self):
         """
         Filter the microburst indicies by the data quality flag.
         """
         self.validFlagIdt = (self.d['flag'] == 0)
-        sameIdt = list(set(self.burstIdt) & set(self.validFlagIdt))
+        sameIdt = list(set(self.peakIdt) & set(self.validFlagIdt))
         self.burstIdt = np.array(sorted(sameIdt))        
         return
 
@@ -116,14 +151,16 @@ class TestFindMicrobursts(FindMicrobursts):
     def plotTimeseries(self):
         validIdt = np.where(self.d['dos1rate'] != -1E31)[0]
         self.ax[0].plot(self.d['dateTime'][validIdt], self.d['dos1rate'][validIdt])
-        self.ax[0].scatter(self.d['dateTime'][self.burstIdt], self.d['dos1rate'][self.burstIdt], c='b', s=50)
+        self.ax[0].scatter(self.d['dateTime'][validIdt[self.burstIdt]], self.d['dos1rate'][validIdt[self.burstIdt]], c='b', s=50)
         self.ax[0].scatter(self.d['dateTime'][self.peakInd], self.d['dos1rate'][self.peakInd], c='r', s=25)
         self.ax[1].plot(self.time, self.dataFlt)
+        self.ax[0].set_ylim(bottom=0, top=np.max(self.d['dos1rate'][validIdt]))
         return
 
 if __name__ == '__main__':
     sc_id = 'A'
     date = datetime(2016, 9, 30)
     obj = TestFindMicrobursts(sc_id, date)
-    obj.plotTimeseries()
-    plt.show()
+    #obj.saveData()
+    #obj.plotTimeseries()
+    #plt.show()

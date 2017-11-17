@@ -39,8 +39,7 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
         else:
             self._getWavelet()
 
-        #self.burstIdt = np.where(self.burstParam > thresh)[0]
-        #self._checkMicroburstFlag()
+        self._checkMicroburstFlag()
         return
 
     def saveData(self, fPath=None):
@@ -78,8 +77,8 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
         Filter the microburst indicies by the data quality flag.
         """
         self.validFlagIdt = (self.d['flag'] == 0)
-        sameIdt = list(set(self.peakIdt) & set(self.validFlagIdt))
-        self.burstIdt = np.array(sorted(sameIdt))        
+        sameIdt = list(set(self.peakInd) & set(self.validFlagIdt))
+        self.peakIdt = np.array(sorted(sameIdt))        
         return
 
     def _loadData(self):
@@ -137,6 +136,7 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
             offset = validDataIdt[self.burstIdt[st]]
             self.peakInd[i] = np.argmax(self.d[ch][validDataIdt[self.burstIdt[st:et]]]) + offset
         self.peakInd = self.peakInd.astype(int)
+        return
 
 class TestFindMicrobursts(FindMicrobursts):
     def __init__(self, sc_id, date):

@@ -1,4 +1,4 @@
-# Microburst catalogue created on 2017-11-17 12:03:57.124225
+# Microburst catalogue created on 2017-11-17 12:10:51.239431
 # dateTime,dos1rate,Lm_OPQ,MLT_OPQ,lat,lon,alt,Dist_In_Track,Lag_In_Track,Dist_Total,Loss_Cone_Type
 2016-09-30 00:05:02,480.003,5.70645,8.3655,69.0095,128.812,619.518,-5.67044,-0.748435,5.98639,1.0
 2016-09-30 00:05:20.100000,620.003,6.20622,8.29159,70.0402,127.48,620.036,-5.6467,-0.745338,5.93233,1.0

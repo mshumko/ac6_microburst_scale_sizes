@@ -77,23 +77,31 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
         detector.
         """
         # Feed the counts into the wavelet microburst finder
-        validIdt = np.where(self.d[ch] != -1E31)[0]
-        waveletAnalysis.WaveletDetector.__init__(self, self.d[ch][validIdt], 
-            self.d['dateTime'][validIdt], 0.1, mother='DOG')
-        self.waveletTransform()
-        self.waveletFilter(self.s0, 1)
-        self.degenerateInvWaveletTransform()
-        self.burstIdt = np.where(self.dataFlt > thresh)[0]
-        # Find peaks
-        startInd, endInd = locate_consecutive_numbers.locateConsecutiveNumbers(
-            self.burstIdt)
-        self.peakInd = np.nan*np.ones(len(startInd), dtype=int)
-        for i, (st, ed) in enumerate(zip(startInd, endInd)):
-            self.peakInd[i] = st + np.argmax(
-                self.d[ch][st:ed])
-        self.peakInd = self.burstIdt[self.peakInd.astype(int)]
+        validDataIdt = np.where(self.d[ch] != -1E31)[0]
+        waveletAnalysis.WaveletDetector.__init__(self, self.d[ch][validDataIdt], 
+            self.d['dateTime'][validDataIdt], 0.1, mother='DOG')
+        self.waveletTransform() # Get wavelet space
+        self.waveletFilter(self.s0, 1) # Do a band pass and significance filter.
+        self.degenerateInvWaveletTransform() # Inverse transform filtered data.
+        # Indicies where the error-filetered data is greater than thresh
+        self.burstIdt = np.where(self.dataFlt > thresh)[0] 
+        self._getPeaks(ch, validDataIdt) # Find peaks
         return
-
+        
+    def _getPeaks(self, ch, validDataIdt):
+        """
+        This function will look for periods of consecutive indicies of detections and
+        find the peak for each period. The peak index array for the data is self.peakInd.  
+        """
+        startInd, endInd = locate_consecutive_numbers.locateConsecutiveNumbers(
+            self.burstIdt) # Find consecutive numbers to get a max of first
+        self.peakInd = np.nan*np.ones(len(startInd), dtype=int)
+        # Loop over every microburst detection region (consecutive microburst indicies)
+        for i, (st, et) in enumerate(zip(startInd, endInd)):
+            # Index nightmare, but works. There may be a better way
+            offset = validDataIdt[self.burstIdt[st]]
+            self.peakInd[i] = np.argmax(self.d[ch][validDataIdt[self.burstIdt[st:et]]]) + offset
+        self.peakInd = self.peakInd.astype(int)
 
 class TestFindMicrobursts(FindMicrobursts):
     def __init__(self, sc_id, date):
@@ -108,8 +116,8 @@ class TestFindMicrobursts(FindMicrobursts):
     def plotTimeseries(self):
         validIdt = np.where(self.d['dos1rate'] != -1E31)[0]
         self.ax[0].plot(self.d['dateTime'][validIdt], self.d['dos1rate'][validIdt])
-        self.ax[0].scatter(self.d['dateTime'][self.burstIdt], self.d['dos1rate'][self.burstIdt], c='b')
-        self.ax[0].scatter(self.d['dateTime'][validIdt[self.peakInd]], self.d['dos1rate'][validIdt[self.peakInd]], c='r')
+        self.ax[0].scatter(self.d['dateTime'][self.burstIdt], self.d['dos1rate'][self.burstIdt], c='b', s=50)
+        self.ax[0].scatter(self.d['dateTime'][self.peakInd], self.d['dos1rate'][self.peakInd], c='r', s=25)
         self.ax[1].plot(self.time, self.dataFlt)
         return
 

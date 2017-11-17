@@ -89,8 +89,9 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
             self.burstIdt)
         self.peakInd = np.nan*np.ones(len(startInd), dtype=int)
         for i, (st, ed) in enumerate(zip(startInd, endInd)):
-            self.peakInd[i] = self.d[ch][st]+np.argmax(self.d[ch][st:ed])
-        self.peakInd = self.peakInd.astype(int)
+            self.peakInd[i] = st + np.argmax(
+                self.d[ch][st:ed])
+        self.peakInd = self.burstIdt[self.peakInd.astype(int)]
         return
 
 
@@ -107,6 +108,7 @@ class TestFindMicrobursts(FindMicrobursts):
     def plotTimeseries(self):
         validIdt = np.where(self.d['dos1rate'] != -1E31)[0]
         self.ax[0].plot(self.d['dateTime'][validIdt], self.d['dos1rate'][validIdt])
+        self.ax[0].scatter(self.d['dateTime'][self.burstIdt], self.d['dos1rate'][self.burstIdt], c='b')
         self.ax[0].scatter(self.d['dateTime'][validIdt[self.peakInd]], self.d['dos1rate'][validIdt[self.peakInd]], c='r')
         self.ax[1].plot(self.time, self.dataFlt)
         return

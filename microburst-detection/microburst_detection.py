@@ -19,7 +19,7 @@ import waveletAnalysis
 import locate_consecutive_numbers
 
 class FindMicrobursts(waveletAnalysis.WaveletDetector):
-    def __init__(self, sc_id, date, runPipeline=True):
+    def __init__(self, sc_id, date, runPipeline=False):
         self.sc_id = sc_id
         self.date = date
         self._loadData() # Read in the data
@@ -158,9 +158,10 @@ class TestFindMicrobursts(FindMicrobursts):
         return
 
 if __name__ == '__main__':
-    sc_id = 'B'
-    date = datetime(2016, 9, 30)
-    obj = TestFindMicrobursts(sc_id, date)
-    #obj.saveData()
-    #obj.plotTimeseries()
-    #plt.show()
+    for sc_id in ['A', 'B']:
+        date = datetime(2017, 1, 11)
+        obj = TestFindMicrobursts(sc_id, date)
+        obj.getMicroburstIdx()
+        obj.saveData()
+        #obj.plotTimeseries()
+        #plt.show()

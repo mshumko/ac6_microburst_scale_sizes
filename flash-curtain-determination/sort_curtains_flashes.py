@@ -3,7 +3,8 @@
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
-import dateutil.parser 
+import dateutil.parser
+import itertools 
 import csv
 import os
 
@@ -39,6 +40,10 @@ class SortMicrobursts:
                 dataDict = {}
                 for i, key in enumerate(self.keys):
                     dataDict[key] = data[:, i]
+                # Loop over all keys but datetimes and set the array types to be floats.
+                for key in itertools.filterfalse(lambda x: x == 'dateTime', self.keys):
+                    dataDict[key] = dataDict[key].astype(float)
+
                 # Convert datetimes
                 dataDict['dateTime'] = np.array([dateutil.parser.parse(i) for i in dataDict['dateTime']])
                 # Assign data to correct attribute
@@ -69,14 +74,23 @@ class SortMicrobursts:
 
 if __name__ == '__main__':
     inDir = os.path.abspath('./../data/microburst_catalogues/')
-    date = datetime(2016, 9, 30)
+    date = datetime(2017, 1, 11)
     sorter = SortMicrobursts(inDir, date)
 
     # Plot the times to understand how closely they match
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(2, sharex=True)
     for burst in sorter.dataA['dateTime']:
-        ax.axvline(burst, ymax=0.5, c='k')
+        ax[0].axvline(burst, ymax=0.5, c='k')
     for burst in sorter.dataB['dateTime']:
-        ax.axvline(burst, ymin=0.5, ymax=1, c='b')
-    ax.set_xlim(sorter.dataA['dateTime'][0], sorter.dataA['dateTime'][-1])
+        ax[0].axvline(burst, ymin=0.5, ymax=1, c='b')
+
+    for i, burst in enumerate(sorter.dataA['dateTime']):
+        ax[1].axvline(burst+timedelta(seconds=sorter.dataA['Lag_In_Track'][i]),
+            ymax=0.5, c='k')
+    for burst in sorter.dataB['dateTime']:
+        ax[1].axvline(burst, ymin=0.5, ymax=1, c='b')
+
+    ax[0].set_xlim(sorter.dataA['dateTime'][0], sorter.dataA['dateTime'][-1])
+    ax[0].set_title('Flashes')
+    ax[1].set_title('Curtains')
     plt.show()

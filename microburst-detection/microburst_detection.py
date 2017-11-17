@@ -56,7 +56,7 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
         headerl2[0] = '# {}'.format(headerl2[0])
 
         if fPath is None:
-            saveDir = os.path.abspath('./../microburst_catalogues/')
+            saveDir = os.path.abspath('./../data/microburst_catalogues/')
             saveName = 'AC{}_{}_microbursts.txt'.format(self.sc_id, self.date.date())
             fPath = os.path.join(saveDir, saveName)
 

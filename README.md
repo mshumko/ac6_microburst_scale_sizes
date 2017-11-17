@@ -24,3 +24,9 @@ This repo will house files and intermediate data used to:
     (There will be less seen east of the SAA, before the chorus 
     region in the dawn MLT sector).
     - Take care to correctly normalize the distributions.
+
+Data tree structure is:
+data
+    microburst_catalogues - Results from step 1 (catalogues of bursts)
+    flash_catalogues - Results from step 2 (catalogues of flashes)
+    curtain_catalogues - Results from step 2 (catalogues of curtains)

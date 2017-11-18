@@ -1,12 +1,16 @@
 from datetime import datetime, timedelta, date
 import itertools
 import logging
+import time
+
 import microburst_detection
 
 # Set up logger
 logging.basicConfig(filename=os.path.abspath(
     './../logs/microburst_detection.log/'), level=logging.INFO, 
     format='%(asctime)s %(message)s')
+    
+progStartTime = time.time()
 
 startDate = date(2014, 1, 1)
 endDate = datetime.now()
@@ -24,3 +28,5 @@ for (sc_id, date) in itertools.product(['A', 'B'], dates):
     obj.getMicroburstIdx()
     obj.saveData()
     logging.info('AC6-{}, {} microbursts detected'.format(sc_id, date))
+    
+logging.info('Program ran in {}'.format(time.time() - progStartTime))

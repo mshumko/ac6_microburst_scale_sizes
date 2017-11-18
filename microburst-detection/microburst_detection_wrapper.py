@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, date
 import itertools
 import logging
 import time
+import os
 
 import microburst_detection
 
@@ -12,7 +13,7 @@ logging.basicConfig(filename=os.path.abspath(
     
 progStartTime = time.time()
 
-startDate = date(2014, 1, 1)
+startDate = datetime(2014, 1, 1)
 endDate = datetime.now()
 dDays = (endDate - startDate).days
 
@@ -25,8 +26,10 @@ for (sc_id, date) in itertools.product(['A', 'B'], dates):
         if 'None or > 1 AC6 files found' in err:
             logging.debug(err) # Wont log is logging level is logging.DEBUG
             continue
+        else:
+            raise
     obj.getMicroburstIdx()
     obj.saveData()
-    logging.info('AC6-{}, {} microbursts detected'.format(sc_id, date))
+    logging.info('AC6-{}, {} microbursts detected'.format(sc_id, date.date()))
     
 logging.info('Program ran in {}'.format(time.time() - progStartTime))

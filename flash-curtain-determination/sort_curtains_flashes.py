@@ -76,21 +76,3 @@ if __name__ == '__main__':
     inDir = os.path.abspath('./../data/microburst_catalogues/')
     date = datetime(2017, 1, 11)
     sorter = SortMicrobursts(inDir, date)
-
-    # Plot the times to understand how closely they match
-    fig, ax = plt.subplots(2, sharex=True)
-    for burst in sorter.dataA['dateTime']:
-        ax[0].axvline(burst, ymax=0.5, c='k')
-    for burst in sorter.dataB['dateTime']:
-        ax[0].axvline(burst, ymin=0.5, ymax=1, c='b')
-
-    for i, burst in enumerate(sorter.dataA['dateTime']):
-        ax[1].axvline(burst+timedelta(seconds=sorter.dataA['Lag_In_Track'][i]),
-            ymax=0.5, c='k')
-    for burst in sorter.dataB['dateTime']:
-        ax[1].axvline(burst, ymin=0.5, ymax=1, c='b')
-
-    ax[0].set_xlim(sorter.dataA['dateTime'][0], sorter.dataA['dateTime'][-1])
-    ax[0].set_title('Flashes')
-    ax[1].set_title('Curtains')
-    plt.show()

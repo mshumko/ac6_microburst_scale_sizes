@@ -10,7 +10,7 @@ import sort_curtains_flashes
 import read_ac_data
 
 inDir = os.path.abspath('./../data/microburst_catalogues/')
-date = datetime(2016, 9, 30)
+date = datetime(2015, 11, 12)
 sorter = sort_curtains_flashes.SortMicrobursts(inDir, date)
 
 # Load AC6 data
@@ -31,6 +31,13 @@ ax[0].plot(dB['dateTime'][validIdb], dB['dos1rate'][validIdb], c='b', label='AC6
 ax[0].legend()
 
 # Curtains
+validIda = np.where(dA['dos1rate'] != -1E31)[0]
+validIdb = np.where(dB['dos1rate'] != -1E31)[0]
+# Shift times
+dA['dateTime_shifted'] = np.array([dA['dateTime'][i] + timedelta(
+    seconds=dA['Lag_In_Track'][i]) for i in validIda])
+ax[2].plot(dA['dateTime_shifted'], dA['dos1rate'][validIda], c='r', label='AC6A')
+ax[2].plot(dB['dateTime'][validIdb], dB['dos1rate'][validIdb], c='b', label='AC6B')
 
 for burst in sorter.dataA['dateTime']:
     ax[1].axvline(burst, ymax=0.5, c='r')

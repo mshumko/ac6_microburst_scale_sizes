@@ -102,10 +102,11 @@ class ScaleSize:
         return data
 
 if __name__ == '__main__':
-    fPath = os.path.abspath('./../data/flash_catalogues/flashes_catalogue.txt')
+    fPath = os.path.abspath('./../data/curtain_catalogues/curtains_catalogue.txt')
+    #fPath = os.path.abspath('./../data/flash_catalogues/flashes_catalogue.txt')
     normPath = os.path.abspath('./dist_norm.txt')
-    ss = ScaleSize(fPath)
+    ss = ScaleSize(fPath, burstType='Curtains')
     ss.loadNormalization(normPath)
-    ax, bx = ss.scaleSizeHist(ss.dist_norm)#, norm=ss.count_norm[:-1])
-    ax.set_xlim(0, 100)
+    ax, bx = ss.scaleSizeHist(ss.dist_norm, norm=ss.count_norm[:-1])
+    ax.set_xlim(0, 150)
     plt.show()

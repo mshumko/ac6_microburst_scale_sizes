@@ -5,17 +5,52 @@ import matplotlib.pyplot as plt
 import numpy as np
 import dateutil.parser
 import itertools 
+import time
 import csv
 import os
 
 class SortMicrobursts:
-    def __init__(self, indir, date):
+    def __init__(self, indir, date=None):
         self.date = date
         self._loadMicroburstCatalogues(indir)
         return
 
-    def findFlashes(self):
-
+    def simpleFindFlashes(self, thresh=0.2):
+        """
+        Loop over list A and look for microbursts in list B at
+        times +/- thresh. If In_Track_Lag < thresh, give 
+        warning or error out.
+        """
+        self.flashes = np.nan*np.ones((0, len(self.keys)+2))
+        dT = timedelta(seconds=thresh)
+        
+        print(self.keys)
+        
+        for (i, tA) in enumerate(self.dataA['dateTime']):
+            matchIdt = np.where(
+                (tA >= self.dataB['dateTime'] - dT) & 
+                (tA <= self.dataB['dateTime'] + dT))
+            if len(matchIdt) == 0: 
+                continue # If 0 or > 1 matches found, ignore.
+                
+            # Save the same keys as input data except save
+            # each spacecraft's times of flashes and their
+            # dos1rates.
+            # Calc stats on separation and location
+            stats = []
+            print(matchIdt)
+            for key in self.keys[2:]:
+                print([self.dataA[key][i], 
+                    self.dataB[key][matchIdt[0]]])
+                stats.append(np.mean([self.dataA[key][i], 
+                    self.dataB[key][matchIdt[0][0]] ]))
+            dataLine = np.array(
+                [tA, self.dataA['dos1rate'][i], 
+                self.dataB['dateTime'][matchIdt[0]],
+                self.dataB['dos1rate'][matchIdt[0]] ])
+            dataLine = np.concatenate(dataLine, stats)
+            print(dataLine)
+        
         return
 
     def _loadMicroburstCatalogues(self, fDir):
@@ -25,8 +60,12 @@ class SortMicrobursts:
         """
         
         for sc_id in ['A', 'B']:
-            fName = 'AC6{}_{}_microbursts.txt'.format(
-                sc_id, self.date.date())
+            if self.date is None:
+                fName = 'AC6{}_microbursts.txt'.format(
+                    sc_id)
+            else:
+                fName = 'AC6{}_{}_microbursts.txt'.format(
+                    sc_id, self.date.date())
             data = self._inputDataSkelletons(sc_id, os.path.join(fDir, fName))
 
             with open(os.path.join(fDir, fName)) as f:
@@ -73,6 +112,9 @@ class SortMicrobursts:
         return data
 
 if __name__ == '__main__':
+    startTime = time.time()
     inDir = os.path.abspath('./../data/microburst_catalogues/')
-    date = datetime(2017, 1, 11)
-    sorter = SortMicrobursts(inDir, date)
+    #date = datetime(2017, 1, 11)
+    sorter = SortMicrobursts(inDir)
+    sorter.simpleFindFlashes()
+    print('Run time: {}'.format(round(time.time()-startTime)))

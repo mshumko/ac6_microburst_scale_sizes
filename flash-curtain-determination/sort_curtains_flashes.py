@@ -10,10 +10,12 @@ import csv
 import os
 
 class SortMicrobursts:
-    def __init__(self, indir, date=None, flashesSwitch=True):
+    def __init__(self, inDir, outDir, date=None, flashesFlag=True):
         self.date = date
-        self._loadMicroburstCatalogues(indir)
-        self.flashesSwitch = flashesSwitch
+        self.inDir = inDir
+        self.flashesFlag = flashesFlag
+        self.outDir = outDir
+        self._loadMicroburstCatalogues()
         return
 
     def simpleFindMatches(self, thresh=0.2):
@@ -51,11 +53,34 @@ class SortMicrobursts:
         print(self.flashes)
         return
 
-    def saveData(self, ):
+    def saveData(self, outName=None):
+        """
+        This function will save the curtain or flashes database to a csv file.
+        """
+        if self.flashesFlag:
+            label = 'flash'
+        else:
+            label = 'curtain'
 
+        if (outName is None) and (self.date is None):
+            outName = '{}_catalogue.txt'.format(label)
+        elif (outName is None) and (self.date is not None): 
+            outName = '{}_{}_catalogue.txt'.format(self.date.date(), label)
+
+        outKeys = np.concatenate((['# dateTimeA', 'dos1rateA', 'dateTimeB', 'dos1rateB'], 
+            self.keys[2:]))
+
+        with open(os.path.join(self.outDir, outName), 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['# {} catalogue created on {}'.format(
+                label, datetime.now().date())])
+            writer.writerow(outKeys)
+
+            for line in self.flashes:
+                writer.writerow(line)
         return
 
-    def _loadMicroburstCatalogues(self, fDir):
+    def _loadMicroburstCatalogues(self):
         """
         This function will load in the microburst catalogues
         from both spacecraft
@@ -68,9 +93,9 @@ class SortMicrobursts:
             else:
                 fName = 'AC6{}_{}_microbursts.txt'.format(
                     sc_id, self.date.date())
-            data = self._inputDataSkelletons(sc_id, os.path.join(fDir, fName))
+            data = self._inputDataSkelletons(sc_id, os.path.join(self.inDir, fName))
 
-            with open(os.path.join(fDir, fName)) as f:
+            with open(os.path.join(self.inDir, fName)) as f:
                 reader = csv.reader(f)
                 next(reader) # Skip header
                 next(reader)
@@ -92,6 +117,10 @@ class SortMicrobursts:
                     self.dataA = dataDict
                 else:
                     self.dataB = dataDict
+
+        # Now shift timestamps by the in track lag for AC6-A if self.flashesFlag is False
+        if not self.flashesFlag:
+            self._shiftTimes()
         return
 
     def _inputDataSkelletons(self, sc_id, fPath):
@@ -113,10 +142,29 @@ class SortMicrobursts:
             data = np.nan*np.ones((N, len(self.keys)), dtype=object)
         return data
 
+    def _shiftTimes(self):
+        """
+        This internal method will shift the datetimes of one spacecraft
+        by the Lag_In_Track
+        """
+        validLags = np.where(self.dataA['Lag_In_Track'] != -1E31)[0]
+        self.dataA['dateTime'] = np.array([dT + timedelta(seconds=dS) for 
+                                (dT, dS) in zip(self.dataA['dateTime'][validLags], 
+                                self.dataA['Lag_In_Track'][validLags])])
+        return
+
 if __name__ == '__main__':
-    startTime = time.time()
-    inDir = os.path.abspath('./../data/daily_microburst_catalogues/')
-    date = datetime(2017, 1, 11)
-    sorter = SortMicrobursts(inDir, date=date)
-    sorter.simpleFindMatches()
-    print('Run time: {}'.format(round(time.time()-startTime)))
+
+burstType = 'curtain'
+startTime = time.time()
+inDir = os.path.abspath('./../data/microburst_catalogues/')
+outDir = os.path.abspath('./../data/{}_catalogues/'.format(burstType))
+
+if burstType == 'flashes':
+    flashesFlag = True
+else:
+    flashesFlag = False
+sorter = SortMicrobursts(inDir, outDir, flashesFlag=flashesFlag)
+sorter.simpleFindMatches()
+sorter.saveData()
+print('Run time: {}'.format(round(time.time()-startTime)))

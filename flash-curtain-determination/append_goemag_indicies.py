@@ -110,3 +110,4 @@ if __name__ == '__main__':
                     'curtain_catalogues/curtains_catalogue.txt')
 
     appendObj = AppendGeoMagIdx(iType, dataPath, indexDir)
+    print(appendObj)

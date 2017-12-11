@@ -1,8 +1,89 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-import os
+from datetime import datetime, timedelta
 
 sys.path.append('/home/mike/research/ac6-microburst-scale-sizes/stats/')
+sys.path.append('/home/mike/research/mission-tools/ac6/')
+import read_ac_data
+import scale_sizes
 
-class PlotMicroburstMatches		
+class PlotMicroburstMatches(scale_sizes.ScaleSize):
+    def __init__(self, cPath, burstType='flashes'):
+        """
+        This class plots the matched microbursts for AC-6, flashes and 
+        curtains.
+        """
+        scale_sizes.ScaleSize.__init__(self, cPath) # Read in catalogue data.
+
+        # Shift times if want to plot curtains
+        if 'curtain' in burstType:
+            # shift times
+
+            # CHECK IF THIS SHIFT NEEDS TO BE DONE HERE OR WHEN PLOTTING!
+            self.dataDict['dateTimeB'] = np.array([t + timedelta(seconds=dt) 
+                for (t, dt) in zip(self.dataDict['dateTimeB'], 
+                self.dataDict['Lag_In_Track'])])
+            self.burstType = 'curtain'
+        elif 'flash' in burstType:
+            self.burstType = 'flash'
+        else:
+            raise NameError("burstType kwarg must be either 'flash' or 'curtain'.")
+        return
+
+    def plotMicroburst(self, thresh=2):
+        """ 
+        This function will plot the microburst flash or curtain detections.
+        """
+        self._findDateBounds() # Get time bounds for unique dates
+
+        fig, self.ax = plt.subplots()
+
+        # Loop over dates.
+        for d in self.dateArr:
+            # Open file
+            dataA = read_ac_data.read_ac_data_wrapper('A', d[0])
+            dataB = read_ac_data.read_ac_data_wrapper('B', d[0])
+
+            # Loop over daily detections.
+            zippedCenterTimes = zip(self.dataDict['dateTimeA'][d[1]:d[2]], 
+                self.dataDict['dateTimeB'][d[1]:d[2]])
+            for (tA, tB) in zippedCenterTimes: 
+                # Plot dos1rate
+                self.plotTimeRange(dataA['dos1rate'], dataB['dos1rate'], 
+                    [tA-thresh, tA+thresh])
+        return
+
+    def plotTimeRange(self, dosA, dosB, tRange):
+        """
+        This function will plot the narrow microburst time range from
+        both spacecraft, and annotate with L, MLT, Lat, Lon. If curtain,
+        add shift in time and space.
+        """
+        validIdA = np.where(dosA != -1E31)[0]
+        validIdB = np.where(dosB != -1E31)[0]
+
+        # Need to pass in the time array as well. Maybe do the time shift here?
+        self.ax.plot()
+        plt.cla()
+        return
+
+
+    def _findDateBounds(self):
+        """ 
+        This function will calculate the unique dates in the catalogue file
+        to speed up the plotting reutine.
+        """
+        dates = [t.date for t in self.dataDict['dateTimeA']]
+        uniqueDates = sorted(set(dates))
+
+        # Make an array with columns with the unique date, startInd, endInd.
+        self.dateArr = np.nan*np.ones((len(uniqueDates), 3), dtype=object)
+        # Fill in the self.dateArr with the start/end indicies that correspond
+        # to the catalogue.
+        for (i, d) in enumerate(uniqueDates):
+            self.dateArr[i, 0] = d
+            dateInd = np.where(dates == d)[0]
+            self.dateArr[i, 1] = dateInd[0]
+            self.dateArr[i, 2] = dateInd[-1]
+        return

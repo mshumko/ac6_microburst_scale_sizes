@@ -50,22 +50,28 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
                 self.dataDict['dateTimeB'][d[1]:d[2]])
             for (tA, tB) in zippedCenterTimes: 
                 # Plot dos1rate
-                self.plotTimeRange(dataA['dos1rate'], dataB['dos1rate'], 
-                    [tA-thresh, tA+thresh])
+                self.plotTimeRange(dataA['dateTime'], dataA['dos1rate'],
+                    dataB['dateTime'], dataB['dos1rate'],[tA-thresh, tA+thresh])
         return
 
-    def plotTimeRange(self, dosA, dosB, tRange):
+    def plotTimeRange(self, timeA, dosA, timeB, dosB, tRange):
         """
         This function will plot the narrow microburst time range from
         both spacecraft, and annotate with L, MLT, Lat, Lon. If curtain,
         add shift in time and space.
         """
-        validIdA = np.where(dosA != -1E31)[0]
-        validIdB = np.where(dosB != -1E31)[0]
+        validIdA = np.where((dosA != -1E31) & (timeA > tRange[0]) & (timeA < tRange[1]))[0]
+        validIdB = np.where((dosB != -1E31) & (timeB > tRange[0]) & (timeB < tRange[1]))[0]
 
         # Need to pass in the time array as well. Maybe do the time shift here?
-        self.ax.plot()
-        plt.cla()
+        self.ax.plot(timeA[validIdA], dosA[validIdA], label='AC-6 A')
+        self.ax.plot(timeB[validIdB], dosB[validIdB], label='AC-6 B')
+        self.ax.set(xlabel='counts/s', ylabel='UTC', 
+            title='AC-6 {} validation | {}'.format(
+            self.burstType, tRange[0].date()))
+        self.ax.text(0, 0, 'test')
+        plt.show()
+        #plt.cla()
         return
 
 
@@ -74,7 +80,7 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         This function will calculate the unique dates in the catalogue file
         to speed up the plotting reutine.
         """
-        dates = [t.date for t in self.dataDict['dateTimeA']]
+        dates = [t.date() for t in self.dataDict['dateTimeA']]
         uniqueDates = sorted(set(dates))
 
         # Make an array with columns with the unique date, startInd, endInd.
@@ -84,6 +90,13 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         for (i, d) in enumerate(uniqueDates):
             self.dateArr[i, 0] = d
             dateInd = np.where(dates == d)[0]
+            print(d, dateInd)
             self.dateArr[i, 1] = dateInd[0]
             self.dateArr[i, 2] = dateInd[-1]
         return
+
+if __name__ == '__main__':
+    cPath = ('/home/mike/research/ac6-microburst-scale-sizes/data/'
+        'flash_catalogues/flashes_catalogue.txt')
+    pltObj = PlotMicroburstMatches(cPath)
+    pltObj.plotMicroburst()

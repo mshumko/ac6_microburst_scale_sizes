@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import os
 from datetime import datetime, timedelta
 
 sys.path.append('/home/mike/research/ac6-microburst-scale-sizes/stats/')
@@ -59,8 +60,15 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
                 # Plot dos1rate
                 pltRange = [tA-timedelta(seconds=thresh), 
                             tA+timedelta(seconds=thresh)]
+                print(pltRange)
                 self.plotTimeRange(dataA['dateTime'], dataA['dos1rate'],
                     dataB['dateTime'], dataB['dos1rate'], pltRange)
+
+                # Save figure
+                saveDir = '/home/mike/research/ac6-microburst-scale-sizes/data/plots/validation/'
+                saveName = '{}_validation_{}.png'.format(self.burstType, pltRange[0].isoformat())
+                plt.savefig(os.path.join(saveDir, saveName))
+                plt.cla()
         return
 
     def plotTimeRange(self, timeA, dosA, timeB, dosB, tRange):
@@ -78,9 +86,7 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         self.ax.set(xlabel='counts/s', ylabel='UTC', 
             title='AC-6 {} validation | {}'.format(
             self.burstType, tRange[0].date()))
-        self.ax.text(0, 0, 'test')
-        plt.show()
-        #plt.cla()
+        self.ax.text(0, 0, 'test', transform=ax.transAxes)
         return
 
 

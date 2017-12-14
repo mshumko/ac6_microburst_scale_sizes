@@ -42,16 +42,25 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         # Loop over dates.
         for d in self.dateArr:
             # Open file
-            dataA = read_ac_data.read_ac_data_wrapper('A', d[0])
-            dataB = read_ac_data.read_ac_data_wrapper('B', d[0])
+            d[0] = datetime.combine(d[0], datetime.min.time())
+            try: # Remove the try except code when I have access to all of the data.
+                dataA = read_ac_data.read_ac_data_wrapper('A', d[0])
+                dataB = read_ac_data.read_ac_data_wrapper('B', d[0])
+            except AssertionError as err:
+                if 'None or > 1 AC6 files found in' in str(err):
+                    continue
+                else:
+                    raise
 
             # Loop over daily detections.
             zippedCenterTimes = zip(self.dataDict['dateTimeA'][d[1]:d[2]], 
                 self.dataDict['dateTimeB'][d[1]:d[2]])
             for (tA, tB) in zippedCenterTimes: 
                 # Plot dos1rate
+                pltRange = [tA-timedelta(seconds=thresh), 
+                            tA+timedelta(seconds=thresh)]
                 self.plotTimeRange(dataA['dateTime'], dataA['dos1rate'],
-                    dataB['dateTime'], dataB['dos1rate'],[tA-thresh, tA+thresh])
+                    dataB['dateTime'], dataB['dos1rate'], pltRange)
         return
 
     def plotTimeRange(self, timeA, dosA, timeB, dosB, tRange):
@@ -80,17 +89,19 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         This function will calculate the unique dates in the catalogue file
         to speed up the plotting reutine.
         """
-        dates = [t.date() for t in self.dataDict['dateTimeA']]
-        uniqueDates = sorted(set(dates))
+        dates = np.array([t.date() for t in self.dataDict['dateTimeA']])
+        uniqueDates = np.array(sorted(set(dates)))
+        #print(uniqueDates)
 
         # Make an array with columns with the unique date, startInd, endInd.
         self.dateArr = np.nan*np.ones((len(uniqueDates), 3), dtype=object)
         # Fill in the self.dateArr with the start/end indicies that correspond
         # to the catalogue.
         for (i, d) in enumerate(uniqueDates):
+            #print(dates, d)
             self.dateArr[i, 0] = d
             dateInd = np.where(dates == d)[0]
-            print(d, dateInd)
+            #print(d, dateInd)
             self.dateArr[i, 1] = dateInd[0]
             self.dateArr[i, 2] = dateInd[-1]
         return

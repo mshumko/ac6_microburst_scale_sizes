@@ -1,3 +1,4 @@
 */__pycache__/
 data/daily_microburst_catalogues/*
 *.tar.gz
+*.png

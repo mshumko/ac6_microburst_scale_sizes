@@ -45,8 +45,8 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
             # Open file
             d[0] = datetime.combine(d[0], datetime.min.time())
             try: # Remove the try except code when I have access to all of the data.
-                dataA = read_ac_data.read_ac_data_wrapper('A', d[0])
-                dataB = read_ac_data.read_ac_data_wrapper('B', d[0])
+                self.dataA = read_ac_data.read_ac_data_wrapper('A', d[0])
+                self.dataB = read_ac_data.read_ac_data_wrapper('B', d[0])
             except AssertionError as err:
                 if 'None or > 1 AC6 files found in' in str(err):
                     continue
@@ -60,9 +60,8 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
                 # Plot dos1rate
                 pltRange = [tA-timedelta(seconds=thresh), 
                             tA+timedelta(seconds=thresh)]
-                print(pltRange)
-                self.plotTimeRange(dataA['dateTime'], dataA['dos1rate'],
-                    dataB['dateTime'], dataB['dos1rate'], pltRange)
+                self.plotTimeRange(self.dataA['dateTime'], self.dataA['dos1rate'],
+                    self.dataB['dateTime'], self.dataB['dos1rate'], pltRange)
 
                 # Save figure
                 saveDir = '/home/mike/research/ac6-microburst-scale-sizes/data/plots/validation/'
@@ -86,7 +85,16 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         self.ax.set(xlabel='counts/s', ylabel='UTC', 
             title='AC-6 {} validation | {}'.format(
             self.burstType, tRange[0].date()))
-        self.ax.text(0, 0, 'test', transform=ax.transAxes)
+
+        textStr = ('L={} MLT={}\nlat={} lon={}\ndist={} LCT={}'.format(
+            round(np.mean(self.dataA['Lm_OPQ'][validIdA])),
+            round(np.mean(self.dataA['MLT_OPQ'][validIdA])),
+            round(np.mean(self.dataA['lat'][validIdA])),
+            round(np.mean(self.dataA['lon'][validIdA])),
+            round(np.mean(self.dataA['Dist_In_Track'][validIdA])),
+            round(np.mean(self.dataA['Loss_Cone_Type'][validIdA]))))
+        self.ax.text(0.05, 0.95, textStr, transform=self.ax.transAxes, 
+            va='top')
         return
 
 

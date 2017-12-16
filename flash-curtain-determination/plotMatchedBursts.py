@@ -39,6 +39,7 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         self._findDateBounds() # Get time bounds for unique dates
 
         fig, self.ax = plt.subplots()
+        self.bx = self.ax.twinx()
 
         # Loop over dates.
         for d in self.dateArr:
@@ -64,10 +65,15 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
                     self.dataB['dateTime'], self.dataB['dos1rate'], pltRange)
 
                 # Save figure
-                saveDir = '/home/mike/research/ac6-microburst-scale-sizes/data/plots/validation/'
+                saveDir = ('/home/mike/research/ac6-microburst-scale-sizes/'
+                    'data/plots/validation/{}/'.format(datetime.now().date()))
+                if not os.path.exists(saveDir): # Create save dir if it does not exist.
+                    os.makedirs(saveDir)
+
                 saveName = '{}_validation_{}.png'.format(self.burstType, pltRange[0].isoformat())
                 plt.savefig(os.path.join(saveDir, saveName))
-                plt.cla()
+                self.ax.clear()
+                self.bx.clear()
         return
 
     def plotTimeRange(self, timeA, dosA, timeB, dosB, tRange):
@@ -80,11 +86,15 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         validIdB = np.where((dosB != -1E31) & (timeB > tRange[0]) & (timeB < tRange[1]))[0]
 
         # Need to pass in the time array as well. Maybe do the time shift here?
-        self.ax.plot(timeA[validIdA], dosA[validIdA], label='AC-6 A')
-        self.ax.plot(timeB[validIdB], dosB[validIdB], label='AC-6 B')
-        self.ax.set(xlabel='counts/s', ylabel='UTC', 
+        self.ax.plot(timeA[validIdA], dosA[validIdA], 'r', label='AC-6 A')
+        self.ax.plot(timeB[validIdB], dosB[validIdB], 'b', label='AC-6 B')
+        self.bx.plot(timeA[validIdA], self.dataA['Alpha'][validIdA], '--r')
+        self.bx.plot(timeB[validIdB], self.dataB['Alpha'][validIdB], '--b')
+        self.ax.set(ylabel='Dos1 [counts/s]', 
             title='AC-6 {} validation | {}'.format(
             self.burstType, tRange[0].date()))
+        self.bx.set(xlabel='UTC', ylabel='Alpha [Deg] (dashed)')
+        self.ax.legend(loc=1)
 
         textStr = ('L={} MLT={}\nlat={} lon={}\ndist={} LCT={}'.format(
             round(np.mean(self.dataA['Lm_OPQ'][validIdA])),

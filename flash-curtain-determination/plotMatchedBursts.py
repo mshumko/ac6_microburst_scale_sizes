@@ -70,7 +70,9 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
                 if not os.path.exists(saveDir): # Create save dir if it does not exist.
                     os.makedirs(saveDir)
 
-                saveName = '{}_validation_{}.png'.format(self.burstType, pltRange[0].isoformat())
+                saveDate = pltRange[0].replace(microsecond=0).isoformat().replace(':', '')
+                saveName = '{}_validation_{}.png'.format(self.burstType, saveDate)
+                plt.tight_layout()
                 plt.savefig(os.path.join(saveDir, saveName))
                 self.ax.clear()
                 self.bx.clear()

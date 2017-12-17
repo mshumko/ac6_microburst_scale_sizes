@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import os
+import scipy.signal
 from datetime import datetime, timedelta
 
 sys.path.append('/home/mike/research/ac6-microburst-scale-sizes/stats/')
@@ -70,7 +71,7 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
                 if not os.path.exists(saveDir): # Create save dir if it does not exist.
                     os.makedirs(saveDir)
 
-                saveDate = pltRange[0].replace(microsecond=0).isoformat().replace(':', '')
+                csaveDate = pltRange[0].replace(microsecond=0).isoformat().replace(':', '')
                 saveName = '{}_validation_{}.png'.format(self.burstType, saveDate)
                 plt.tight_layout()
                 plt.savefig(os.path.join(saveDir, saveName))
@@ -98,13 +99,20 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         self.bx.set(xlabel='UTC', ylabel='Alpha [Deg] (dashed)')
         self.ax.legend(loc=1)
 
-        textStr = ('L={} MLT={}\nlat={} lon={}\ndist={} LCT={}'.format(
+        # Do the cross correlation
+        corrIndA = validIdA[len(validIdA)//2 - 5 : len(validIdA)//2 + 5]
+        corrIndB = validIdB[len(validIdB)//2 - 5 : len(validIdB)//2 + 5]
+        cc = scipy.signal.correlate(dosA[corrIndA], dosB[corrIndB], mode='valid')[0]
+        print(cc, validIdA, validIdB)
+
+        textStr = ('L={} MLT={}\nlat={} lon={}\ndist={} LCT={}\nCrossCorr={}'.format(
             round(np.mean(self.dataA['Lm_OPQ'][validIdA])),
             round(np.mean(self.dataA['MLT_OPQ'][validIdA])),
             round(np.mean(self.dataA['lat'][validIdA])),
             round(np.mean(self.dataA['lon'][validIdA])),
             round(np.mean(self.dataA['Dist_In_Track'][validIdA])),
-            round(np.mean(self.dataA['Loss_Cone_Type'][validIdA]))))
+            round(np.mean(self.dataA['Loss_Cone_Type'][validIdA]))),
+            round(cc))
         self.ax.text(0.05, 0.95, textStr, transform=self.ax.transAxes, 
             va='top')
         return

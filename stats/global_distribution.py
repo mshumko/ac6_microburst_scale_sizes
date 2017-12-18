@@ -32,6 +32,32 @@ class GlobalDistribution(scale_sizes.ScaleSize):
             plt.show()
         return Image
 
+    def rectLongDistribution(self, ax=None, Lrange=[5, 6], MLTbins=range(24),
+                            lonBins=np.linspace(-180, 180, 24), cmin=None, cmax=None):
+        """ 
+        This function plots the L-MLT distribution of flashes
+        and curtains in a rectanguar plot.
+        """
+        if ax is None:
+            _, self.ax = plt.subplots()
+        else:
+            self.ax = ax
+
+        # Filter by L
+        validL = np.where((self.dataDict['Lm_OPQ'] >= Lrange[0]) &
+                (self.dataDict['Lm_OPQ'] <= Lrange[1]))[0]
+
+        (counts, xedges, yedges, Image) = self.ax.hist2d(
+            self.dataDict['lon'][validL], self.dataDict['MLT_OPQ'][validL], 
+            bins=[lonBins, MLTbins], cmin=cmin, cmax=cmax)
+        if ax is None:
+            self.ax.set(xlabel='MLT', ylabel='L', 
+                title='MLT-Lon distribution of {} for {} < L < {}'.format(
+                    self.burstType, Lrange[0], Lrange[1]))
+            plt.colorbar(Image)
+            plt.show()
+        return Image
+
     def polarDistributionPlot(self, ax=None, Lbins=range(3, 10), MLTbins=range(24)):
         """
         This function plots the L-MLT distribution of flashes

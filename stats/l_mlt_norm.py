@@ -25,7 +25,7 @@ sc_id = 'B'
 # Create histogram arrays.
 Lrange = np.arange(2, 11)
 MLTrange = np.arange(0, 25)
-timeHist = np.ones((len(Lrange)-1, len(MLTrange)-1), dtype=float)
+timeHist = np.zeros((len(Lrange)-1, len(MLTrange)-1), dtype=float)
 
 # Loop over spcecraft and dates using itertools.product()
 for date in dates: 

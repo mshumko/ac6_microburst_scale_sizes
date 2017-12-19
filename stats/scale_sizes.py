@@ -38,14 +38,13 @@ class ScaleSize:
             # histNorm, bin_edges = np.histogram(self.count_norm,
             #    bins=self.dist_norm)
             #bx.bar(center, hist, align='center', width=width)
-            bx.plot(self.dist_norm+width/2, self.count_norm)
-            bx.set(xlabel='Separation (km)', ylabel = 'Days',
-            title='AC6B mean daily separation with 10 Hz data')
+            bx.plot(self.dist_norm+width/2, self.count_norm/86400)
+            bx.set(xlabel='Separation (km)', ylabel = 'Days at separation')
         else:
             fig, ax = plt.subplots(1)
 
-        ax.bar(center, hist, align='center', width=width)
-        ax.set(ylabel='# of flashes', 
+        ax.bar(center, hist*86400, align='center', width=width)
+        ax.set(ylabel='flashes/day', 
             title='AC6 {} scale size distribution'.format(self.burstType), 
             xlabel='Separation (km)')
         if visualizeNorm:
@@ -116,9 +115,22 @@ if __name__ == '__main__':
     fPath = os.path.abspath('./../data/flash_catalogues/flashes_catalogue.txt')
     normPath = os.path.abspath('./dist_norm.txt')
     ss = ScaleSize(fPath, burstType='Flashes')
-    ss.loadNormalization(normPath)
+    #ss.loadNormalization(normPath)
     #ax, bx = ss.scaleSizeHist(ss.dist_norm, norm=ss.count_norm[:-1])
     #ax, bx = ss.scaleSizeHist(ss.dist_norm)
-    ax, _ = ss.scaleSizeHist(np.arange(0, 500, 10), visualizeNorm=False)
+
+    # Load normalization
+    normDist = np.load(os.path.abspath('./normalization/dist_vals.npy'))
+    normCounts = np.load(os.path.abspath('./normalization/dist_norm.npy'))
+
+    # Rebin normalization histogram to n km (every nth point)
+    n = 10
+    normDist = normDist[::n]
+    normCounts = np.array([np.sum(normCounts[i*n:(i+1)*n] ) for i in range(len(normCounts)//n)])
+
+    ss.dist_norm = normDist[:-1]
+    ss.count_norm = normCounts
+
+    ax, _ = ss.scaleSizeHist(normDist, visualizeNorm=True, norm=normCounts)
     ax.set_xlim(0, 300)
     plt.show()

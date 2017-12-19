@@ -12,7 +12,7 @@ class GlobalDistribution(scale_sizes.ScaleSize):
         return
 
     def rectDistributionPlot(self, ax=None, Lbins=range(2, 10), MLTbins=range(24),
-                            cmin=None, cmax=None):
+                            cmin=None, cmax=None, norm=None):
         """ 
         This function plots the L-MLT distribution of flashes
         and curtains in a rectanguar plot.
@@ -22,15 +22,24 @@ class GlobalDistribution(scale_sizes.ScaleSize):
         else:
             self.ax = ax
 
-        (counts, xedges, yedges, Image) = self.ax.hist2d(
-            self.dataDict['MLT_OPQ'], self.dataDict['Lm_OPQ'], 
-            bins=[MLTbins, Lbins], cmin=cmin, cmax=cmax)
+        (H, MLTedges, Ledges) = np.histogram2d(self.dataDict['MLT_OPQ'], 
+            self.dataDict['Lm_OPQ'], bins=(MLTbins, Lbins))
+
+        if norm is not None: # Normalize by a given 2-D norm array
+            H /= norm
+            normLabel = '/day'
+        else:
+            normLabel = ''
+
+        XX, YY = np.meshgrid(MLTedges, Ledges)
+        # This function preserves the correct bin edges.
+        im = self.ax.pcolormesh(XX, YY, H.T) 
         if ax is None:
             self.ax.set(xlabel='MLT', ylabel='L', 
                 title='L-MLT distribution of {}'.format(self.burstType))
-            plt.colorbar(Image)
+            plt.colorbar(im, label='flashes{}'.format(normLabel))
             plt.show()
-        return Image
+        return im
 
     def rectLongDistribution(self, ax=None, Lrange=[5, 6], MLTbins=range(24),
                             lonBins=np.linspace(-180, 180, 24), cmin=None, cmax=None):

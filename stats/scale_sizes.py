@@ -106,7 +106,7 @@ class ScaleSize:
             #next(reader) # Skip first line of header
             self.keys = next(reader)
             # Remove comment and empty space chars
-            self.keys[0] = self.keys[0][2:] 
+            #self.keys[0] = self.keys[0][2:] 
             # Empty data file
             data = np.nan*np.ones((N, len(self.keys)), dtype=object)
         return data

@@ -22,10 +22,12 @@ def mergeDailyFiles(sc_id, inDir, outPath):
         for (i, iFname) in enumerate(fileNames): # Loop over files
             with open(iFname, 'r') as iF:
                 reader = csv.reader(iF)
+                next(reader)
+                next(reader)
                 for line in reader:
                     # Don't copy the header, except for first file.
-                    if ('#' in line[0]) and (i > 0): 
-                        continue 
+                    # if ('#' in line[0]) and (i > 0): 
+                    #     continue 
                     writer.writerow(line)
     return
     

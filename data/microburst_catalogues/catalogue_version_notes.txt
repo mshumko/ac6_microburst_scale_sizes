@@ -1,0 +1,4 @@
+Version 0:
+Initial attempt to generate catalogues.
+Version 1:
+Sucessfully (?) added in a data flag filter to remove noise due to radio transmission.

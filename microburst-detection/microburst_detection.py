@@ -50,13 +50,13 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
         """
         keys = ['dateTime', 'dos1rate', 'Lm_OPQ', 'MLT_OPQ', 'lat',
             'lon', 'alt', 'Dist_In_Track', 'Lag_In_Track', 'Dist_Total','Loss_Cone_Type']
-        headerl1 = ['# Microburst catalogue created on {}'.format(
+        headerl1 = ['Microburst catalogue created on {}'.format(
             datetime.now())]
         headerl2 = copy.copy(keys)
-        headerl2[0] = '# {}'.format(headerl2[0])
+        #headerl2[0] = '# {}'.format(headerl2[0])
 
         if fPath is None:
-            saveDir = os.path.abspath('./../data/microburst_catalogues/')
+            saveDir = os.path.abspath('./../data/daily_microburst_catalogues/')
             saveName = 'AC6{}_{}_microbursts.txt'.format(self.sc_id, self.date.date())
             fPath = os.path.join(saveDir, saveName)
 
@@ -72,13 +72,34 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
                 writer.writerow(line)
         return
 
-    def _checkMicroburstFlag(self):
+    def _checkMicroburstFlag(self, gTx=True, scTx=True):
         """
         Filter the microburst indicies by the data quality flag.
+        Refer to AC-6 data README for more information on the flag
+        bitmap.
+        
+        OPTIONAL ARGS:
+        gTx = True : Filter out detections made during ground transmission
+        scTx = True : Filter out detections made during crosslink transmission
         """
-        self.validFlagIdt = (self.d['flag'] == 0)
-        sameIdt = list(set(self.peakInd) & set(self.validFlagIdt))
-        self.peakIdt = np.array(sorted(sameIdt))        
+        flag = np.array(self.d['flag'], dtype=int)
+        if gTx:
+            # Identify flags without the ground transmission.
+            gTxInd = np.bitwise_and(flag, 1)
+        else:
+            gTxInd = np.zeros_like(flag)
+        if scTx:
+            # Identify flags without the cross-spacecraft transmission.
+            scTxInd = np.bitwise_and(flag, 2)
+        else:
+            scTxInd = np.zeros_like(flag)
+        # Index array of bad flags.
+        badBool = np.logical_or(gTxInd, scTxInd) 
+        goodBool = np.logical_not(badBool)    
+        goodInd = np.where(goodBool)[0]
+
+        sameInd = list(set(self.peakInd) & set(goodInd))
+        self.peakInd = np.array(sorted(sameInd), dtype=int)    
         return
 
     def _loadData(self):
@@ -145,7 +166,7 @@ class TestFindMicrobursts(FindMicrobursts):
         FindMicrobursts.__init__(self, self.sc_id, self.date)  
 
         # Create empty plots
-        self.fig, self.ax = plt.subplots(2, sharex=True)
+        self.fig, self.ax = plt.subplots(3, sharex=True)
         return
 
     def plotTimeseries(self):
@@ -155,6 +176,7 @@ class TestFindMicrobursts(FindMicrobursts):
         self.ax[0].scatter(self.d['dateTime'][self.peakInd], self.d['dos1rate'][self.peakInd], c='r', s=25)
         self.ax[1].plot(self.time, self.dataFlt)
         self.ax[0].set_ylim(bottom=0, top=np.max(self.d['dos1rate'][validIdt]))
+        self.ax[2].scatter(self.d['dateTime'][self.peakInd], self.d['flag'][self.peakInd], c='r', s=25)
         return
 
 if __name__ == '__main__':
@@ -162,6 +184,6 @@ if __name__ == '__main__':
         date = datetime(2017, 1, 11)
         obj = TestFindMicrobursts(sc_id, date)
         obj.getMicroburstIdx()
-        obj.saveData()
-        #obj.plotTimeseries()
-        #plt.show()
+        #obj.saveData()
+        obj.plotTimeseries()
+        plt.show()

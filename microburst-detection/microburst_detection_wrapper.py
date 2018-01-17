@@ -25,7 +25,8 @@ for (sc_id, date) in itertools.product(['A', 'B'], dates):
         obj = microburst_detection.FindMicrobursts(sc_id, date)
     except AssertionError as err:
         if ( ('None or > 1 AC6 files found' in str(err)) or
-            ('Error, the data is not 2D (Empty file?)' in str(err)) ):
+            ('Error, the data is not 2D (Empty file?)' in str(err)) 
+            or ('File is empty!' in str(err))):
             # Wont log is logging level is logging.DEBUG
             logging.debug('AC6-{} on {}: {}'.format(sc_id, date.date(), err)) 
             continue

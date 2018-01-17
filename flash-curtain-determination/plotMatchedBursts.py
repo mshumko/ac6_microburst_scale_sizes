@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.dates
 import sys
 import os
 import scipy.signal
@@ -74,6 +75,9 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
 
                 saveDate = pltRange[0].replace(microsecond=0).isoformat().replace(':', '')
                 saveName = '{}_validation_{}.png'.format(self.burstType, saveDate)
+                # Format times and plots.
+                tfmt = matplotlib.dates.DateFormatter('%H:%M:%S')
+                self.ax.xaxis.set_major_formatter(tfmt)
                 plt.tight_layout()
                 if flag == 1:
                     print('Saving figure {}'.format(saveName))
@@ -151,6 +155,6 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
 
 if __name__ == '__main__':
     cPath = ('/home/mike/research/ac6-microburst-scale-sizes/data/'
-        'flash_catalogues/flashes_catalogue.txt')
+        'flash_catalogues/flashes_catalogue_v1.txt')
     pltObj = PlotMicroburstMatches(cPath)
     pltObj.plotMicroburst()

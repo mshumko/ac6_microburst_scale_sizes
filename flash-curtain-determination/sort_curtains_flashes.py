@@ -67,12 +67,12 @@ class SortMicrobursts:
         elif (outName is None) and (self.date is not None): 
             outName = '{}_{}_catalogue.txt'.format(self.date.date(), label)
 
-        outKeys = np.concatenate((['# dateTimeA', 'dos1rateA', 'dateTimeB', 'dos1rateB'], 
+        outKeys = np.concatenate((['dateTimeA', 'dos1rateA', 'dateTimeB', 'dos1rateB'], 
             self.keys[2:]))
 
         with open(os.path.join(self.outDir, outName), 'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(['# {} catalogue created on {}'.format(
+            writer.writerow(['{} catalogue created on {}'.format(
                 label, datetime.now().date())])
             writer.writerow(outKeys)
 
@@ -134,7 +134,7 @@ class SortMicrobursts:
         # Get data keys and data from file
         with open(fPath, 'r') as f:
             reader = csv.reader(f)
-            next(reader) # Skip first line of header
+            #next(reader) # Skip first line of header
             self.keys = next(reader)
             # Remove comment and empty space chars
             #self.keys[0] = self.keys[0][2:] 
@@ -154,17 +154,16 @@ class SortMicrobursts:
         return
 
 if __name__ == '__main__':
+    burstType = 'curtain'
+    startTime = time.time()
+    inDir = os.path.abspath('./../data/microburst_catalogues/')
+    outDir = os.path.abspath('./../data/{}_catalogues/'.format(burstType))
 
-burstType = 'curtain'
-startTime = time.time()
-inDir = os.path.abspath('./../data/microburst_catalogues/')
-outDir = os.path.abspath('./../data/{}_catalogues/'.format(burstType))
-
-if burstType == 'flashes':
-    flashesFlag = True
-else:
-    flashesFlag = False
-sorter = SortMicrobursts(inDir, outDir, flashesFlag=flashesFlag)
-sorter.simpleFindMatches()
-sorter.saveData()
-print('Run time: {}'.format(round(time.time()-startTime)))
+    if 'flash' in burstType:
+        flashesFlag = True
+    else:
+        flashesFlag = False
+    sorter = SortMicrobursts(inDir, outDir, flashesFlag=flashesFlag)
+    sorter.simpleFindMatches()
+    sorter.saveData()
+    print('Run time: {}'.format(round(time.time()-startTime)))

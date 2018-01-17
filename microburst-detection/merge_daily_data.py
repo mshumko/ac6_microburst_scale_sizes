@@ -23,7 +23,10 @@ def mergeDailyFiles(sc_id, inDir, outPath):
             with open(iFname, 'r') as iF:
                 reader = csv.reader(iF)
                 next(reader)
-                next(reader)
+                if i == 0:
+                    writer.writerow(next(reader))
+                else:
+                    next(reader)
                 for line in reader:
                     # Don't copy the header, except for first file.
                     # if ('#' in line[0]) and (i > 0): 
@@ -32,9 +35,9 @@ def mergeDailyFiles(sc_id, inDir, outPath):
     return
     
 if __name__ == '__main__':
-    sc_id = 'b'
-    inPath = ('/home/mike/research/ac6-microburst-scale-sizes/'
-        'data/daily_microburst_catalogues')
-    outPath = ('/home/mike/research/ac6-microburst-scale-sizes/'
-        'data/microburst_catalogues/AC6{}_microbursts.txt'.format(sc_id.upper()))
-    mergeDailyFiles(sc_id, inPath, outPath)
+    for sc_id in ['a', 'b']:
+        inPath = ('/home/mike/research/ac6-microburst-scale-sizes/'
+            'data/daily_microburst_catalogues')
+        outPath = ('/home/mike/research/ac6-microburst-scale-sizes/'
+            'data/microburst_catalogues/AC6{}_microbursts_v1.txt'.format(sc_id.upper()))
+        mergeDailyFiles(sc_id, inPath, outPath)

@@ -81,7 +81,7 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
                 plt.tight_layout()
                 if flag == 1:
                     print('Saving figure {}'.format(saveName))
-                    plt.savefig(os.path.join(saveDir, saveName))
+                    plt.savefig(os.path.join(saveDir, saveName))     
                 self.ax.clear()
                 self.bx.clear()
         return
@@ -100,22 +100,24 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         self.ax.plot(timeB[validIdB], dosB[validIdB], 'b', label='AC-6 B')
         self.bx.plot(timeA[validIdA], self.dataA['Alpha'][validIdA], '--r')
         self.bx.plot(timeB[validIdB], self.dataB['Alpha'][validIdB], '--b')
-        self.ax.set(ylabel='Dos1 [counts/s]', 
+        self.ax.set(ylabel='Dos1 [counts/s]', xlabel='UTC',
             title='AC-6 {} validation | {}'.format(
             self.burstType, tRange[0].date()))
         self.bx.set(xlabel='UTC', ylabel='Alpha [Deg] (dashed)')
         self.ax.legend(loc=1)
 
         # Do the cross correlation
-        corrIndA = validIdA[len(validIdA)//2 - 5 : len(validIdA)//2 + 5]
-        corrIndB = validIdB[len(validIdB)//2 - 5 : len(validIdB)//2 + 5]
-        cc = scipy.signal.correlate(dosA[corrIndA] - np.mean(dosA[corrIndA]), 
-            dosB[corrIndB] - np.mean(dosB[corrIndB]), mode='valid')[0]
+        cc = self._calcCrossCorr(dosA, dosB, validIdA, validIdB)
         
-        cc /= np.std(dosA[corrIndA])*np.std(dosB[corrIndB])*(len(corrIndA)+len(corrIndB))/2
-        # if cc < 0.75: # A simple cross-correlation filter
-        #     return -1
-
+        if cc < 0.9: # Simple cross correlation test
+            return 0
+        
+        # Calc power spectrum
+#        f, ps = self._calcFrequSpec(dosA[validIdA])
+#        self.ax.plot(f, ps, 'r')
+#        f, ps = self._calcFrequSpec(dosB[validIdB])
+#        self.ax[.plot(f, ps, 'b')
+#        self.ax[1].set_xlim(left=0)
         meanFlag = (np.mean(self.dataA['flag'][validIdA]) + 
             np.mean(self.dataB['flag'][validIdB]))/2
         textStr = ('L={} MLT={}\nlat={} lon={}\ndist={} LCT={}\nCrossCorr={} flag={}'.format(
@@ -129,6 +131,30 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         self.ax.text(0.05, 0.95, textStr, transform=self.ax.transAxes, 
             va='top')
         return 1
+        
+    def _calcCrossCorr(self, dosA, dosB, validIdtA, validIdtB, width=5):
+        """
+        This function calculates a cross correlation of the data with a
+        data width in data points. 
+        """
+        corrIndA = validIdtA[len(validIdtA)//2-width : len(validIdtA)//2+width]
+        corrIndB = validIdtB[len(validIdtB)//2-width : len(validIdtB)//2+width]
+        cc = scipy.signal.correlate(dosA[corrIndA] - np.mean(dosA[corrIndA]), 
+            dosB[corrIndB] - np.mean(dosB[corrIndB]), mode='valid')[0]
+        cc /= np.std(dosA[corrIndA])*np.std(dosB[corrIndB])*(len(corrIndA)+len(corrIndB))/2
+        return cc
+        
+    def _calcFrequSpec(self, dosRate, cadence=0.1):
+        """
+        This function calculates the frequency spectrum on the dosRate data
+        using an FFT with a 10 Hz data by default. Inspired by 
+        https://stackoverflow.com/questions/15382076/plotting-power-spectrum-in-python
+        """
+        dosRate -= np.mean(dosRate) # Remove DC offset.
+        ps = np.abs(np.fft.fft(dosRate))**2
+        f = np.fft.fftfreq(len(dosRate), cadence)
+        idx = np.argsort(f) # Not sure why these need to be sorted, but cant hurt.
+        return f[idx], ps[idx]
 
 
     def _findDateBounds(self):

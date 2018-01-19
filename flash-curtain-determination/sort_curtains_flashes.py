@@ -4,36 +4,65 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
 import dateutil.parser
+import scipy.signal
 import itertools 
 import time
 import csv
+import sys
 import os
 
+sys.path.append('/home/mike/research/mission-tools/ac6/')
+import read_ac_data
+
 class SortMicrobursts:
-    def __init__(self, inDir, outDir, date=None, flashesFlag=True):
+    def __init__(self, inDir, outDir, date=None, flashesFlag=True, cadence=0.1):
         self.date = date
         self.inDir = inDir
         self.flashesFlag = flashesFlag
         self.outDir = outDir
         self._loadMicroburstCatalogues()
+        self.cadence = cadence
         return
 
-    def simpleFindMatches(self, thresh=0.2):
+    def simpleFindMatches(self, T_THRESH=0.2, CC_WITH=0.5):
         """
         Loop over list A and look for microbursts in list B at
-        times +/- thresh. If In_Track_Lag < thresh, give 
+        times +/- T_THRESH. If In_Track_Lag < T_THRESH, give 
         warning or error out.
         """
-        self.flashes = np.nan*np.ones((0, len(self.keys)+2))
-        dT = timedelta(seconds=thresh)
-        
+        self.flashes = np.nan*np.ones((0, len(self.keys)+3))
+        dT = timedelta(seconds=T_THRESH)
+
+        currentDate = datetime.min
         for (i, tA) in enumerate(self.dataA['dateTime']):
             matchIdt = np.where(
                 (tA >= self.dataB['dateTime'] - dT) & 
                 (tA <= self.dataB['dateTime'] + dT))
             if len(matchIdt[0]) != 1: 
                 continue # If 0 or > 1 matches found, ignore.
-                
+
+            # My attempt at functional programming.
+            # Whenever current date changes, load in the new data.
+            if currentDate.date() != tA.date():
+                print('Loading data from {}'.format(tA.date()))
+                # Read in data to caculate the cross correlation
+                dataA = read_ac_data.read_ac_data_wrapper('A', tA)
+                dataB = read_ac_data.read_ac_data_wrapper('B', tA)
+                currentDate = tA
+
+            # Calculate the cross correlation coefficent.
+            try:
+                cc = self._calcCrossCorr(dataA, dataB, tA, 
+                    self.dataB['dateTime'][matchIdt[0]], 
+                    width=CC_WITH)  
+            except ValueError as err:
+                if str(err) == 'math domain error':
+                    print(err)
+                    continue
+                else:
+                    raise
+
+
             # Save the same keys as input data except save
             # each spacecraft's times of flashes and their
             # dos1rates.
@@ -42,6 +71,7 @@ class SortMicrobursts:
             for key in self.keys[2:]:
                 stats.append(np.mean([self.dataA[key][i], 
                     self.dataB[key][matchIdt[0][0]] ]))
+            stats.append(cc) # Append the cross correlation coefficient
             dataLine = np.array(
                 [tA, self.dataA['dos1rate'][i], 
                 self.dataB['dateTime'][matchIdt[0][0]],
@@ -52,6 +82,25 @@ class SortMicrobursts:
             self.flashes = np.row_stack((self.flashes, dataLine))
         print(self.flashes)
         return
+
+    def _calcCrossCorr(self, dataA, dataB, tA, tB, width=0.5):
+        """
+        This function calculates a cross correlation of the data with a
+        data width in data points. 
+        """
+        corrIndA = np.where((dataA['dateTime'] <= tA + timedelta(seconds=width)) & 
+                            (dataA['dateTime'] >= tA - timedelta(seconds=width)))[0]
+        corrIndB = np.where((dataB['dateTime'] <= tB + timedelta(seconds=width)) & 
+                            (dataB['dateTime'] >= tB - timedelta(seconds=width)))[0] 
+        dosA = dataA['dos1rate'][corrIndA]
+        dosB = dataB['dos1rate'][corrIndB]
+        # Replace any error values with 0 so correlate does not add any weight to it.
+        dosA[dosA == -1E31] = 0
+        dosB[dosB == -1E31] = 0
+        cc = scipy.signal.correlate(dosA - np.mean(dosA), dosB - np.mean(dosB), 
+            mode='valid')[0]
+        cc /= np.std(dosA)*np.std(dosB)*(len(corrIndA)+len(corrIndB))/2
+        return cc
 
     def saveData(self, outName=None):
         """
@@ -68,7 +117,7 @@ class SortMicrobursts:
             outName = '{}_{}_catalogue.txt'.format(self.date.date(), label)
 
         outKeys = np.concatenate((['dateTimeA', 'dos1rateA', 'dateTimeB', 'dos1rateB'], 
-            self.keys[2:]))
+            self.keys[2:], ['cross_correlation']))
 
         with open(os.path.join(self.outDir, outName), 'w', newline='') as f:
             writer = csv.writer(f)

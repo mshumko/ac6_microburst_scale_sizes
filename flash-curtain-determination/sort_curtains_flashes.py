@@ -62,7 +62,6 @@ class SortMicrobursts:
                 else:
                     raise
 
-
             # Save the same keys as input data except save
             # each spacecraft's times of flashes and their
             # dos1rates.
@@ -71,7 +70,7 @@ class SortMicrobursts:
             for key in self.keys[2:]:
                 stats.append(np.mean([self.dataA[key][i], 
                     self.dataB[key][matchIdt[0][0]] ]))
-            stats.append(cc) # Append the cross correlation coefficient
+            stats.append(round(cc, 2)) # Append the cross correlation coefficient
             dataLine = np.array(
                 [tA, self.dataA['dos1rate'][i], 
                 self.dataB['dateTime'][matchIdt[0][0]],
@@ -203,7 +202,7 @@ class SortMicrobursts:
         return
 
 if __name__ == '__main__':
-    burstType = 'curtain'
+    burstType = 'flash'
     startTime = time.time()
     inDir = os.path.abspath('./../data/microburst_catalogues/')
     outDir = os.path.abspath('./../data/{}_catalogues/'.format(burstType))

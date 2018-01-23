@@ -14,7 +14,7 @@ class ScaleSize:
         return
 
     def scaleSizeHist(self, bins, range=None, norm=None, visualizeNorm=True,
-                      lowAE=None, highAE=None):
+                      lowAE=None, highAE=None, ccThresh=None):
         """
         This function plots the histogram of microburst scale sizes.
         """
@@ -26,6 +26,10 @@ class ScaleSize:
         if highAE is not None: # If lower bound AE is set.
             highAEInd = np.where(self.dataDict['AE'] <= highAE)[0]
             validInd = np.array(sorted(list(set(validInd) & set(highAEInd))))
+        if ccThresh is not None:
+            ccInd = np.where(self.dataDict['cross_correlation'] >= ccThresh)[0]
+            validInd = np.array(sorted(list(set(validInd) & set(ccInd))))
+        assert len(validInd) > 0, 'No filtered indicies found!'
 
         hist, bin_edges = np.histogram(self.dataDict['Dist_Total'][validInd],
             bins=bins)
@@ -112,7 +116,7 @@ class ScaleSize:
 
 if __name__ == '__main__':
     #fPath = os.path.abspath('./../data/curtain_catalogues/curtains_catalogue.txt')
-    fPath = os.path.abspath('./../data/flash_catalogues/flashes_catalogue.txt')
+    fPath = os.path.abspath('./../data/flash_catalogues/flash_catalogue_v2.txt')
     normPath = os.path.abspath('./dist_norm.txt')
     ss = ScaleSize(fPath, burstType='Flashes')
     #ss.loadNormalization(normPath)
@@ -124,13 +128,13 @@ if __name__ == '__main__':
     normCounts = np.load(os.path.abspath('./normalization/dist_norm.npy'))
 
     # Rebin normalization histogram to n km (every nth point)
-    n = 10
+    n = 20
     normDist = normDist[::n]
     normCounts = np.array([np.sum(normCounts[i*n:(i+1)*n] ) for i in range(len(normCounts)//n)])
 
     ss.dist_norm = normDist[:-1]
     ss.count_norm = normCounts
 
-    ax, _ = ss.scaleSizeHist(normDist, visualizeNorm=True, norm=normCounts)
+    ax, _ = ss.scaleSizeHist(normDist, visualizeNorm=True, norm=normCounts, ccThresh=0.8)
     ax.set_xlim(0, 300)
     plt.show()

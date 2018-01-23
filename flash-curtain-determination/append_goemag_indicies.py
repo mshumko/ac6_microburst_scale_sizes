@@ -161,15 +161,15 @@ class AppendGeoMagIdx:
 
 if __name__ == '__main__':
     iType = 'ae'
-    dataType = 'curtains'
+    dataType = 'flashes'
     indexDir = '/home/mike/research/geomag_indicies/ae'
 
     if dataType == 'flashes':
         dataPath = ('/home/mike/research/ac6-microburst-scale-sizes/data/'
-                    'flash_catalogues/flashes_catalogue.txt')
+                    'flash_catalogues/flash_catalogue_v2.txt')
     else:
         dataPath = ('/home/mike/research/ac6-microburst-scale-sizes/data/'
-                    'curtain_catalogues/curtains_catalogue.txt')
+                    'curtain_catalogues/curtain_catalogue.txt')
 
     appendObj = AppendGeoMagIdx(iType, dataPath, indexDir)
     appendObj.appendIndex()

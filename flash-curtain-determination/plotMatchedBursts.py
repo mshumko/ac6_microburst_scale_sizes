@@ -59,13 +59,14 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
             # Loop over daily detections.
             zippedCenterTimes = zip(self.dataDict['dateTimeA'][d[1]:d[2]], 
                 self.dataDict['dateTimeB'][d[1]:d[2]])
-            for (tA, tB) in zippedCenterTimes: 
+            for i, (tA, tB) in enumerate(zippedCenterTimes): 
                 # Plot dos1rate
                 pltRange = [tA-timedelta(seconds=thresh), 
                             tA+timedelta(seconds=thresh)]
                 flag = self.plotTimeRange(self.dataA['dateTime'], 
-                    self.dataA['dos1rate'],
-                    self.dataB['dateTime'], self.dataB['dos1rate'], pltRange)
+                    self.dataA['dos1rate'], self.dataB['dateTime'], 
+                    self.dataB['dos1rate'], pltRange, 
+                    self.dataDict['cross_correlation'][i])
 
                 # Save figure
                 saveDir = ('/home/mike/research/ac6-microburst-scale-sizes/'
@@ -78,7 +79,7 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
                 # Format times and plots.
                 tfmt = matplotlib.dates.DateFormatter('%H:%M:%S')
                 self.ax.xaxis.set_major_formatter(tfmt)
-                plt.tight_layout()
+                #plt.tight_layout()
                 if flag == 1:
                     print('Saving figure {}'.format(saveName))
                     plt.savefig(os.path.join(saveDir, saveName))     
@@ -86,12 +87,14 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
                 self.bx.clear()
         return
 
-    def plotTimeRange(self, timeA, dosA, timeB, dosB, tRange):
+    def plotTimeRange(self, timeA, dosA, timeB, dosB, tRange, cc):
         """
         This function will plot the narrow microburst time range from
         both spacecraft, and annotate with L, MLT, Lat, Lon. If curtain,
         add shift in time and space.
         """
+        if cc < 0.9: # Simple cross correlation test
+            return 0
         validIdA = np.where((dosA != -1E31) & (timeA > tRange[0]) & (timeA < tRange[1]))[0]
         validIdB = np.where((dosB != -1E31) & (timeB > tRange[0]) & (timeB < tRange[1]))[0]
 
@@ -107,10 +110,9 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         self.ax.legend(loc=1)
 
         # Do the cross correlation
-        cc = self._calcCrossCorr(dosA, dosB, validIdA, validIdB)
-        
-        if cc < 0.9: # Simple cross correlation test
-            return 0
+        #cc = self._calcCrossCorr(dosA, dosB, validIdA, validIdB)
+        #if cc < 0.9: # Simple cross correlation test
+        #    return 0
         
         # Calc power spectrum
 #        f, ps = self._calcFrequSpec(dosA[validIdA])
@@ -127,7 +129,7 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
             round(np.mean(self.dataA['lon'][validIdA])),
             round(np.mean(self.dataA['Dist_In_Track'][validIdA])),
             round(np.mean(self.dataA['Loss_Cone_Type'][validIdA])),
-            round(cc, 1), round(meanFlag)))
+            cc, round(meanFlag)))
         self.ax.text(0.05, 0.95, textStr, transform=self.ax.transAxes, 
             va='top')
         return 1
@@ -181,6 +183,6 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
 
 if __name__ == '__main__':
     cPath = ('/home/mike/research/ac6-microburst-scale-sizes/data/'
-        'flash_catalogues/flashes_catalogue_v1.txt')
+        'flash_catalogues/flash_catalogue_v2.txt')
     pltObj = PlotMicroburstMatches(cPath)
     pltObj.plotMicroburst()

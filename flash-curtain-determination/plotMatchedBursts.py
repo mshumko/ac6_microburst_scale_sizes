@@ -93,7 +93,7 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         both spacecraft, and annotate with L, MLT, Lat, Lon. If curtain,
         add shift in time and space.
         """
-        if cc < 0.9: # Simple cross correlation test
+        if cc < 0.8: # Simple cross correlation test
             return 0
         validIdA = np.where((dosA != -1E31) & (timeA > tRange[0]) & (timeA < tRange[1]))[0]
         validIdB = np.where((dosB != -1E31) & (timeB > tRange[0]) & (timeB < tRange[1]))[0]

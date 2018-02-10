@@ -65,7 +65,7 @@ class ScaleSize:
 
         with open(fPath) as f:
             reader = csv.reader(f)
-            next(reader) # Skip header
+            #next(reader) # Skip header
             next(reader)
 
             for i, line in enumerate(reader): # Read in the data
@@ -101,12 +101,12 @@ class ScaleSize:
         """
         # Scan the file to get number of lines.
         with open(fPath, 'r') as f:
-            N = sum(1 for row in f) - 2
+            N = sum(1 for row in f) - 1
 
         # Get data keys and data from file
         with open(fPath, 'r') as f:
             reader = csv.reader(f)
-            next(reader) # Skip first line of header
+            #next(reader) # Skip first line of header
             self.keys = next(reader)
             # Remove comment and empty space chars
             #self.keys[0] = self.keys[0][2:] 

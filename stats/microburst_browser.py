@@ -116,8 +116,10 @@ class MicroburstBrowser(ttk.Frame):
             self._open_database()
 
             # Populate the listBox.
-            for item in self.dataDict['dateTimeA']:
-                self.list.insert(tkinter.END, item)
+            for (t, bt) in zip(self.dataDict['dateTimeA'], self.dataDict['burstType']):
+                self.list.insert(tkinter.END, t)
+                if bt != 'nan':
+                    self.list.itemconfig(tkinter.END, {'bg':'yellow'})
         return
 
     def plot_timeseries(self, ax):
@@ -390,6 +392,18 @@ class MicroburstBrowser(ttk.Frame):
 
     def _keyPress(self, event):
         print("pressed", repr(event.char))
+        if repr(event.char) == 'f':
+            self.dataDict['burstType'][self.idt[0]] = 'flash'
+            self.burstType.set('flash')
+        elif repr(event.char) == 'c':
+            self.dataDict['burstType'][self.idt[0]] = 'curtain'
+            self.burstType.set('curtain')
+        elif repr(event.char) == 'n':
+            self.dataDict['burstType'][self.idt[0]] = 'neither'
+            self.burstType.set('neither')
+        elif repr(event.char) == 'a':
+            self.dataDict['burstType'][self.idt[0]] = 'ambiguous'
+            self.burstType.set('ambiguous')
         return
 
     def _init_microburst_buttons(self):
@@ -403,18 +417,18 @@ class MicroburstBrowser(ttk.Frame):
         radioFrame = tkinter.Frame(self.root)
         radioFrame.grid(column=4, row=0, columnspan=2, sticky='e')
 
-        self.flash_button = ttk.Radiobutton(radioFrame, text='Flash', 
+        self.flash_button = ttk.Radiobutton(radioFrame, text='Flash [f]', 
                                             variable=self.burstType, 
                                             val='flash', 
                                             command=self._update_burst_type)
-        self.curtain_button = ttk.Radiobutton(radioFrame, text='Curtain', 
+        self.curtain_button = ttk.Radiobutton(radioFrame, text='Curtain [c]', 
                                             variable=self.burstType, 
                                             val='curtain', 
                                             command=self._update_burst_type)
-        self.neither_button = ttk.Radiobutton(radioFrame, text='Neither', 
+        self.neither_button = ttk.Radiobutton(radioFrame, text='Neither [n]', 
                                             variable=self.burstType, val='neither', 
                                             command=self._update_burst_type)
-        self.ambiguous_button = ttk.Radiobutton(radioFrame, text='Ambiguous', 
+        self.ambiguous_button = ttk.Radiobutton(radioFrame, text='Ambiguous [a]', 
                                             variable=self.burstType, val='ambiguous',
                                             command=self._update_burst_type)
         self.flash_button.grid(row=0, column=0, sticky='w')

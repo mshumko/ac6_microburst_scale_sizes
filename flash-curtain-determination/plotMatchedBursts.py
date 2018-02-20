@@ -10,6 +10,7 @@ sys.path.append('/home/mike/research/ac6-microburst-scale-sizes/stats/')
 sys.path.append('/home/mike/research/mission-tools/ac6/')
 import read_ac_data
 import scale_sizes
+import gaus_fit
 
 class PlotMicroburstMatches(scale_sizes.ScaleSize):
     def __init__(self, cPath, burstType='flashes'):
@@ -109,17 +110,30 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         self.bx.set(xlabel='UTC', ylabel='Alpha [Deg] (dashed)')
         self.ax.legend(loc=1)
 
-        # Do the cross correlation
-        #cc = self._calcCrossCorr(dosA, dosB, validIdA, validIdB)
-        #if cc < 0.9: # Simple cross correlation test
-        #    return 0
+        # Fit a Gaussian to both time series.
+        FIT_WIDTH = 0.5 # seconds
+        t0A = timeA[validIdA[len(validIdA)//2]] # Center times
+        t0B = timeB[validIdB[len(validIdB)//2]]
+        # Calculate start/end indicies to fit.
+        startIndA = validIdA[len(validIdA)//2-int(FIT_WIDTH/0.1)]
+        endIndA = validIdA[len(validIdA)//2+int(FIT_WIDTH/0.1)]
+        startIndB = validIdB[len(validIdB)//2-int(FIT_WIDTH/0.1)]
+        endIndB = validIdB[len(validIdB)//2+int(FIT_WIDTH/0.1)]
+
+        tsA = [(t0A - t).total_seconds() 
+                for t in timeA[startIndA:endIndA]]
+        tsB = [(t0B - t).total_seconds() 
+                for t in timeB[startIndB:endIndB]]
+        fitDict = self._fitGaus(timeA[validIdA], dosA[validIdA])
+        print(fitDict)
         
         # Calc power spectrum
-#        f, ps = self._calcFrequSpec(dosA[validIdA])
-#        self.ax.plot(f, ps, 'r')
-#        f, ps = self._calcFrequSpec(dosB[validIdB])
-#        self.ax[.plot(f, ps, 'b')
-#        self.ax[1].set_xlim(left=0)
+        #f, ps = self._calcFrequSpec(dosA[validIdA])
+        #self.ax.plot(f, ps, 'r')
+        #f, ps = self._calcFrequSpec(dosB[validIdB])
+        #self.ax[.plot(f, ps, 'b')
+        #self.ax[1].set_xlim(left=0)
+
         meanFlag = (np.mean(self.dataA['flag'][validIdA]) + 
             np.mean(self.dataB['flag'][validIdB]))/2
         textStr = ('L={} MLT={}\nlat={} lon={}\ndist={} LCT={}\nCrossCorr={} flag={}'.format(
@@ -133,6 +147,16 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         self.ax.text(0.05, 0.95, textStr, transform=self.ax.transAxes, 
             va='top')
         return 1
+
+    def _fitGaus(self, tA, xA, tB, xB):
+        fit = gaus_fit.GausFit()
+        poptA, perrA = fit.fitData(xA, tA, p0=None)
+        poptB, perrB = fit.fitData(xB, tB, p0=None)
+        print('AC6-A', poptA, perrA)
+        print('AC6-B', poptB, perrB)
+        out = {'poptA':poptA, 'poptB':poptB, 
+                'perrA':perrA, 'perrB':perrB}
+        return out
         
     def _calcCrossCorr(self, dosA, dosB, validIdtA, validIdtB, width=5):
         """

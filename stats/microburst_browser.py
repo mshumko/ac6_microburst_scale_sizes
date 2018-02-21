@@ -118,7 +118,8 @@ class MicroburstBrowser(ttk.Frame):
             # Populate the listBox.
             for (t, bt) in zip(self.dataDict['dateTimeA'], self.dataDict['burstType']):
                 self.list.insert(tkinter.END, t)
-                if bt != 'nan':
+                #print(str(bt) == 'nan')
+                if str(bt) != 'nan':
                     self.list.itemconfig(tkinter.END, {'bg':'yellow'})
         return
 
@@ -214,7 +215,12 @@ class MicroburstBrowser(ttk.Frame):
                         ("all files","*.*")) 
             )
         if f:
-            keys = np.append(self.keys, 'burstType')
+            # This if statement prevents duplicate burstType columns.
+            if 'burstType' not in self.keys: 
+                keys = np.append(self.keys, 'burstType')
+            else:
+                keys = self.keys
+
             writer = csv.writer(f)
             writer.writerow(keys) # write header keys
             writer.writerows(zip(*[self.dataDict[key] for key in keys]))

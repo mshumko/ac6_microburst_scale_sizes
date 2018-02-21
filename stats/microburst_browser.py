@@ -136,8 +136,8 @@ class MicroburstBrowser(ttk.Frame):
                 self.dataB = read_ac_data.read_ac_data_wrapper('B', self.pltTime)
                 self.currentDate = self.pltTime
             except AssertionError as err:
-                print(str(err))
-                return
+                print(err)
+                raise AssertionError('I can not find the AC-6 data.')
 
         # Plot the unajusted timeseries
         # Filter out invalid data

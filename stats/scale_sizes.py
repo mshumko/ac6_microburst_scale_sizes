@@ -135,6 +135,6 @@ if __name__ == '__main__':
     ss.dist_norm = normDist[:-1]
     ss.count_norm = normCounts
 
-    ax, _ = ss.scaleSizeHist(normDist, visualizeNorm=True, norm=normCounts, ccThresh=0.8)
+    ax, _ = ss.scaleSizeHist(normDist, visualizeNorm=True, norm=normCounts, ccThresh=None)
     ax.set_xlim(0, 300)
     plt.show()

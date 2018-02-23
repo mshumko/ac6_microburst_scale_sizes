@@ -8,9 +8,16 @@ import sys
 import os
 
 class ScaleSize:
-    def __init__(self, fPath, burstType='flashes'):
+    def __init__(self, fPath, burstType='flashes', filterSorted=True):
         self._loadData(fPath)
         self.burstType = burstType
+
+        # Filter the catalog if it has been sorted.
+        if (filterSorted and ('burstType' in self.dataDict.keys()) 
+                        and 'flash' in self.burstType.lower()):
+            flashInd = np.where(self.dataDict['burstType'] == 'flash')[0]
+            for key in self.dataDict.keys():
+                self.dataDict[key] = self.dataDict[key][flashInd]
         return
 
     def scaleSizeHist(self, bins, range=None, norm=None, visualizeNorm=True,
@@ -36,21 +43,25 @@ class ScaleSize:
         width = 0.9 * (bins[1] - bins[0])
         center = (bins[:-1] + bins[1:]) / 2
         if norm is not None:
-            hist = np.divide(hist, norm)
+            hist = 86400*np.divide(hist, norm)
         if visualizeNorm:
             fig, (ax, bx) = plt.subplots(2, sharex=True)
             # histNorm, bin_edges = np.histogram(self.count_norm,
             #    bins=self.dist_norm)
             #bx.bar(center, hist, align='center', width=width)
-            bx.plot(self.dist_norm+width/2, self.count_norm/86400)
+            bx.bar(self.dist_norm+width/2, self.count_norm/86400, align='center', width=width)
             bx.set(xlabel='Separation (km)', ylabel = 'Days at separation')
         else:
             fig, ax = plt.subplots(1)
 
-        ax.bar(center, hist*86400, align='center', width=width)
+        ax.bar(center, hist, align='center', width=width)
         ax.set(ylabel='flashes/day', 
             title='AC6 {} scale size distribution'.format(self.burstType), 
             xlabel='Separation (km)')
+        # ax.bar(center, hist, align='center', width=width)
+        # ax.set(ylabel='flashes', 
+        #     title='AC6 {} scale size distribution'.format(self.burstType), 
+        #     xlabel='Separation (km)')
         if visualizeNorm:
             return (ax, bx)
         else:
@@ -75,7 +86,7 @@ class ScaleSize:
             for i, key in enumerate(self.keys):
                 self.dataDict[key] = data[:, i]
             # Loop over all keys but datetimes and set the array types to be floats.
-            for key in itertools.filterfalse(lambda x:'dateTime' in x, self.keys):
+            for key in itertools.filterfalse(lambda x:'dateTime' in x or 'burstType' in x, self.keys):
                 self.dataDict[key] = self.dataDict[key].astype(float)
 
             # Convert datetimes
@@ -116,7 +127,7 @@ class ScaleSize:
 
 if __name__ == '__main__':
     #fPath = os.path.abspath('./../data/curtain_catalogues/curtains_catalogue.txt')
-    fPath = os.path.abspath('./../data/flash_catalogues/flash_catalogue_v2.txt')
+    fPath = os.path.abspath('./../data/flash_catalogues/flash_catalogue_v2_sorted.txt')
     normPath = os.path.abspath('./dist_norm.txt')
     ss = ScaleSize(fPath, burstType='Flashes')
     #ss.loadNormalization(normPath)
@@ -128,13 +139,16 @@ if __name__ == '__main__':
     normCounts = np.load(os.path.abspath('./normalization/dist_norm.npy'))
 
     # Rebin normalization histogram to n km (every nth point)
-    n = 20
+    n = 10
     normDist = normDist[::n]
     normCounts = np.array([np.sum(normCounts[i*n:(i+1)*n] ) for i in range(len(normCounts)//n)])
 
     ss.dist_norm = normDist[:-1]
     ss.count_norm = normCounts
 
-    ax, _ = ss.scaleSizeHist(normDist, visualizeNorm=True, norm=normCounts, ccThresh=None)
-    ax.set_xlim(0, 300)
+    ax, _ = ss.scaleSizeHist(normDist, visualizeNorm=True, 
+                    norm=ss.count_norm, ccThresh=None, lowAE=None, highAE=None)
+    #ax, _ = ss.scaleSizeHist(normDist, visualizeNorm=False, norm=None, ccThresh=None)
+    ax.set_xlim(0, 100)
+    #ax.set_yscale('log')
     plt.show()

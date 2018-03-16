@@ -41,7 +41,8 @@ class Hist1D:
             if self.ac6data is None:
                 continue # If data file is empty
             ind = self.filterData()
-            self.hist_data(ind)
+            # If using Hist2D, the Hist1D's method will be overwritten.
+            self.hist_data(ind) 
 
         return
 
@@ -84,8 +85,6 @@ class Hist1D:
         """
         H, _ = np.histogram(self.ac6data['Dist_Total'][ind], bins=self.d)
         self.count += H/10
-
-        print(self.count)
         return
 
     def save_data(self, fPath):
@@ -102,24 +101,62 @@ class Hist1D:
         return
 
 class Hist2D(Hist1D):
-    def __init__(self):
+    def __init__(self, histKeyX, histKeyY, bins=None, sc_id='B', startDate=datetime(2014, 1, 1),
+                 endDate=datetime.now(), filterDict={}, flag=True):
         """
         This class calculates the 2D histograms as a function of distance
         for the various filter parameters. 
         """
-        pass
+        Hist1D.__init__(self, d=None, sc_id=sc_id, startDate=startDate, 
+                        endDate=endDate, filterDict=filterDict, flag=flag)
+        self.histKeyX = histKeyX
+        self.histKeyY = histKeyY
+
+        if bins is None: # Determine what the bins should be.
+            if 'lm' in histKeyX.lower(): # L-MLT distribution
+                self.bins=np.array([np.arange(2, 10), np.arange(0, 24)])
+            elif 'lm' in histKeyY.lower():
+                self.bins=np.array([np.arange(0, 24), np.arange(2, 10)])
+
+            elif 'lat' in histKeyX.lower(): # lat-lon distribution
+                self.bins=np.array([np.arange(-90, 90, 5), np.arange(-180, 180, 5)])
+            elif 'lat' in histKeyY.lower():
+                self.bins=np.array([np.arange(-90, 90, 5), np.arange(-180, 180, 5)])
+            else:
+                raise ValueError('Could not determine how to make bins!'
+                                ' Plase supply them')
+        else:
+            self.bins = bins
+        
+        self.count = np.zeros((len(self.bins[0]), len(self.bins[1])))
+        return
+
+    def hist_data(self, ind):
+        """
+        This histogram method overwrites the Hist1D's hist_data() method
+        """
+        H, xedges, yedges = np.histogram2d(self.ac6data[self.histKeyX][ind],
+                                self.ac6data[self.histKeyY][ind], bins=self.bins)
+
+        print(H, xedges, yedges)
+        self.count += H/10
+        return
+
+    def save_data(self, fPathBin, fPathNorm):
+        """
+        This method saves the histrogram bins and normalization coefficients.
+        """
+        with open(fPathBin, 'w', nwline='') as f:
+            w = csv.writer(f)
+            w.writerow(['histKeyX', 'histKeyY'])
+            w.writerows(self.bins)
+
+        with open(fPathNorm, 'w', nwline='') as f:
+            w = csv.writer(f)
+            w.writerow(['histKeyX', 'histKeyY'])
+            w.writerows(self.count)
+        return
+
 
 if __name__ == '__main__':
-    # This script will loop over the intervals in Lbins, and 
-    # make normalization histograms for all of them.
-    Lbins = [3, 4, 5, 6, 7]
-    for (lL, uL) in zip(Lbins[:-1], Lbins[1:]):
-        h = Hist1D(filterDict={'Lm_OPQ':[lL,uL]})
-        h.loop_data()
-        h.save_data('/home/mike/research/ac6-microburst-scale-sizes'
-                    '/data/norm/ac6_norm_{}_L_{}.txt'.format(lL, uL))
-
-    # h = Hist1D()
-    # h.loop_data()
-    # h.save_data('/home/mike/research/ac6-microburst-scale-sizes'
-    #             '/data/norm/ac6_norm_all.txt')
+    ss = Hist2D('Lm_OPQ', 'MLT_OPQ')

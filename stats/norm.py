@@ -128,7 +128,7 @@ class Hist2D(Hist1D):
         else:
             self.bins = bins
         
-        self.count = np.zeros((len(self.bins[0]), len(self.bins[1])))
+        self.count = np.zeros((len(self.bins[0])-1, len(self.bins[1])-1))
         return
 
     def hist_data(self, ind):
@@ -138,7 +138,6 @@ class Hist2D(Hist1D):
         H, xedges, yedges = np.histogram2d(self.ac6data[self.histKeyX][ind],
                                 self.ac6data[self.histKeyY][ind], bins=self.bins)
 
-        print(H, xedges, yedges)
         self.count += H/10
         return
 
@@ -146,17 +145,22 @@ class Hist2D(Hist1D):
         """
         This method saves the histrogram bins and normalization coefficients.
         """
-        with open(fPathBin, 'w', nwline='') as f:
+        XX, YY = np.meshgrid(self.bins[0], self.bins[1])
+
+        with open(fPathBin, 'w', newline='') as f:
             w = csv.writer(f)
-            w.writerow(['histKeyX', 'histKeyY'])
+            w.writerow([self.histKeyX, self.histKeyY])
             w.writerows(self.bins)
 
-        with open(fPathNorm, 'w', nwline='') as f:
+        with open(fPathNorm, 'w', newline='') as f:
             w = csv.writer(f)
-            w.writerow(['histKeyX', 'histKeyY'])
+            w.writerow([self.histKeyX, self.histKeyY])
             w.writerows(self.count)
         return
 
 
 if __name__ == '__main__':
     ss = Hist2D('Lm_OPQ', 'MLT_OPQ')
+    ss.loop_data()
+    sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
+    ss.save_data(os.path.join(sDir, 'L_MLT_bins.csv'), os.path.join(sDir, 'L_MLT_norm.csv'))

@@ -160,7 +160,7 @@ class Hist2D(Hist1D):
 
 
 if __name__ == '__main__':
-    ss = Hist2D('Lm_OPQ', 'MLT_OPQ')
+    ss = Hist2D('Lm_OPQ', 'lon')
     ss.loop_data()
     sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
-    ss.save_data(os.path.join(sDir, 'L_MLT_bins.csv'), os.path.join(sDir, 'L_MLT_norm.csv'))
+    ss.save_data(os.path.join(sDir, 'L_lon_bins.csv'), os.path.join(sDir, 'L_lon_norm.csv'))

@@ -68,6 +68,7 @@ class Hist1D:
         """
         This function will filter the AC-6 data.
         """
+        print('Filtering data...')
         if self.flag:
             ind = np.where(self.ac6data['flag'] == 0)[0]
         else:
@@ -160,7 +161,7 @@ class Hist2D(Hist1D):
 
 
 if __name__ == '__main__':
-    ss = Hist2D('Lm_OPQ', 'lon')
+    ss = Hist2D('Lm_OPQ', 'lon', bins=[np.arange(2, 10), np.arange(-180, 181, 5)])
     ss.loop_data()
     sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
     ss.save_data(os.path.join(sDir, 'L_lon_bins.csv'), os.path.join(sDir, 'L_lon_norm.csv'))

@@ -56,12 +56,26 @@ class ReplaceErrorVals:
         """
         This function looks for error values in the flash/curtain catalog.
         """
+        # Find all errorrous values in the catalog file.
         errInd = np.where(self.catDict['Lag_In_Track'] == -1E31)[0]
         print(errInd)
+        # Loop over each error, and find the in-track separation and time 
+        # separation values from the separation file given by Bern Blake.
+        if 'dateTimeA' in self.catKeys:
+            tKey = 'dateTimeA'
+        else:
+            tKey = 'dateTime'
         for i in errInd:
-            catInd = np.where((self.catDict['dateTimeA'][i] > self.sepDict['Date/Time'][:-1]) &
-                            (self.catDict['dateTimeA'][i] < self.sepDict['Date/Time'][1:]) )[0]
-            assert len(catInd) == 1, 'More than one separation time found!'
+            catInd = np.where((self.catDict[tKey][i] > self.sepDict['Date/Time'][:-1]) &
+                            (self.catDict[tKey][i] < self.sepDict['Date/Time'][1:]) )[0]
+
+            if len(catInd) > 1:
+                print('More than one separation time found! \n {}, time={}'.format(catInd,      self.catDict[tKey][i]))
+                continue
+            elif len(catInd) == 0:
+                print('No separation time found! \n {}, time={}'.format(catInd,      self.catDict[tKey][i]))
+                continue
+
             self.catDict['Lag_In_Track'][i] = self.sepDict['Time Separation [sec]'][catInd[0]]
             self.catDict['Dist_In_Track'][i] = self.sepDict['In-Track Separation [km]'][catInd[0]]
         return
@@ -87,9 +101,12 @@ class ReplaceErrorVals:
             writer.writerows(zip(*[self.catDict[key] for key in self.catKeys]))
 
 if __name__ == '__main__':
+    # r = ReplaceErrorVals('/home/mike/research/ac6/AC6_Separation.csv', 
+    #     ('/home/mike/research/ac6-microburst-scale-sizes/'
+    #     'data/flash_catalogues/flash_catalogue_v2.txt'))
     r = ReplaceErrorVals('/home/mike/research/ac6/AC6_Separation.csv', 
         ('/home/mike/research/ac6-microburst-scale-sizes/'
-        'data/flash_catalogues/flash_catalogue_v2.txt'))
+        'data/microburst_catalogues/AC6A_microbursts.txt'))
     r.loadSeprationFile()
     r.loadCatalog()
     r.replaceErrors()

@@ -202,7 +202,8 @@ class SortMicrobursts:
         return
 
 if __name__ == '__main__':
-    burstType = 'flash'
+    burstType = 'curtain'
+    version = 2
     startTime = time.time()
     inDir = os.path.abspath('./../data/microburst_catalogues/')
     outDir = os.path.abspath('./../data/{}_catalogues/'.format(burstType))
@@ -213,5 +214,5 @@ if __name__ == '__main__':
         flashesFlag = False
     sorter = SortMicrobursts(inDir, outDir, flashesFlag=flashesFlag)
     sorter.simpleFindMatches()
-    sorter.saveData()
+    sorter.saveData(outName='{}_catalogue_v{}.txt'.format(burstType, version))
     print('Run time: {}'.format(round(time.time()-startTime)))

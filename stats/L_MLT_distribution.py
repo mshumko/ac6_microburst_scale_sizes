@@ -38,12 +38,12 @@ class GlobalDist:
     def make_L_MLT_map(self):
         f, ax = plt.subplots(2)
         im = ax[0].pcolormesh(self.normBins[1], self.normBins[0], self.H)
-        ax[0].set(xlabel='MLT', ylabel='Lm OPQ', title='Microbururst Occurance Rates')
+        ax[0].set(xlabel=self.normKeys[1], ylabel=self.normKeys[0], title='Microbururst Occurance Rates')
         plt.colorbar(im, ax=ax[0], label = 'microbursts/s')
 
         im = ax[1].pcolormesh(self.normBins[1], self.normBins[0], self.norm)
-        ax[1].set(xlabel='MLT', ylabel='Lm OPQ', title='Normalization')
-        plt.colorbar(im, ax=ax[1], label = 'Seconds in bin')
+        ax[1].set(xlabel=self.normKeys[1], ylabel=self.normKeys[0], title='Normalization')
+        plt.colorbar(im, ax=ax[1], label = 'Seconds/bin')
 
         plt.tight_layout()
         return
@@ -114,8 +114,8 @@ if __name__ == '__main__':
     cName = 'flash_catalogue_v2_sorted.txt'
     # Normalization dir and name
     normDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm'
-    normName = 'ac6_L_MLT_norm.csv'
-    normBinName = 'ac6_L_MLT_bins.csv'
+    normName = 'ac6_L_lon_norm.csv'
+    normBinName = 'ac6_L_lon_bins.csv'
     
     ss = GlobalDist(os.path.join(cDir, cName), os.path.join(normDir, normName), 
                     os.path.join(normDir, normBinName), 

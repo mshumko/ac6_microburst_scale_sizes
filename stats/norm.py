@@ -13,7 +13,7 @@ sys.path.insert(0, '/home/mike/research/mission-tools/ac6')
 import read_ac_data
 
 class Hist1D:
-    def __init__(self, d=None, sc_id='B', startDate=datetime(2014, 1, 1),
+    def __init__(self, d=None, startDate=datetime(2014, 1, 1),
                  endDate=datetime.now(), filterDict={}, flag=True):
         """
         This class calculates the 1D histograms as a function of distance
@@ -28,7 +28,6 @@ class Hist1D:
         self.count = np.zeros(len(self.d)-1) # Number of days at that separation.
         dDays = (endDate - startDate).days
         self.dates = [startDate + timedelta(days=i) for i in range(dDays)] 
-        #self.sc_id = sc_id  
         self.filterDict = filterDict
         self.flag = flag
         return
@@ -180,7 +179,14 @@ class Hist2D(Hist1D):
 
 
 if __name__ == '__main__':
-    ss = Hist2D('Lm_OPQ', 'lon', bins=[np.arange(2, 10), np.arange(-180, 181, 5)])
+    ### SCRIPT TO MAKE "Dst_Total" NORMALIZATION ###
+    ss=Hist1D()
     ss.loop_data()
     sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
-    ss.save_data(os.path.join(sDir, 'L_lon_bins.csv'), os.path.join(sDir, 'L_lon_norm.csv'))
+    ss.save_data(os.path.join(sDir, 'ac6_norm_all_test.csv'))
+
+    ### SCRIPT TO MAKE L-MLT NORMALIATION ###
+    # ss = Hist2D('Lm_OPQ', 'lon', bins=[np.arange(2, 10), np.arange(-180, 181, 5)])
+    # ss.loop_data()
+    # sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
+    # ss.save_data(os.path.join(sDir, 'L_lon_bins.csv'), os.path.join(sDir, 'L_lon_norm.csv'))

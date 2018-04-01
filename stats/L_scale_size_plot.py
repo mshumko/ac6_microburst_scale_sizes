@@ -1,5 +1,6 @@
 # this script explores the scale size dependence on L shell
 import matplotlib.pyplot as plt
+from datetime import datetime
 import scale_size
 import os
 
@@ -26,5 +27,5 @@ for (lL, uL) in zip(Lrange[:-1], Lrange[1:]):
     ax[1].set_title('Normalization')
 
     plt.savefig(('/home/mike/Dropbox/0_grad_work/ac6-flashes-curtains/'
-                'plots/2018-03-14_scale_sizes/'
-                'flash_scale_size_{}_L_{}.png').format(lL, uL))
+                'plots/{}_scale_sizes/'
+                'flash_scale_size_{}_L_{}.png').format(datetime.now().date(), lL, uL))

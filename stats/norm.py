@@ -2,6 +2,7 @@
 # micorburst scale size distributions.
 
 from datetime import datetime, timedelta
+from matplotlib.dates import date2num 
 import csv
 import numpy as np
 import sys
@@ -27,7 +28,7 @@ class Hist1D:
         self.count = np.zeros(len(self.d)-1) # Number of days at that separation.
         dDays = (endDate - startDate).days
         self.dates = [startDate + timedelta(days=i) for i in range(dDays)] 
-        self.sc_id = sc_id  
+        #self.sc_id = sc_id  
         self.filterDict = filterDict
         self.flag = flag
         return
@@ -38,8 +39,8 @@ class Hist1D:
         """
         for day in self.dates:
             self.load_day_data(day)
-            if self.ac6data is None:
-                continue # If data file is empty
+            if (self.ac6dataA is None) or (self.ac6dataB is None):
+                continue # If one (or both) of the data files is empty
             ind = self.filterData()
             # If using Hist2D, the Hist1D's method will be overwritten.
             self.hist_data(ind) 
@@ -53,38 +54,56 @@ class Hist1D:
         """
         try:   
             print('Loading data from {}'.format(date))
-            self.ac6data = read_ac_data.read_ac_data_wrapper(
-                self.sc_id, date, dType='10Hz', plot=False)
+            self.ac6dataA = read_ac_data.read_ac_data_wrapper(
+                'A', date, dType='10Hz', plot=False)
+            self.ac6dataB = read_ac_data.read_ac_data_wrapper(
+                'B', date, dType='10Hz', plot=False)
         except AssertionError as err:
             if ( ('None or > 1 AC6 files found' in str(err)) or
                 ('File is empty!' in str(err)) ):
-                self.ac6data = None
-                return None
+                self.ac6dataA = None
+                self.ac6dataB = None
             else:
                 raise
-        return self.ac6data
+        finally:
+            return self.ac6dataA, self.ac6dataB
 
-    def filterData(self):
+    def filterData(self, verbose=True):
         """
-        This function will filter the AC-6 data.
+        This function filters the AC-6 data by common times, data flag value,
+        and filterDict dictionary.
         """
-        print('Filtering data...')
-        if self.flag:
-            ind = np.where(self.ac6data['flag'] == 0)[0]
-        else:
-            ind = range(len(self.ac6data['flag']))
+        if verbose:
+            start_time = datetime.now()
+            print('Filtering data at {}'.format(datetime.now()))
+        ### Find common times of the two data sets ###
+        tA = date2num(self.ac6dataA['dateTime'])
+        tB = date2num(self.ac6dataB['dateTime'])
+        # np.in1d returns a boolean array that correspond to indicies in tB
+        # that are also in tA. np.where will convert this mask array into
+        # an index array
+        ind = np.where(np.in1d(tB, tA, assume_unique=True))[0]
 
+        ### Data quality flag filter ###
+        if self.flag: # First filter by common times and flag
+            indf = np.where(self.ac6dataB['flag'] == 0)[0]
+            ind = np.intersect1d(ind, indf) 
+
+        ### filerDict filter ###
         for key, value in self.filterDict.items():
-            idx = np.where((self.ac6data[key] > np.min(value)) & 
-                            (self.ac6data[key] < np.max(value)))[0]
+            idx = np.where((self.ac6dataB[key] > np.min(value)) & 
+                            (self.ac6dataB[key] < np.max(value)))[0]
             ind = np.intersect1d(ind, idx)
+        if verbose:
+            print('Data filted in {} s'.format(
+                (datetime.now()-start_time).total_seconds()))
         return ind
 
     def hist_data(self, ind):
         """
         This method will histrogram the total distance data.
         """
-        H, _ = np.histogram(self.ac6data['Dist_Total'][ind], bins=self.d)
+        H, _ = np.histogram(self.ac6dataB['Dist_Total'][ind], bins=self.d)
         self.count += H/10
         return
 
@@ -136,8 +155,8 @@ class Hist2D(Hist1D):
         """
         This histogram method overwrites the Hist1D's hist_data() method
         """
-        H, xedges, yedges = np.histogram2d(self.ac6data[self.histKeyX][ind],
-                                self.ac6data[self.histKeyY][ind], bins=self.bins)
+        H, xedges, yedges = np.histogram2d(self.ac6dataB[self.histKeyX][ind],
+                                self.ac6dataB[self.histKeyY][ind], bins=self.bins)
 
         self.count += H/10
         return

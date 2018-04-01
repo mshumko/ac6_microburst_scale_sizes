@@ -180,11 +180,21 @@ class Hist2D(Hist1D):
 
 if __name__ == '__main__':
     ### SCRIPT TO MAKE "Dst_Total" NORMALIZATION ###
-    ss=Hist1D()
+    # ss=Hist1D()
+    # st = datetime.now()
+    # ss.loop_data()
+    # sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
+    # ss.save_data(os.path.join(sDir, 'ac6_norm_all_test.csv'))
+    # print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
+
+    ### SCRIPT TO MAKE L-dependent "Dst_Total" NORMALIZATION ###
     st = datetime.now()
-    ss.loop_data()
-    sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
-    ss.save_data(os.path.join(sDir, 'ac6_norm_all_test.csv'))
+    L = [3, 4, 5, 6, 7]
+    for (lL, uL) in zip(L[:-1], L[1:]):
+        ss=Hist1D(filterDict={'Lm_OPQ':[lL, uL]})
+        ss.loop_data()
+        sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
+        ss.save_data(os.path.join(sDir, 'ac6_norm_{}_L_{}.csv'.format(lL, uL)))
     print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
 
     ### SCRIPT TO MAKE L-MLT NORMALIATION ###

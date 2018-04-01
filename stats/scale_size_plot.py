@@ -109,7 +109,7 @@ if __name__ == '__main__':
     cName = 'flash_catalogue_v2_sorted.txt'
     # Normalization dir and name
     nDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm'
-    nName = 'ac6_norm_all.txt'
+    nName = 'ac6_norm_all.csv'
     
     ss = ScaleSizeDist(os.path.join(cDir, cName), os.path.join(nDir, nName), 
                     fltDict={'burstType':'flash'})
@@ -123,5 +123,5 @@ if __name__ == '__main__':
     ax[1].set_title('Normalization')
 
     plt.savefig(('/home/mike/Dropbox/0_grad_work/ac6-flashes-curtains/'
-                'plots/2018-03-14_scale_sizes/'
-                'flash_scale_size_all.png'))
+                'plots/2018-04-01/'
+                'microburst_scale_size_all.png'))

@@ -181,9 +181,11 @@ class Hist2D(Hist1D):
 if __name__ == '__main__':
     ### SCRIPT TO MAKE "Dst_Total" NORMALIZATION ###
     ss=Hist1D()
+    st = datetime.now()
     ss.loop_data()
     sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
     ss.save_data(os.path.join(sDir, 'ac6_norm_all_test.csv'))
+    print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
 
     ### SCRIPT TO MAKE L-MLT NORMALIATION ###
     # ss = Hist2D('Lm_OPQ', 'lon', bins=[np.arange(2, 10), np.arange(-180, 181, 5)])

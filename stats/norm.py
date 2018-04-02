@@ -120,13 +120,13 @@ class Hist1D:
         return
 
 class Hist2D(Hist1D):
-    def __init__(self, histKeyX, histKeyY, bins=None, sc_id='B', startDate=datetime(2014, 1, 1),
+    def __init__(self, histKeyX, histKeyY, bins=None, startDate=datetime(2014, 1, 1),
                  endDate=datetime.now(), filterDict={}, flag=True):
         """
         This class calculates the 2D histograms as a function of distance
         for the various filter parameters. 
         """
-        Hist1D.__init__(self, d=None, sc_id=sc_id, startDate=startDate, 
+        Hist1D.__init__(self, d=None, startDate=startDate, 
                         endDate=endDate, filterDict=filterDict, flag=flag)
         self.histKeyX = histKeyX
         self.histKeyY = histKeyY

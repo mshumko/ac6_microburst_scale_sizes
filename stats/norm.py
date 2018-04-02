@@ -188,17 +188,23 @@ if __name__ == '__main__':
     # print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
 
     ### SCRIPT TO MAKE L-dependent "Dst_Total" NORMALIZATION ###
-    st = datetime.now()
-    L = [3, 4, 5, 6, 7]
-    for (lL, uL) in zip(L[:-1], L[1:]):
-        ss=Hist1D(filterDict={'Lm_OPQ':[lL, uL]})
-        ss.loop_data()
-        sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
-        ss.save_data(os.path.join(sDir, 'ac6_norm_{}_L_{}.csv'.format(lL, uL)))
-    print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
+    # st = datetime.now()
+    # L = [3, 4, 5, 6, 7]
+    # for (lL, uL) in zip(L[:-1], L[1:]):
+    #     ss=Hist1D(filterDict={'Lm_OPQ':[lL, uL]})
+    #     ss.loop_data()
+    #     sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
+    #     ss.save_data(os.path.join(sDir, 'ac6_norm_{}_L_{}.csv'.format(lL, uL)))
+    # print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
 
     ### SCRIPT TO MAKE L-MLT NORMALIATION ###
-    # ss = Hist2D('Lm_OPQ', 'lon', bins=[np.arange(2, 10), np.arange(-180, 181, 5)])
-    # ss.loop_data()
-    # sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
-    # ss.save_data(os.path.join(sDir, 'L_lon_bins.csv'), os.path.join(sDir, 'L_lon_norm.csv'))
+    ss = Hist2D('Lm_OPQ', 'lon', bins=[np.arange(2, 10), np.arange(-180, 181, 5)])
+    ss.loop_data()
+    sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
+    ss.save_data(os.path.join(sDir, 'ac6_L_lon_bins.csv'), 
+                 os.path.join(sDir, 'ac6_L_lon_norm.csv'))
+
+    ss2 = Hist2D('Lm_OPQ', 'MLT_OPQ', bins=[np.arange(2, 10), np.arange(0, 25)])
+    ss2.loop_data()
+    ss2.save_data(os.path.join(sDir, 'ac6_L_MLT_bins.csv'), 
+                  os.path.join(sDir, 'ac6_L_MLT_norm.csv'))

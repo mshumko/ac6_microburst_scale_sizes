@@ -183,7 +183,7 @@ if __name__ == '__main__':
     # ss=Hist1D()
     # st = datetime.now()
     # ss.loop_data()
-    # sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
+    sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
     # ss.save_data(os.path.join(sDir, 'ac6_norm_all_test.csv'))
     # print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
 
@@ -198,13 +198,20 @@ if __name__ == '__main__':
     # print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
 
     ### SCRIPT TO MAKE L-MLT NORMALIATION ###
-    ss = Hist2D('Lm_OPQ', 'lon', bins=[np.arange(2, 10), np.arange(-180, 181, 5)])
+    # ss = Hist2D('Lm_OPQ', 'lon', bins=[np.arange(2, 10), np.arange(-180, 181, 5)])
+    # ss.loop_data()
+    # sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
+    # ss.save_data(os.path.join(sDir, 'ac6_L_lon_bins.csv'), 
+    #              os.path.join(sDir, 'ac6_L_lon_norm.csv'))
+
+    # ss2 = Hist2D('Lm_OPQ', 'MLT_OPQ', bins=[np.arange(2, 10), np.arange(0, 25)])
+    # ss2.loop_data()
+    # ss2.save_data(os.path.join(sDir, 'ac6_L_MLT_bins.csv'), 
+    #               os.path.join(sDir, 'ac6_L_MLT_norm.csv'))
+
+    ### SCRIPT TO MAKE MLT-LON NORMALIZATION ####
+    ss = Hist2D('MLT_OPQ', 'lon', bins=[np.arange(0, 24), np.arange(-180, 181, 5)])
     ss.loop_data()
     sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
-    ss.save_data(os.path.join(sDir, 'ac6_L_lon_bins.csv'), 
-                 os.path.join(sDir, 'ac6_L_lon_norm.csv'))
-
-    ss2 = Hist2D('Lm_OPQ', 'MLT_OPQ', bins=[np.arange(2, 10), np.arange(0, 25)])
-    ss2.loop_data()
-    ss2.save_data(os.path.join(sDir, 'ac6_L_MLT_bins.csv'), 
-                  os.path.join(sDir, 'ac6_L_MLT_norm.csv'))
+    ss.save_data(os.path.join(sDir, 'ac6_MLT_lon_bins.csv'), 
+                 os.path.join(sDir, 'ac6_MLT_lon_norm.csv'))

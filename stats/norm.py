@@ -210,8 +210,8 @@ if __name__ == '__main__':
     #               os.path.join(sDir, 'ac6_L_MLT_norm.csv'))
 
     ### SCRIPT TO MAKE MLT-LON NORMALIZATION ####
-    ss = Hist2D('MLT_OPQ', 'lon', bins=[np.arange(0, 24), np.arange(-180, 181, 5)])
+    ss = Hist2D('MLT_OPQ', 'lon', bins=[np.arange(0, 24.5, 0.5), np.arange(-180, 181, 5)])
     ss.loop_data()
     sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
-    ss.save_data(os.path.join(sDir, 'ac6_MLT_lon_bins.csv'), 
-                 os.path.join(sDir, 'ac6_MLT_lon_norm.csv'))
+    ss.save_data(os.path.join(sDir, 'ac6_MLT_lon_bins_2.csv'), 
+                 os.path.join(sDir, 'ac6_MLT_lon_norm_2.csv'))

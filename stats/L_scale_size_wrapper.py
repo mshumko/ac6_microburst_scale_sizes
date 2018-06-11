@@ -23,7 +23,7 @@ for (lL, uL) in zip(Lrange[:-1], Lrange[1:]):
     ss.plot_hist(ax=ax[0])
     ax[0].set_xlim(0, 100)
     ss.plot_norm(bx=ax[1])
-    ax[0].set_title('Flash Scale Sizes | {} < L < {}'.format(lL, uL))
+    ax[0].set_title('Microburst Scale Sizes | {} < L < {}'.format(lL, uL))
     ax[1].set_title('Normalization')
 
     plt.savefig(('/home/mike/Dropbox/0_grad_work/ac6-flashes-curtains/'

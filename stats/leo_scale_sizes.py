@@ -80,7 +80,7 @@ class ScaleSizeDist:
             center = (bins[:-1] + bins[1:]) / 2
             H = 86400*np.divide(H, self.nData['Seconds'])
             self.ax.bar(bins+width/2, H, align='center', width=width)
-            self.ax.set(ylabel='flash/day')
+            self.ax.set(ylabel='microbursts/day')
         else:
             self.ax.hist(self.cData['Dist_Total'], bins=bins)
 
@@ -104,6 +104,8 @@ class ScaleSizeDist:
         return self.bx
 
 if __name__ == '__main__':
+    """ This script makes a plots of the all microburst scale size distribution. """
+    from datetime import datetime
     # Catalog dir and name
     cDir = '/home/mike/research/ac6-microburst-scale-sizes/data/flash_catalogues'
     cName = 'flash_catalogue_v2_sorted.txt'
@@ -119,9 +121,9 @@ if __name__ == '__main__':
     ss.plot_hist(ax=ax[0])
     ax[0].set_xlim(0, 100)
     ss.plot_norm(bx=ax[1])
-    ax[0].set_title('Flash Scale Sizes')
+    ax[0].set_title('Microbust Scale Size Distribution')
     ax[1].set_title('Normalization')
 
     plt.savefig(('/home/mike/Dropbox/0_grad_work/ac6-flashes-curtains/'
-                'plots/2018-04-01/'
-                'microburst_scale_size_all.png'))
+                'plots/{}/'
+                'microburst_scale_size_all.png'.format(datetime.now().date())))

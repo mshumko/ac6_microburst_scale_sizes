@@ -22,15 +22,16 @@ theory, the spacecraft separation at which no more coincident
 microbursts are observed is the largest microburst scale size.
 
 # REPO STRUCTURE
-├── data **Contains the processed data files**
-│   ├── catalogue_version_notes.txt **User info on different catalog versions.**
-│   ├── curtain_catalogues **Folder with spatial event catalogs**
-│   ├── coincident_microbursts_catalogues **Folder with temporal event catalogs**
-│   ├── microburst_catalogues **Folder with microburst event catalogs (uncombined from both units)**
-│   └── norm **Normalization csv files**
-├── docs **In-depth repo documentation. Manuscript will be added here**
-├── flash-curtain-determination
-│   ├── append_goemag_indicies.py
+├── data/ **Contains the processed data files** <br />
+│   ├── catalogue_version_notes.txt **User info on different catalog versions.** <br />
+│   ├── curtain_catalogues/ **Folder with spatial event catalogs** <br />
+│   ├── coincident_microbursts_catalogues/ **Folder with temporal event catalogs** <br />
+│   ├── microburst_catalogues/ **Folder with microburst event catalogs (uncombined from both units)** <br />
+│   └── norm/ **Normalization csv files** <br />
+|   └── plots/ **Contains validation plots (not pushed)** <br />
+├── docs/ **In-depth repo documentation. Manuscript will be added here** <br />
+├── flash-curtain-determination/ <br />
+│   ├── append_goemag_indicies.py <br />
 │   ├── plotMatchedBursts.py
 │   ├── replace_error_sep_lags.py
 │   ├── sort_curtains_flashes.py

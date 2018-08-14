@@ -180,8 +180,10 @@ class TestFindMicrobursts(FindMicrobursts):
         return
 
 if __name__ == '__main__':
+    # Good day for microbursts to test: 2016-10-14
+    # Bad day to test: 2015-04-14
     for sc_id in ['A', 'B']:
-        date = datetime(2017, 1, 11)
+        date = datetime(2015, 4, 14) 
         obj = TestFindMicrobursts(sc_id, date)
         obj.getMicroburstIdx()
         #obj.saveData()

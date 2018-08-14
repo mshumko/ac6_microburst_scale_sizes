@@ -37,7 +37,7 @@ def mergeDailyFiles(sc_id, inDir, outPath):
 if __name__ == '__main__':
     for sc_id in ['a', 'b']:
         inPath = ('/home/mike/research/ac6-microburst-scale-sizes/'
-            'data/daily_microburst_catalogues')
+            'data/z_daily_microburst_catalogues')
         outPath = ('/home/mike/research/ac6-microburst-scale-sizes/'
             'data/microburst_catalogues/AC6{}_microbursts_v1.txt'.format(sc_id.upper()))
         mergeDailyFiles(sc_id, inPath, outPath)

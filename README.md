@@ -29,6 +29,7 @@ microbursts are observed is the largest microburst scale size.
 │   ├── microburst_catalogues/ **Folder with microburst event catalogs (uncombined from both units)** <br />
 │   └── norm/ **Normalization csv files** <br />
 │   └── plots/ **Contains validation plots (not pushed)** <br />
+│   └── z_daily_microburst_catalogues/ **Temporary folder that contains the dairly microburst files before merging** <br />
 ├── docs/ **In-depth repo documentation. Manuscript will be added here** <br />
 ├── flash-curtain-determination/ <br />
 │   ├── append_goemag_indicies.py <br />
@@ -37,11 +38,11 @@ microbursts are observed is the largest microburst scale size.
 │   ├── sort_curtains_flashes.py <br />
 │   └── test_sort_curtains_flashes.py <br />
 ├── logs <br />
-│   └── microburst_detection.log <br />
+│   └── microburst_detection.log **Microburst detection log**<br />
 ├── microburst-detection <br />
 │   ├── merge_daily_data.py <br />
-│   ├── microburst_detection.py <br />
-│   └── microburst_detection_wrapper.py <br />
+│   ├── microburst_detection.py **Finds microbursts for each spacecraft** <br /> 
+│   └── microburst_detection_wrapper.py **Wrapper to process all of the data** <br />
 ├── README.md **This file** <br />
 └── stats **Folder for statistical analysis of the catalogs** <br />
     ├── ac6_mission_separation.py <br />
@@ -53,6 +54,11 @@ microbursts are observed is the largest microburst scale size.
     ├── norm.py <br />
 
 # HOW TO RUN THE ENTIRE PIPELINE
+1. Detect microbursts on both spacecraft separately. Use microburst_detection_wrapper.py
+   file, and check the detection parameters in microburst_detection.py. The daily files
+   can be merged with merge_daily_data.py, but that is already done by the 
+   microburst_detection_wrapper.py script.
+2. 
 
 
 MORE 

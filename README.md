@@ -28,46 +28,29 @@ microbursts are observed is the largest microburst scale size.
 │   ├── coincident_microbursts_catalogues/ **Folder with temporal event catalogs** <br />
 │   ├── microburst_catalogues/ **Folder with microburst event catalogs (uncombined from both units)** <br />
 │   └── norm/ **Normalization csv files** <br />
-|   └── plots/ **Contains validation plots (not pushed)** <br />
+│   └── plots/ **Contains validation plots (not pushed)** <br />
 ├── docs/ **In-depth repo documentation. Manuscript will be added here** <br />
 ├── flash-curtain-determination/ <br />
 │   ├── append_goemag_indicies.py <br />
-│   ├── plotMatchedBursts.py
-│   ├── replace_error_sep_lags.py
-│   ├── sort_curtains_flashes.py
-│   └── test_sort_curtains_flashes.py
-├── logs
-│   └── microburst_detection.log
-├── microburst-detection
-│   ├── merge_daily_data.py
-│   ├── microburst_detection.py
-│   └── microburst_detection_wrapper.py
-├── README.md **This file**
-└── stats **Folder for statistical analysis of the catalogs**
-    ├── ac6_mission_separation.py
-    ├── equatorial_scale_sizes.py
-    ├── leo_scale_sizes.py
-    ├── L_MLT_distribution.py
-    ├── L_scale_size_wrapper.py
-    ├── microburst_browser.py
-    ├── norm.py
-    ├── old
-    │   ├── bar_test.py
-    │   ├── dist_norm.py
-    │   ├── gaus_fit.py
-    │   ├── global_distribution.py
-    │   ├── L_MLT_distribution.py
-    │   ├── l_mlt_norm.py
-    │   ├── MLT_lon_distribution.py
-    │   ├── normalization
-    │   │   ├── dist_norm.npy
-    │   │   ├── dist_norm.txt
-    │   │   ├── dist_vals.npy
-    │   │   ├── L_edges_norm.npy
-    │   │   ├── L_MLT_sec_norm.npy
-    │   │   └── MLT_edges_norm.npy
-    │   ├── scale_size_norm.py
-    │   └── scale_sizes.py
+│   ├── plotMatchedBursts.py <br />
+│   ├── replace_error_sep_lags.py <br />
+│   ├── sort_curtains_flashes.py <br />
+│   └── test_sort_curtains_flashes.py <br />
+├── logs <br />
+│   └── microburst_detection.log <br />
+├── microburst-detection <br />
+│   ├── merge_daily_data.py <br />
+│   ├── microburst_detection.py <br />
+│   └── microburst_detection_wrapper.py <br />
+├── README.md **This file** <br />
+└── stats **Folder for statistical analysis of the catalogs** <br />
+    ├── ac6_mission_separation.py <br />
+    ├── equatorial_scale_sizes.py <br />
+    ├── leo_scale_sizes.py <br />
+    ├── L_MLT_distribution.py <br />
+    ├── L_scale_size_wrapper.py <br />
+    ├── microburst_browser.py <br />
+    ├── norm.py <br />
 
 # HOW TO RUN THE ENTIRE PIPELINE
 

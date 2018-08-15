@@ -171,7 +171,12 @@ class TestFindMicrobursts(FindMicrobursts):
 
     def plotTimeseries(self):
         validIdt = np.where(self.d['dos1rate'] != -1E31)[0]
-        self.ax[0].plot(self.d['dateTime'][validIdt], self.d['dos1rate'][validIdt])
+        self.ax[0].plot(self.d['dateTime'][validIdt], 
+                        self.d['dos1rate'][validIdt])
+        self.ax[0].fill_between(self.d['dateTime'][validIdt], 
+            self.d['dos1rate'][validIdt]-np.sqrt(self.d['dos1rate'][validIdt]),
+            self.d['dos1rate'][validIdt]+np.sqrt(self.d['dos1rate'][validIdt]),
+            color='r', alpha=0.5)
         self.ax[0].scatter(self.d['dateTime'][validIdt[self.burstIdt]], self.d['dos1rate'][validIdt[self.burstIdt]], c='b', s=50)
         self.ax[0].scatter(self.d['dateTime'][self.peakInd], self.d['dos1rate'][self.peakInd], c='r', s=25)
         self.ax[1].plot(self.time, self.dataFlt)
@@ -183,7 +188,7 @@ if __name__ == '__main__':
     # Good day for microbursts to test: 2016-10-14
     # Bad day to test: 2015-04-14
     for sc_id in ['A', 'B']:
-        date = datetime(2015, 4, 14) 
+        date = datetime(2016, 10, 14) 
         obj = TestFindMicrobursts(sc_id, date)
         obj.getMicroburstIdx()
         #obj.saveData()

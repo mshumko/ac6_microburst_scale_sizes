@@ -21,6 +21,7 @@
 %% To submit your paper:
 \documentclass[draft,linenumbers]{agujournal2018}
 \usepackage{apacite}
+\usepackage{color}
 \usepackage{url} %this package should fix any errors with URLs in refs.
 
 %%%%%%%
@@ -64,7 +65,7 @@
 %
 % ie, \journalname{Water Resources Research}
 
-\journalname{Enter journal name here}
+\journalname{JGR: Space Physics}
 
 
 \begin{document}
@@ -81,7 +82,7 @@
 
 % Example: \title{This is a test title}
 
-\title{=enter title here=}
+\title{Microburst Spatial Scale Size Distribution Derived With the AeroCube-6 CubeSats}
 
 %% ------------------------------------------------------------------------ %%
 %
@@ -123,7 +124,7 @@
 
 % Example: \correspondingauthor{First and Last Name}{email@address.edu}
 
-\correspondingauthor{=name=}{=email address=}
+\correspondingauthor{Mykhaylo Shumko}{msshumko@gmail.com}
 
 %% Keypoints, final entry on title page.
 
@@ -139,9 +140,9 @@
 % \end{keypoints}
 
 \begin{keypoints}
-\item enter point 1 here
-\item enter point 2 here
-\item enter point 3 here
+\item Used the dual AeroCube-6 CubeSats to identify coincident microbursts as a function of spacecraft separation.
+\item The spatial scale size of coincident microbursts was found to be less than X km in LEO.
+\item The LEO scale size distribution mapped to the magnetic equator is on the same scale size as whistler mode chorus.
 \end{keypoints}
 
 %% ------------------------------------------------------------------------ %%
@@ -172,133 +173,74 @@ enter abstract here
 % commands below.
 %% ------------------------------------------------------------------------ %%
 
-\begin{plainlanguage}
-Write your Plain Language Summary here or delete the plainlanguage environment.
-\end{plainlanguage}
+\textbf{Plain Language Summary} \newline
+Test
+
+%\begin{plainlanguage}
+%Write your Plain Language Summary here or delete the plainlanguage %environment.
+%\end{plainlanguage}
 
 
-%% ------------------------------------------------------------------------ %%
-%
-%  TEXT
-%
-%% ------------------------------------------------------------------------ %%
-
-%%% Suggested section heads:
-% \section{Introduction}
-%
-% The main text should start with an introduction. Except for short
-% manuscripts (such as comments and replies), the text should be divided
-% into sections, each with its own heading.
-
-% Headings should be sentence fragments and do not begin with a
-% lowercase letter or number. Examples of good headings are:
-
-% \section{Materials and Methods}
-% Here is text on Materials and Methods.
-%
-% \subsection{A descriptive heading about methods}
-% More about Methods.
-%
-% \section{Data} (Or section title might be a descriptive heading about data)
-%
-% \section{Results} (Or section title might be a descriptive heading about the
-% results)
-%
-% \section{Conclusions}
+\section{Introduction}
+\textcolor{blue}{OUTLINE
+\begin{enumerate}
+    \item Talk about rad belt acceleration and loss mechanisms
+    \item Introduce microbursts, and some prior work done on them. Why do people think they are important?
+    \item Why is microbust spatial scale size important? It constrains the parameters needed to estimate the role of microburst precipitation with global losses of radiation belt electrons.
+    \item Introduce this study, and the basic premise of it. 
+    \begin{enumerate}
+        \item What is the hypothesis? Is the LEO microburst scale size a projection of the chorus scale size at the equator?
+        \item While coincident microbursts by themselves only tell you the lower bound of their scale size, many events at varying separations will give you a better idea of the occurrence rate of microbursts with a particular minimum scale size occur, as a function of spacecraft separation.
+        \item The spacecraft separation at which coincident microbursts are no longer observed tells you their maximum scale size.
+    \end{enumerate}
+\end{enumerate}}
 
 
-\section{= enter section title =}
+\section{Instrumentation}
+\textcolor{blue}{OUTLINE
+\begin{enumerate}
+    \item Introduce AC-6, their orbit, spin rate, attitude control, and how their maintain their separation, confimed with GPS.
+    \item FIGURE 1: AC-6 separation evolution for the mission duration.
+    \item Introduce dos1, and why we only use it instead of the other detectors.
+    \item Mention which MLT sector they are in.
+\end{enumerate}}
+    
+\section{Methodology}
+\textcolor{blue}{OUTLINE
+\begin{enumerate}
+    \item Microburst identification with wavelets and Paul's burst param.
+    \item Mention how good these algorithms area. Mention that it is a trade off between false-positives and efficiency. Convince myself, and try to make a claim that both detectors give similar results, so it does not matter which one you use. Or is my wavelet method more general since it is sensitive to a wider range of microburst durations? 
+    \item FIGURE 2: Something about how microburst are detected. Maybe a wavelet filter plot in 3 panels?
+    \item Discuss how microbursts are matched across both catalogs and merged into one.
+    \item Mention the by-eye noise and curtain removal step.
+    \item FIGURE 3: Examples of coincident microbursts observed at small and large separations.
+    \item Mention how many coincident microbursts were observed.
+    \item Chance coincidence? Are the larger scale size just due to coincidence?
+\end{enumerate}}
 
-%Text here ===>>>
+\section{Results}
+\textcolor{blue}{OUTLINE
+\begin{enumerate}
+    \item Show the entire microburst scale size distribution of occurrence rates. 
+    \item Discuss the normalization.
+    \item FIGURE 4: microburst scale size as a function of L.
+    \item FIGURE 5: microburst scale size as a function of AE.
+    \item FIGURE 6: Equatorial scale size distribution. Should I try to normalize this?
+    \item Brifly discuss any interesting patters.
+\end{enumerate}}
 
-%%
+\section{Discussion}
+\textcolor{blue}{OUTLINE
+\begin{enumerate}
+    \item Discuss how the overall LEO scale compares to prior literature.
+    \item Discuss the scale size dependence on L and AE.
+    \item Discuss the equatorial scale size and how it compares to Santolik et al. 2003 and Olekysiy's work.
+    \item Look into the < 10 km microbursts. How are they different then the other microbursts? Try to do a scale size vs AE plots. Test Paul's theory that they are chance events. Given the fraction of occurrence rates of < 10 km to > 10 km microbursts, what is the equatorial filling factor necessary for this to be true?
+\end{enumerate}}
 
-%  Numbered lines in equations:
-%  To add line numbers to lines in equations,
-%  \begin{linenomath*}
-%  \begin{equation}
-%  \end{equation}
-%  \end{linenomath*}
+\section{Conclusion}
 
 
-
-%% Enter Figures and Tables near as possible to where they are first mentioned:
-%
-% DO NOT USE \psfrag or \subfigure commands.
-%
-% Figure captions go below the figure.
-% Table titles go above tables;  other caption information
-%  should be placed in last line of the table, using
-% \multicolumn2l{$^a$ This is a table note.}
-%
-%----------------
-% EXAMPLE FIGURE
-%
-% \begin{figure}[h]
-% \centering
-% when using pdflatex, use pdf file:
-% \includegraphics[natwidth=800px,natheight=600px]{figsamp.pdf}
-%
-% when using dvips, use .eps file:
-% \includegraphics[natwidth=800px,natheight=600px]{figsamp.eps}
-%
-% \caption{Short caption}
-% \label{figone}
-%  \end{figure}
-%
-% We recommend that you provide the native width and height (natwidth, natheight) of your figures.
-% Specifying native dimensions ensures that your figures are properly scaled
-%
-%
-% ---------------
-% EXAMPLE TABLE
-%
-% \begin{table}
-% \caption{Time of the Transition Between Phase 1 and Phase 2$^{a}$}
-% \centering
-% \begin{tabular}{l c}
-% \hline
-%  Run  & Time (min)  \\
-% \hline
-%   $l1$  & 260   \\
-%   $l2$  & 300   \\
-%   $l3$  & 340   \\
-%   $h1$  & 270   \\
-%   $h2$  & 250   \\
-%   $h3$  & 380   \\
-%   $r1$  & 370   \\
-%   $r2$  & 390   \\
-% \hline
-% \multicolumn{2}{l}{$^{a}$Footnote text here.}
-% \end{tabular}
-% \end{table}
-
-%% SIDEWAYS FIGURE and TABLE
-% AGU prefers the use of {sidewaystable} over {landscapetable} as it causes fewer problems.
-%
-% \begin{sidewaysfigure}
-% \includegraphics[width=20pc]{figsamp}
-% \caption{caption here}
-% \label{newfig}
-% \end{sidewaysfigure}
-%
-%  \begin{sidewaystable}
-%  \caption{Caption here}
-% \label{tab:signif_gap_clos}
-%  \begin{tabular}{ccc}
-% one&two&three\\
-% four&five&six
-%  \end{tabular}
-%  \end{sidewaystable}
-
-%% If using numbered lines, please surround equations with \begin{linenomath*}...\end{linenomath*}
-%\begin{linenomath*}
-%\begin{equation}
-%y|{f} \sim g(m, \sigma),
-%\end{equation}
-%\end{linenomath*}
-
-%%% End of body of article
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Optional Appendix goes here
@@ -342,18 +284,6 @@ Write your Plain Language Summary here or delete the plainlanguage environment.
 %   \end{acronyms}
 
 %
-%%%%%%%%%%%%%%
-% Notation
-%   \begin{notation}
-%   \notation{$a+b$} Notation Definition here
-%   \notation{$e=mc^2$}
-%   Equation in German-born physicist Albert Einstein's theory of special
-%  relativity that showed that the increased relativistic mass ($m$) of a
-%  body comes from the energy of motion of the body—that is, its kinetic
-%  energy ($E$)—divided by the speed of light squared ($c^2$).
-%   \end{notation}
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

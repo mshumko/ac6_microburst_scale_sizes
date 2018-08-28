@@ -9,16 +9,17 @@ from datetime import datetime, timedelta
 sys.path.append('/home/mike/research/ac6-microburst-scale-sizes/stats/')
 sys.path.append('/home/mike/research/mission-tools/ac6/')
 import read_ac_data
-import scale_sizes
-import gaus_fit
+import leo_scale_sizes
+#import gaus_fit
 
-class PlotMicroburstMatches(scale_sizes.ScaleSize):
-    def __init__(self, cPath, burstType='flashes'):
+class PlotMicroburstMatches(leo_scale_sizes.ScaleSizeDist):
+    def __init__(self, cPath, burstType='flash', saveDir=None):
         """
         This class plots the matched microbursts for AC-6, flashes and 
         curtains.
         """
-        scale_sizes.ScaleSize.__init__(self, cPath) # Read in catalogue data.
+        leo_scale_sizes.ScaleSizeDist.__init__(self, cPath, cPath) # Read in catalogue data.
+        self.dataDict = self.cData
 
         # Shift times if want to plot curtains
         if 'curtain' in burstType:
@@ -33,6 +34,12 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
             self.burstType = 'flash'
         else:
             raise NameError("burstType kwarg must be either 'flash' or 'curtain'.")
+        
+        if saveDir is not None:
+            self.saveDir = saveDir
+        else:
+            self.saveDir = ('/home/mike/research/ac6-microburst-scale-sizes/'
+                    'plots/validation/{}/'.format(datetime.now().date()))
         return
 
     def plotMicroburst(self, thresh=2):
@@ -57,10 +64,15 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
                 else:
                     raise
 
+            print(d)
+
             # Loop over daily detections.
             zippedCenterTimes = zip(self.dataDict['dateTimeA'][d[1]:d[2]], 
                 self.dataDict['dateTimeB'][d[1]:d[2]])
             for i, (tA, tB) in enumerate(zippedCenterTimes): 
+                # Skip if its not the correct burst type.
+                if self.dataDict['burstType'][d[1]+i] != self.burstType:
+                    continue
                 # Plot dos1rate
                 pltRange = [tA-timedelta(seconds=thresh), 
                             tA+timedelta(seconds=thresh)]
@@ -70,10 +82,9 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
                     self.dataDict['cross_correlation'][i])
 
                 # Save figure
-                saveDir = ('/home/mike/research/ac6-microburst-scale-sizes/'
-                    'data/plots/validation/{}/'.format(datetime.now().date()))
-                if not os.path.exists(saveDir): # Create save dir if it does not exist.
-                    os.makedirs(saveDir)
+                if not os.path.exists(self.saveDir): # Create save dir if it does not exist.
+                    os.makedirs(self.saveDir)
+                    print('Made plot directory', self.saveDir)
 
                 saveDate = pltRange[0].replace(microsecond=0).isoformat().replace(':', '')
                 saveName = '{}_validation_{}.png'.format(self.burstType, saveDate)
@@ -83,7 +94,7 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
                 #plt.tight_layout()
                 if flag == 1:
                     print('Saving figure {}'.format(saveName))
-                    plt.savefig(os.path.join(saveDir, saveName))     
+                    plt.savefig(os.path.join(self.saveDir, saveName))     
                 self.ax.clear()
                 self.bx.clear()
         return
@@ -124,8 +135,8 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
                 for t in timeA[startIndA:endIndA]]
         tsB = [(t0B - t).total_seconds() 
                 for t in timeB[startIndB:endIndB]]
-        fitDict = self._fitGaus(timeA[validIdA], dosA[validIdA])
-        print(fitDict)
+        #fitDict = self._fitGaus(timeA[validIdA], dosA[validIdA])
+        #print(fitDict)
         
         # Calc power spectrum
         #f, ps = self._calcFrequSpec(dosA[validIdA])
@@ -206,7 +217,7 @@ class PlotMicroburstMatches(scale_sizes.ScaleSize):
         return
 
 if __name__ == '__main__':
-    cPath = ('/home/mike/research/ac6-microburst-scale-sizes/data/'
-        'flash_catalogues/flash_catalogue_v2.txt')
+    cPath = ('./../data/'
+        'coincident_microbursts_catalogues/flash_catalogue_v2_sorted.txt')
     pltObj = PlotMicroburstMatches(cPath)
     pltObj.plotMicroburst()

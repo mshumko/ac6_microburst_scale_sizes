@@ -5,3 +5,4 @@ data/daily_microburst_catalogues/*
 *.aux
 *.log
 *.synctex.gz
+/plots/*

@@ -15,7 +15,7 @@ import read_ac_data
 #import leo_scale_sizes
 
 class ValidateDetections:
-    def __init__(self, sc_id, cPath, saveDir=None):
+    def __init__(self, sc_id, cPathPrimary, cPathSecondary, saveDir=None):
         """
         This class contains code to validate the microburst detector algorithm
         by plotting the detections made from each spacecraft side by side. No
@@ -26,17 +26,21 @@ class ValidateDetections:
         """
         
         # Load catalog
-        self.cData = self._load_catalog_(cPath)
-        self.sc_id = sc_id
+        self.cDataPrimary = self._load_catalog_(cPathPrimary)
+        self.cDataSecondary = self._load_catalog_(cPathSecondary)
+        self.primary_sc = sc_id
         # Set save directory
         if saveDir is not None:
             self.saveDir = saveDir
         else:
             self.saveDir = ('/home/mike/research/ac6-microburst-scale-sizes/'
                     'plots/validation/{}/'.format(datetime.now().date()))
+        if not os.path.exists(self.saveDir):
+            print('Creating plot directory at:', self.saveDir)
+            os.makedirs(self.saveDir)
         return
         
-    def plotLoop(self, pltWidth=5):
+    def plotLoop(self, pltWidth=4):
         """
         This method loops over the detections in the catalog file and plots 
         the dos1 data.
@@ -61,19 +65,29 @@ class ValidateDetections:
                     continue
                 else:
                     raise
+                
+            # The following block of code finds the detections made on day d[0].
+            primaryDetTimes = self.cDataPrimary['dateTime'][d[1]:d[2]]
+            secondaryDates = np.array([t.date() for t in self.cDataSecondary['dateTime']])
+            secondaryIdx = np.where(secondaryDates == d[0].date())[0]
+            secondaryDetTimes = self.cDataSecondary['dateTime'][secondaryIdx]
 
             # Loop over detections on d'th day.
-            #zCenterTimes = self.cData['dateTime'][d[1]:d[2]]
-            for i, tA in enumerate(self.cData['dateTime'][d[1]:d[2]]): 
-                # Plot dos1rate
+            for i, tA in enumerate(self.cDataPrimary['dateTime'][d[1]:d[2]]):
                 pltRange = [tA-timedelta(seconds=pltWidth), 
-                            tA+timedelta(seconds=pltWidth)]
+                            tA+timedelta(seconds=pltWidth)] 
+                # Do not plot anything other then good data (flag = 0)
+                validIdA = np.where((self.dataA['dateTime'] > pltRange[0]) & 
+                                    (self.dataA['dateTime'] < pltRange[1]))[0]
+                if np.any(self.dataA['flag'][validIdA]):
+                    continue
+                # Plot dos1rate, centered on the detection.
                 flag = self.plot(self.dataA['dateTime'], 
                     self.dataA['dos1rate'], self.dataB['dateTime'], 
-                    self.dataB['dos1rate'], pltRange)
+                    self.dataB['dos1rate'], pltRange, 
+                    primaryDetTimes, secondaryDetTimes)
                 if flag == -1:
                     continue
-                self.ax.axvline(tA)
                 
                 saveDate = pltRange[0].replace(
                                 microsecond=0).isoformat().replace(':', '')
@@ -85,11 +99,15 @@ class ValidateDetections:
         return
         
         
-    def plot(self, timeA, dosA, timeB, dosB, tRange):
+    def plot(self, timeA, dosA, timeB, dosB, tRange, pDet, sDet):
         """
         This method plots the narrow microburst time range from
         both spacecraft, and annotate with L, MLT, Lat, Lon.
+
+        pDet and sDet are the primary and secondary spacececraft
+        detection times.
         """
+        sc_opt = ['A', 'B'] # Spacecraft options (for the plot labels.)
         validIdA = np.where((dosA != -1E31) & 
                             (timeA > tRange[0]) & 
                             (timeA < tRange[1]))[0]
@@ -100,18 +118,25 @@ class ValidateDetections:
             return -1
 
         # Plot the timeseries.
-        self.ax.plot(timeA[validIdA], dosA[validIdA], 'r', label='AC-6 A')
-        self.ax.plot(timeB[validIdB], dosB[validIdB], 'b', label='AC-6 B')
-        #self.bx.plot(timeA[validIdA], self.dataA['Alpha'][validIdA], '--r')
-        #self.bx.plot(timeB[validIdB], self.dataB['Alpha'][validIdB], '--b')
+        self.ax.plot(timeA[validIdA], dosA[validIdA], 'r', 
+                    label='AC-6 {}'.format(self.primary_sc))
+        self.ax.plot(timeB[validIdB], dosB[validIdB], 'b',
+                    label='AC-6 {}'.format(sc_opt[sc_opt != self.primary_sc][0]))
+        # for det in pDet:
+        #     self.ax.axvline(det, c='r')
+        # Mark detection times
+        plt.scatter(pDet, np.zeros_like(pDet), c='r', marker='*', s=50) 
+        plt.scatter(sDet, -10*np.ones_like(sDet), c='b', marker='x', s=30)
+        # for det in sDet:
+        #     self.ax.axvline(det, c='b', lw=)
         self.ax.set(ylabel='Dos1 [counts/s]', xlabel='UTC',
+            xlim=tRange,
             title='AC6-{} microburst validation | {}'.format(
-                                self.sc_id, tRange[0].date()))
+                                self.primary_sc, tRange[0].date()))
         #self.bx.set(xlabel='UTC', ylabel='Alpha [Deg] (dashed)')
         self.ax.legend(loc=1)
 
-        meanFlag = (np.mean(self.dataA['flag'][validIdA]) + 
-            np.mean(self.dataB['flag'][validIdB]))/2
+        meanFlag = np.mean(self.dataA['flag'][validIdA])
         textStr = ('L={} MLT={}\nlat={} lon={}\ndist={} LCT={}\nflag={}'.format(
             round(np.mean(self.dataA['Lm_OPQ'][validIdA])),
             round(np.mean(self.dataA['MLT_OPQ'][validIdA])),
@@ -130,7 +155,6 @@ class ValidateDetections:
         """
         with open(fPath) as f:
             r = csv.reader(f)
-            #next(r) # Skip creation header
             keys = next(r)
             rawData = np.array(list(r))
         data = {key:rawData[:, i] for i, key in enumerate(keys)}
@@ -149,7 +173,7 @@ class ValidateDetections:
         This function will calculate the unique dates in the catalogue file
         to speed up the plotting reutine.
         """
-        dates = np.array([t.date() for t in self.cData['dateTime']])
+        dates = np.array([t.date() for t in self.cDataPrimary['dateTime']])
         uniqueDates = np.array(sorted(set(dates)))
         #print(uniqueDates)
 
@@ -169,9 +193,9 @@ class ValidateDetections:
 
 if __name__ == '__main__':
     sc_id = 'A'
-    catPath = ('/home/mike/research/ac6-microburst-scale-sizes/'
-                'data/microburst_catalogues/AC6{}_microbursts.txt'.format(
-                sc_id))
-    
-    p = ValidateDetections(sc_id, catPath)
+    catPathA = ('/home/mike/research/ac6-microburst-scale-sizes/'
+                'data/microburst_catalogues/AC6A_microbursts.txt')
+    catPathB = ('/home/mike/research/ac6-microburst-scale-sizes/'
+                'data/microburst_catalogues/AC6B_microbursts.txt')
+    p = ValidateDetections(sc_id, catPathA, catPathB)
     p.plotLoop()

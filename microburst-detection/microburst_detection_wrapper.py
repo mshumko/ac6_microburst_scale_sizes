@@ -60,9 +60,12 @@ for (sc_id, date) in itertools.product(['A', 'B'], dates):
 for sc_id in ['a', 'b']:
     inPath = ('/home/mike/research/ac6-microburst-scale-sizes/'
         'data/z_daily_microburst_catalogues')
-    outPath = ('/home/mike/research/ac6-microburst-scale-sizes/'
-        'data/microburst_catalogues/AC6{}_microbursts_v{}.txt'.format(
-            sc_id.upper(), cVersion))
+        
+    outPath = ('/home/mike/research/'
+                'ac6-microburst-scale-sizes/data/'
+                'microburst_catalogues/'
+                'AC6{}_microbursts_v{}.txt'.format(
+                sc_id.upper(), cVersion))
     if os.path.exists(outPath):
         raise OSError('Merged catalog already exists!')
     merge_daily_data.mergeDailyFiles(sc_id, inPath, outPath)

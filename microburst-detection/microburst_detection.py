@@ -49,7 +49,8 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
         L, MLT, lat, lon, alt, Loss_Cone_Type, 
         """
         keys = ['dateTime', 'dos1rate', 'Lm_OPQ', 'MLT_OPQ', 'lat',
-            'lon', 'alt', 'Dist_In_Track', 'Lag_In_Track', 'Dist_Total','Loss_Cone_Type']
+            'lon', 'alt', 'Dist_In_Track', 'Lag_In_Track',
+            'Dist_Total','Loss_Cone_Type', 'flag']
         headerl1 = ['Microburst catalogue created on {}'.format(
             datetime.now())]
         headerl2 = copy.copy(keys)

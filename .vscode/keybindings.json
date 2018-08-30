@@ -1,0 +1,6 @@
+{
+    "key": "ctrl+e",
+    "command": "runInTerminal.run",
+    "args": {"cmd": "python3 ${relativeFile}", "match": ".*"},
+    "when": "resourceLangId == python" 
+}

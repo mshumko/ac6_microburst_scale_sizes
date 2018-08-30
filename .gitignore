@@ -6,3 +6,4 @@ data/daily_microburst_catalogues/*
 *.log
 *.synctex.gz
 /plots/*
+/data/z_daily_microburst_catalogues/*

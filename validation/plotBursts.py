@@ -40,7 +40,7 @@ class ValidateDetections:
             os.makedirs(self.saveDir)
         return
         
-    def plotLoop(self, pltWidth=4):
+    def plotLoop(self, pltWidth=4, corrWidth=2):
         """
         This method loops over the detections in the catalog file and plots 
         the dos1 data.
@@ -48,7 +48,7 @@ class ValidateDetections:
         #currentDate = datetime.date().min
         self._findDateBounds() # Get index bounds for each date.
         
-        fig, self.ax = plt.subplots()
+        fig, self.ax = plt.subplots(2)
         #self.bx = self.ax.twinx()
         
         # Loop over dates.
@@ -79,27 +79,31 @@ class ValidateDetections:
                 # Do not plot anything other then good data (flag = 0)
                 validIdA = np.where((self.dataA['dateTime'] > pltRange[0]) & 
                                     (self.dataA['dateTime'] < pltRange[1]))[0]
-                if np.any(self.dataA['flag'][validIdA]):
-                    continue
+                #if np.any(self.dataA['flag'][validIdA]):
+                #    continue
                 # Plot dos1rate, centered on the detection.
-                flag = self.plot(self.dataA['dateTime'], 
+                flag = self.plotCounts(self.ax[0], self.dataA['dateTime'], 
                     self.dataA['dos1rate'], self.dataB['dateTime'], 
                     self.dataB['dos1rate'], pltRange, 
                     primaryDetTimes, secondaryDetTimes)
                 if flag == -1:
                     continue
+                corrRange = [tA-timedelta(seconds=corrWidth), 
+                            tA+timedelta(seconds=corrWidth)] 
+                self.autoCorrCounts(self.dataA['dateTime'], 
+                                    self.dataA['dos1rate'], 
+                                    corrRange, ax=self.ax[1])
                 
                 saveDate = pltRange[0].replace(
                                 microsecond=0).isoformat().replace(':', '')
                 saveName = '{}_microburst_validation.png'.format(saveDate)
                 
                 plt.savefig(os.path.join(self.saveDir, saveName))
-                self.ax.clear()
- 
+                for a in self.ax:
+                    a.clear()
         return
         
-        
-    def plot(self, timeA, dosA, timeB, dosB, tRange, pDet, sDet):
+    def plotCounts(self, ax, timeA, dosA, timeB, dosB, tRange, pDet, sDet):
         """
         This method plots the narrow microburst time range from
         both spacecraft, and annotate with L, MLT, Lat, Lon.
@@ -118,23 +122,23 @@ class ValidateDetections:
             return -1
 
         # Plot the timeseries.
-        self.ax.plot(timeA[validIdA], dosA[validIdA], 'r', 
+        ax.plot(timeA[validIdA], dosA[validIdA], 'r', 
                     label='AC-6 {}'.format(self.primary_sc))
-        self.ax.plot(timeB[validIdB], dosB[validIdB], 'b',
+        ax.plot(timeB[validIdB], dosB[validIdB], 'b',
                     label='AC-6 {}'.format(sc_opt[sc_opt != self.primary_sc][0]))
-        # for det in pDet:
-        #     self.ax.axvline(det, c='r')
         # Mark detection times
-        plt.scatter(pDet, np.zeros_like(pDet), c='r', marker='*', s=50) 
-        plt.scatter(sDet, -10*np.ones_like(sDet), c='b', marker='x', s=30)
+        ax.scatter(pDet, np.zeros_like(pDet), c='r', marker='*', s=50) 
+        ax.scatter(sDet, -10*np.ones_like(sDet), c='b', marker='x', s=30)
         # for det in sDet:
         #     self.ax.axvline(det, c='b', lw=)
-        self.ax.set(ylabel='Dos1 [counts/s]', xlabel='UTC',
+        ax.set(ylabel='Dos1 [counts/s]', xlabel='UTC',
             xlim=tRange,
             title='AC6-{} microburst validation | {}'.format(
                                 self.primary_sc, tRange[0].date()))
+        ax.locator_params(axis='x', nbins=3)
+
         #self.bx.set(xlabel='UTC', ylabel='Alpha [Deg] (dashed)')
-        self.ax.legend(loc=1)
+        ax.legend(loc=1)
 
         meanFlag = np.mean(self.dataA['flag'][validIdA])
         textStr = ('L={} MLT={}\nlat={} lon={}\ndist={} LCT={}\nflag={}'.format(
@@ -145,9 +149,36 @@ class ValidateDetections:
             round(np.mean(self.dataA['Dist_In_Track'][validIdA])),
             round(np.mean(self.dataA['Loss_Cone_Type'][validIdA])),
             round(meanFlag)))
-        self.ax.text(0.05, 0.95, textStr, transform=self.ax.transAxes, 
+        ax.text(0.05, 0.95, textStr, transform=ax.transAxes, 
             va='top')
         return 1
+        
+    def autoCorrCounts(self, times, counts, tRange, ax=None, norm=True):
+        """
+        This function calculates the autocorrelation of the counts array in
+        the time range specified by tRange. times array is used to identify 
+        which counts to autocorrelate.
+        
+        The ax argument specified the subplot on which to plot the 
+        autocorrelation on. 
+        """
+        validIdt = np.where((counts != -1E31) & 
+                            (times > tRange[0]) & 
+                            (times < tRange[1]))[0]
+        x = counts[validIdt] - counts[validIdt].mean()
+        # mode=same means that some edge effects will be observed. Should be ok.                    
+        ac = np.correlate(x, x, mode='same')
+        ac = ac[ac.size//2:]
+        # Lags are normalized to seconds  
+        lags = np.arange(0, ac.size)/10 
+        
+        if norm:
+            ac /= len(x)*np.var(x)
+        
+        if ax is not None:
+            ax.plot(lags, ac)
+            ax.set(xlabel='Lag [s]', ylabel='autocorrelation coefficient')
+        return ac, lags
         
     def _load_catalog_(self, fPath):
         """
@@ -194,8 +225,8 @@ class ValidateDetections:
 if __name__ == '__main__':
     sc_id = 'A'
     catPathA = ('/home/mike/research/ac6-microburst-scale-sizes/'
-                'data/microburst_catalogues/AC6A_microbursts.txt')
+                'data/microburst_catalogues/AC6A_microbursts_v2.txt')
     catPathB = ('/home/mike/research/ac6-microburst-scale-sizes/'
-                'data/microburst_catalogues/AC6B_microbursts.txt')
+                'data/microburst_catalogues/AC6B_microbursts_v2.txt')
     p = ValidateDetections(sc_id, catPathA, catPathB)
     p.plotLoop()

@@ -74,6 +74,11 @@ class ValidateDetections:
 
             # Loop over detections on d'th day.
             for i, tA in enumerate(self.cDataPrimary['dateTime'][d[1]:d[2]]):
+                # This if statement filters out events detected at 
+                # separations > 100 km.
+                if self.cDataPrimary['Dist_Total'][d[1]+i] > 10:
+                    continue
+                
                 pltRange = [tA-timedelta(seconds=pltWidth), 
                             tA+timedelta(seconds=pltWidth)] 
                 # Do not plot anything other then good data (flag = 0)
@@ -174,10 +179,14 @@ class ValidateDetections:
         
         if norm:
             ac /= len(x)*np.var(x)
+            
+        # Identify peaks
+        peakInd, _ = scipy.signal.find_peaks(ac)
         
         if ax is not None:
             ax.plot(lags, ac)
             ax.set(xlabel='Lag [s]', ylabel='autocorrelation coefficient')
+            ax.scatter(lags[peakInd], ac[peakInd], marker='+')
         return ac, lags
         
     def _load_catalog_(self, fPath):

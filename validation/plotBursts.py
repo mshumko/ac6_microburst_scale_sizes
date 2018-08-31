@@ -184,7 +184,7 @@ class ValidateDetections:
         peakInd, _ = scipy.signal.find_peaks(ac)
         
         if ax is not None:
-            ax.plot(lags, ac)
+            ax.plot(lags, ac, c='r')
             ax.set(xlabel='Lag [s]', ylabel='autocorrelation coefficient')
             ax.scatter(lags[peakInd], ac[peakInd], marker='+')
         return ac, lags

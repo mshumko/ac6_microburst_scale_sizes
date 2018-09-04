@@ -236,6 +236,8 @@ class ValidateDetections:
         
         if ax is not None:
             ax.plot(lags, cc, c='r', label='cross correlation')
+            ax.axhline(0.8, c='g', ls='--', label='0.8')
+            ax.axhline(0.9, c='g', ls='-', label='0.9')
             ax.set(xlabel='Lag [s] (shift blue trace by...)', ylabel='correlation coefficient', ylim=(-1, 1))
             ax.scatter(lags[peakInd], cc[peakInd], marker='+')
         return cc, lags

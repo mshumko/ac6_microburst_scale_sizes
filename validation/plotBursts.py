@@ -40,7 +40,7 @@ class ValidateDetections:
             os.makedirs(self.saveDir)
         return
         
-    def plotLoop(self, pltWidth=4, corrWidth=2):
+    def plotLoop(self, pltWidth=4, autoCorrWidth=2, crossCorrWidth=1):
         """
         This method loops over the detections in the catalog file and plots 
         the dos1 data.
@@ -48,7 +48,7 @@ class ValidateDetections:
         #currentDate = datetime.date().min
         self._findDateBounds() # Get index bounds for each date.
         
-        fig, self.ax = plt.subplots(2)
+        fig, self.ax = plt.subplots(3, figsize=(8, 10))
         #self.bx = self.ax.twinx()
         
         # Loop over dates.
@@ -77,7 +77,7 @@ class ValidateDetections:
                 # This if statement filters out events detected at 
                 # separations > 100 km.
                 if self.cDataPrimary['Dist_Total'][d[1]+i] > 10:
-                    continue
+                   continue
                 
                 pltRange = [tA-timedelta(seconds=pltWidth), 
                             tA+timedelta(seconds=pltWidth)] 
@@ -93,12 +93,19 @@ class ValidateDetections:
                     primaryDetTimes, secondaryDetTimes)
                 if flag == -1:
                     continue
-                corrRange = [tA-timedelta(seconds=corrWidth), 
-                            tA+timedelta(seconds=corrWidth)] 
+                autoCorrRange = [tA-timedelta(seconds=autoCorrWidth/2), 
+                            tA+timedelta(seconds=autoCorrWidth/2)] 
+                crossCorrRange = [tA-timedelta(seconds=crossCorrWidth/2), 
+                            tA+timedelta(seconds=crossCorrWidth/2)]     
                 self.autoCorrCounts(self.dataA['dateTime'], 
                                     self.dataA['dos1rate'], 
-                                    corrRange, ax=self.ax[1])
-                
+                                    autoCorrRange, ax=self.ax[1])
+                self.corrCounts(self.dataA['dateTime'],self.dataB['dateTime'], 
+                                self.dataA['dos1rate'], self.dataB['dos1rate'], 
+                                crossCorrRange, ax=self.ax[2])
+                self.ax[1].legend(loc=1)
+                self.ax[2].legend(loc=1)
+
                 saveDate = pltRange[0].replace(
                                 microsecond=0).isoformat().replace(':', '')
                 saveName = '{}_microburst_validation.png'.format(saveDate)
@@ -184,10 +191,54 @@ class ValidateDetections:
         peakInd, _ = scipy.signal.find_peaks(ac)
         
         if ax is not None:
-            ax.plot(lags, ac, c='r')
-            ax.set(xlabel='Lag [s]', ylabel='autocorrelation coefficient')
+            ax.plot(lags, ac, c='r', label='auto-correlation')
+            ax.set(xlabel='Lag [s]', ylabel='correlation coefficient', ylim=(-1, 1))
             ax.scatter(lags[peakInd], ac[peakInd], marker='+')
+            
+            # Print a True/False flag if the first peak is less than a 
+            # threshold.
+            if len(peakInd) > 0 and peakInd[0] < 0.5*10:
+                ax.text(0.5, 0.9, 'Flagged as Noise', va='top', ha='right', 
+                        transform=ax.transAxes)
         return ac, lags
+
+    def corrCounts(self, timesA, timesB, countsA, countsB, tRange, ax=None, norm=True):
+        """
+        This method calculates the autocorrelation of the counts array in
+        the time range specified by tRange. times array is used to identify 
+        which counts to autocorrelate. This method also calculates the cross
+        correlation of the two signals to determine if the micorbursts 
+        observed by both AC6 units are coincident.
+        
+        The ax argument specified the subplot on which to plot the 
+        autocorrelation on. 
+        """
+        validIdtA = np.where((countsA != -1E31) & 
+                            (timesA > tRange[0]) & 
+                            (timesA < tRange[1]))[0]
+        x = countsA[validIdtA] - countsA[validIdtA].mean()
+
+        validIdtB = np.where((countsB != -1E31) & 
+                            (timesB > tRange[0]) & 
+                            (timesB < tRange[1]))[0]
+        y = countsB[validIdtB] - countsB[validIdtB].mean()
+
+        cc = np.correlate(x, y, mode='same')
+        #ac = ac[ac.size//2:]
+        # Lags are normalized to seconds  
+        lags = np.arange(-cc.size/2, cc.size/2)/10 
+        
+        if norm:
+            cc /= np.sqrt(len(x)*np.var(x)*len(y)*np.var(y))
+            
+        # Identify peaks
+        peakInd, _ = scipy.signal.find_peaks(cc)
+        
+        if ax is not None:
+            ax.plot(lags, cc, c='r', label='cross correlation')
+            ax.set(xlabel='Lag [s] (shift blue trace by...)', ylabel='correlation coefficient', ylim=(-1, 1))
+            ax.scatter(lags[peakInd], cc[peakInd], marker='+')
+        return cc, lags
         
     def _load_catalog_(self, fPath):
         """

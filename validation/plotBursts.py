@@ -15,7 +15,8 @@ import read_ac_data
 #import leo_scale_sizes
 
 class ValidateDetections:
-    def __init__(self, sc_id, cPathPrimary, cPathSecondary, saveDir=None):
+    def __init__(self, sc_id, cPathPrimary, cPathSecondary, saveDir=None,
+                 uniqueFolders=True):
         """
         This class contains code to validate the microburst detector algorithm
         by plotting the detections made from each spacecraft side by side. No
@@ -23,21 +24,34 @@ class ValidateDetections:
 
         For a user-suplied catalog file (path specified by cPath), the 
         catalog file is first read. Then 
+
+        uniqueFolders flag determines if the true/false plots are to be 
+        sorted into different folders to easier inspection.
         """
-        
         # Load catalog
         self.cDataPrimary = self._load_catalog_(cPathPrimary)
         self.cDataSecondary = self._load_catalog_(cPathSecondary)
         self.primary_sc = sc_id
+        self.uniqueFolders = uniqueFolders
         # Set save directory
         if saveDir is not None:
             self.saveDir = saveDir
+        elif saveDir is None and not uniqueFolders:
+            self.saveDir = ('/home/mike/research/ac6-microburst-scale-sizes/'
+                    'plots/validation/{}/'.format(datetime.now().date()))
+            if not os.path.exists(self.saveDir):
+                print('Creating plot directory at:', self.saveDir)
+                os.makedirs(self.saveDir)
         else:
             self.saveDir = ('/home/mike/research/ac6-microburst-scale-sizes/'
                     'plots/validation/{}/'.format(datetime.now().date()))
-        if not os.path.exists(self.saveDir):
-            print('Creating plot directory at:', self.saveDir)
-            os.makedirs(self.saveDir)
+            if not os.path.exists(os.path.join(self.saveDir, 'true')):
+                os.makedirs(os.path.join(self.saveDir, 'true'))
+            if not os.path.exists(os.path.join(self.saveDir, 'false')):
+                os.makedirs(os.path.join(self.saveDir, 'false'))
+            print('Created plot directories:', 
+                os.path.join(self.saveDir, 'true'), 'and', 
+                os.path.join(self.saveDir, 'false'))
         return
         
     def plotLoop(self, pltWidth=4, autoCorrWidth=2, crossCorrWidth=1):
@@ -77,7 +91,7 @@ class ValidateDetections:
                 # This if statement filters out events detected at 
                 # separations > 100 km.
                 if self.cDataPrimary['Dist_Total'][d[1]+i] > 10:
-                   continue
+                  continue
                 
                 pltRange = [tA-timedelta(seconds=pltWidth), 
                             tA+timedelta(seconds=pltWidth)] 
@@ -110,7 +124,10 @@ class ValidateDetections:
                                 microsecond=0).isoformat().replace(':', '')
                 saveName = '{}_microburst_validation.png'.format(saveDate)
                 
-                plt.savefig(os.path.join(self.saveDir, saveName))
+                if self.uniqueFolders:
+                    plt.savefig(os.path.join(self.saveDir, self.noiseFlag, saveName))
+                else:
+                    plt.savefig(os.path.join(self.saveDir, saveName))
                 for a in self.ax:
                     a.clear()
         return
@@ -200,6 +217,10 @@ class ValidateDetections:
             if len(peakInd) > 0 and peakInd[0] < 0.5*10:
                 ax.text(0.5, 0.9, 'Flagged as Noise', va='top', ha='right', 
                         transform=ax.transAxes)
+                # Backwards to that 'false' means bad detection.
+                self.noiseFlag = 'false' 
+            else:
+                self.noiseFlag = 'true'
         return ac, lags
 
     def corrCounts(self, timesA, timesB, countsA, countsB, tRange, ax=None, norm=True):

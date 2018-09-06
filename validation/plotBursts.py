@@ -91,7 +91,7 @@ class ValidateDetections:
                 # This if statement filters out events detected at 
                 # separations > 100 km.
                 if self.cDataPrimary['Dist_Total'][d[1]+i] > 10:
-                  continue
+                    continue
                 
                 pltRange = [tA-timedelta(seconds=pltWidth), 
                             tA+timedelta(seconds=pltWidth)] 
@@ -205,7 +205,7 @@ class ValidateDetections:
             ac /= len(x)*np.var(x)
             
         # Identify peaks
-        peakInd, _ = scipy.signal.find_peaks(ac)
+        peakInd, properties = scipy.signal.find_peaks(ac, prominence=0.1)
         
         if ax is not None:
             ax.plot(lags, ac, c='r', label='auto-correlation')
@@ -217,6 +217,9 @@ class ValidateDetections:
             if len(peakInd) > 0 and peakInd[0] < 0.5*10:
                 ax.text(0.5, 0.9, 'Flagged as Noise', va='top', ha='right', 
                         transform=ax.transAxes)
+                # Mark prominances
+                ax.vlines(x=lags[peakInd], ymax=ac[peakInd], 
+                        ymin=ac[peakInd] - properties["prominences"], color="C1")
                 # Backwards to that 'false' means bad detection.
                 self.noiseFlag = 'false' 
             else:
@@ -257,10 +260,12 @@ class ValidateDetections:
         
         if ax is not None:
             ax.plot(lags, cc, c='r', label='cross correlation')
+            ax.axhline(0.7, c='g', ls=':', label='0.7')
             ax.axhline(0.8, c='g', ls='--', label='0.8')
             ax.axhline(0.9, c='g', ls='-', label='0.9')
             ax.set(xlabel='Lag [s] (shift blue trace by...)', ylabel='correlation coefficient', ylim=(-1, 1))
-            ax.scatter(lags[peakInd], cc[peakInd], marker='+')
+            # Mark peaks
+            ax.scatter(lags[peakInd], cc[peakInd], marker='+') 
         return cc, lags
         
     def _load_catalog_(self, fPath):

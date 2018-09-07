@@ -7,7 +7,7 @@ import os
 import microburst_detection
 import merge_daily_data
 
-cVersion = 2 #Catalog version
+cVersion = 3 #Catalog version
 
 # Set up logger
 logging.basicConfig(filename=os.path.abspath(
@@ -38,7 +38,7 @@ for (sc_id, date) in itertools.product(['A', 'B'], dates):
         else:
             raise
     try:
-        obj.getMicroburstIdx() # Run the wavelet detector.
+        obj.getMicroburstIdx(maxWidth=0.5) # Run the wavelet detector.
     except ValueError as err:
         if 'v cannot be empty' in str(err):
             logging.info('AC6-{} no microbursts found on {}.'.format(

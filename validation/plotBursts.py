@@ -54,10 +54,15 @@ class ValidateDetections:
                 os.path.join(self.saveDir, 'false'))
         return
         
-    def plotLoop(self, pltWidth=4, autoCorrWidth=2, crossCorrWidth=1):
+    def plotLoop(self, pltWidth=4, autoCorrWidth=2, crossCorrWidth=1, maxDist=1E31):
         """
         This method loops over the detections in the catalog file and plots 
         the dos1 data.
+
+        The autoCorrWidth and crossCorrWidth kwargs set the correlation window
+        sizes for the experimental filtering algirthms. maxDist kwarg sets the
+        maximum distance that will be plotted (usefull if you want to plot events
+        when the spacecraft were near each other).
         """
         #currentDate = datetime.date().min
         self._findDateBounds() # Get index bounds for each date.
@@ -90,7 +95,7 @@ class ValidateDetections:
             for i, tA in enumerate(self.cDataPrimary['dateTime'][d[1]:d[2]]):
                 # This if statement filters out events detected at 
                 # separations > 100 km.
-                if self.cDataPrimary['Dist_Total'][d[1]+i] > 10:
+                if self.cDataPrimary['Dist_Total'][d[1]+i] > maxDist:
                     continue
                 
                 pltRange = [tA-timedelta(seconds=pltWidth), 
@@ -205,21 +210,26 @@ class ValidateDetections:
             ac /= len(x)*np.var(x)
             
         # Identify peaks
-        peakInd, properties = scipy.signal.find_peaks(ac, prominence=0.1)
+        peakInd, properties = scipy.signal.find_peaks(ac, prominence=0.05)
         
         if ax is not None:
             ax.plot(lags, ac, c='r', label='auto-correlation')
             ax.set(xlabel='Lag [s]', ylabel='correlation coefficient', ylim=(-1, 1))
             ax.scatter(lags[peakInd], ac[peakInd], marker='+')
+
+            # Mark prominances
+            ax.vlines(x=lags[peakInd], ymax=ac[peakInd], 
+                    ymin=ac[peakInd] - properties["prominences"], color="C1")
+            for i, pi in enumerate(peakInd):
+                ax.text(lags[pi], ac[pi] - properties["prominences"][i] - 0.2, 
+                        round(properties["prominences"][i], 2), 
+                        va='bottom', ha='center', color='C1')
             
             # Print a True/False flag if the first peak is less than a 
             # threshold.
             if len(peakInd) > 0 and peakInd[0] < 0.5*10:
                 ax.text(0.5, 0.9, 'Flagged as Noise', va='top', ha='right', 
                         transform=ax.transAxes)
-                # Mark prominances
-                ax.vlines(x=lags[peakInd], ymax=ac[peakInd], 
-                        ymin=ac[peakInd] - properties["prominences"], color="C1")
                 # Backwards to that 'false' means bad detection.
                 self.noiseFlag = 'false' 
             else:
@@ -317,4 +327,4 @@ if __name__ == '__main__':
     catPathB = ('/home/mike/research/ac6-microburst-scale-sizes/'
                 'data/microburst_catalogues/AC6B_microbursts_v2.txt')
     p = ValidateDetections(sc_id, catPathA, catPathB)
-    p.plotLoop()
+    p.plotLoop(maxDist=10)

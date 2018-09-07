@@ -28,7 +28,7 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
             self.saveData()
         return
 
-    def getMicroburstIdx(self, thresh=0.1, method='wavelet'):
+    def getMicroburstIdx(self, thresh=0.1, maxWidth=1, method='wavelet'):
         """
         Use either obrien or wavelet method to calculate the 
         microbrust indicies _getPeak() method will find the peak
@@ -37,7 +37,7 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
         if method == 'obrien':
             self._getBurstParam()
         else:
-            self._getWavelet(thresh=thresh)
+            self._getWavelet(thresh=thresh, maxWidth=maxWidth)
 
         self._checkMicroburstFlag()
         return
@@ -127,7 +127,7 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
             self.d[ch], 0.1, N_WIDTH=n, A_WIDTH=a)
         return
 
-    def _getWavelet(self, ch='dos1rate', thresh=0.1):
+    def _getWavelet(self, ch='dos1rate', thresh=0.1, maxWidth=1):
         """
         This function handles the creation and manipulation of the wavelet
         detector.
@@ -137,7 +137,7 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
         waveletAnalysis.WaveletDetector.__init__(self, self.d[ch][validDataIdt], 
             self.d['dateTime'][validDataIdt], 0.1, mother='DOG')
         self.waveletTransform() # Get wavelet space
-        self.waveletFilter(self.s0, 1) # Do a band pass and significance filter.
+        self.waveletFilter(self.s0, maxWidth) # Do a band pass and significance filter.
         self.degenerateInvWaveletTransform() # Inverse transform filtered data.
         # Indicies where the error-filetered data is greater than thresh
         self.burstIdt = np.where(self.dataFlt > thresh)[0] 

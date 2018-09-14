@@ -67,7 +67,7 @@ class ValidateDetections:
         #currentDate = datetime.date().min
         self._findDateBounds() # Get index bounds for each date.
         
-        fig, self.ax = plt.subplots(3, figsize=(8, 10))
+        fig, self.ax = plt.subplots(4, figsize=(8, 10))
         #self.bx = self.ax.twinx()
         
         # Loop over dates.
@@ -107,28 +107,37 @@ class ValidateDetections:
                 #    continue
                 # Plot dos1rate, centered on the detection.
                 flag = self.plotCounts(self.ax[0], self.dataA['dateTime'], 
-                    self.dataA['dos1rate'], self.dataB['dateTime'], 
-                    self.dataB['dos1rate'], pltRange, 
+                    self.dataB['dateTime'], 'dos1rate', pltRange, 
                     primaryDetTimes, secondaryDetTimes)
                 if flag == -1:
                     continue
+
+                # Plot dos2rate for the same time period
+                flag = self.plotCounts(self.ax[1], self.dataA['dateTime'], 
+                    self.dataB['dateTime'], 'dos2rate', pltRange, [], [])
+
+                # Plot the auto-correlation and cross-correlations.
                 autoCorrRange = [tA-timedelta(seconds=autoCorrWidth/2), 
                             tA+timedelta(seconds=autoCorrWidth/2)] 
                 crossCorrRange = [tA-timedelta(seconds=crossCorrWidth/2), 
                             tA+timedelta(seconds=crossCorrWidth/2)]     
                 self.autoCorrCounts(self.dataA['dateTime'], 
                                     self.dataA['dos1rate'], 
-                                    autoCorrRange, ax=self.ax[1])
+                                    autoCorrRange, ax=self.ax[-2])
+                self.autoCorrCounts(self.dataA['dateTime'], 
+                                    self.dataA['dos2rate'], 
+                                    autoCorrRange, ax=self.ax[-2], label='dos2rate', c='b')
                 self.corrCounts(self.dataA['dateTime'],self.dataB['dateTime'], 
                                 self.dataA['dos1rate'], self.dataB['dos1rate'], 
-                                crossCorrRange, ax=self.ax[2])
-                self.ax[1].legend(loc=1)
-                self.ax[2].legend(loc=1)
+                                crossCorrRange, ax=self.ax[-1])
+                self.ax[-2].legend(loc=1)
+                self.ax[-1].legend(loc=1)
 
                 saveDate = pltRange[0].replace(
                                 microsecond=0).isoformat().replace(':', '')
                 saveName = '{}_microburst_validation.png'.format(saveDate)
                 
+                plt.tight_layout()
                 if self.uniqueFolders:
                     plt.savefig(os.path.join(self.saveDir, self.noiseFlag, saveName))
                 else:
@@ -137,7 +146,7 @@ class ValidateDetections:
                     a.clear()
         return
         
-    def plotCounts(self, ax, timeA, dosA, timeB, dosB, tRange, pDet, sDet):
+    def plotCounts(self, ax, timeA, timeB, doskey, tRange, pDet, sDet):
         """
         This method plots the narrow microburst time range from
         both spacecraft, and annotate with L, MLT, Lat, Lon.
@@ -146,6 +155,9 @@ class ValidateDetections:
         detection times.
         """
         sc_opt = ['A', 'B'] # Spacecraft options (for the plot labels.)
+        dosA = self.dataA[doskey]
+        dosB = self.dataB[doskey]
+
         validIdA = np.where((dosA != -1E31) & 
                             (timeA > tRange[0]) & 
                             (timeA < tRange[1]))[0]
@@ -161,11 +173,16 @@ class ValidateDetections:
         ax.plot(timeB[validIdB], dosB[validIdB], 'b',
                     label='AC-6 {}'.format(sc_opt[sc_opt != self.primary_sc][0]))
         # Mark detection times
-        ax.scatter(pDet, np.zeros_like(pDet), c='r', marker='*', s=50) 
-        ax.scatter(sDet, -10*np.ones_like(sDet), c='b', marker='x', s=30)
+        #for m in pDet:
+        #    ax.text(m, 0.1, 'x', color='r', transform=ax.transAxes)
+        #for m in sDet:
+        #    ax.text(m, 0.05, 'x', color='b', transform=ax.transAxes)
+        maxCC = np.max([dosA[validIdA].max(), dosB[validIdB].max()])
+        ax.scatter(pDet, maxCC*np.ones_like(pDet), c='r', marker='*', s=50) 
+        ax.scatter(sDet, 0.9*maxCC*np.ones_like(sDet), c='b', marker='x', s=30)
         # for det in sDet:
         #     self.ax.axvline(det, c='b', lw=)
-        ax.set(ylabel='Dos1 [counts/s]', xlabel='UTC',
+        ax.set(ylabel='{} [counts/s]'.format(doskey), xlabel='UTC',
             xlim=tRange,
             title='AC6-{} microburst validation | {}'.format(
                                 self.primary_sc, tRange[0].date()))
@@ -187,7 +204,7 @@ class ValidateDetections:
             va='top')
         return 1
         
-    def autoCorrCounts(self, times, counts, tRange, ax=None, norm=True):
+    def autoCorrCounts(self, times, counts, tRange, ax=None, norm=True, label='dos1rate', c='r'):
         """
         This function calculates the autocorrelation of the counts array in
         the time range specified by tRange. times array is used to identify 
@@ -210,10 +227,10 @@ class ValidateDetections:
             ac /= len(x)*np.var(x)
             
         # Identify peaks
-        peakInd, properties = scipy.signal.find_peaks(ac, prominence=0.05)
+        peakInd, properties = scipy.signal.find_peaks(ac, prominence=0.1)
         
         if ax is not None:
-            ax.plot(lags, ac, c='r', label='auto-correlation')
+            ax.plot(lags, ac, c=c, label='{} auto-correlation'.format(label))
             ax.set(xlabel='Lag [s]', ylabel='correlation coefficient', ylim=(-1, 1))
             ax.scatter(lags[peakInd], ac[peakInd], marker='+')
 
@@ -227,7 +244,8 @@ class ValidateDetections:
             
             # Print a True/False flag if the first peak is less than a 
             # threshold.
-            if len(peakInd) > 0 and peakInd[0] < 0.5*10:
+            lag4 = np.where(peakInd == 4)[0] # Check if there is a peak at 0.4 s lag.W
+            if len(lag4) == 1:
                 ax.text(0.5, 0.9, 'Flagged as Noise', va='top', ha='right', 
                         transform=ax.transAxes)
                 # Backwards to that 'false' means bad detection.

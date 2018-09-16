@@ -258,7 +258,7 @@ class ValidateDetections:
             # threshold.
             lag4 = np.where(peakInd == 4)[0] # Check if there is a peak at 0.4 s lag.W
             if len(lag4) == 1 and np.percentile(counts[validIdt], 95) > 1000:
-                ax.text(0.5, 0.9, 'Flagged as Noise | 95% {}'.format(np.percentile(counts[validIdt], 95)), va='top', ha='right', 
+                ax.text(0.5, 0.9, 'Flagged as Noise | 95% = {}'.format(np.percentile(counts[validIdt], 95)), va='top', ha='right', 
                         transform=ax.transAxes)
                 # Backwards to that 'false' means bad detection.
                 self.noiseFlag = 'false' 

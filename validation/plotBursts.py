@@ -33,6 +33,7 @@ class ValidateDetections:
         self.cDataSecondary = self._load_catalog_(cPathSecondary)
         self.primary_sc = sc_id
         self.uniqueFolders = uniqueFolders
+        self.sep_range = [-2E31, 1000]
         # Set save directory
         if saveDir is not None:
             self.saveDir = saveDir
@@ -49,12 +50,12 @@ class ValidateDetections:
                 os.makedirs(os.path.join(self.saveDir, 'true'))
             if not os.path.exists(os.path.join(self.saveDir, 'false')):
                 os.makedirs(os.path.join(self.saveDir, 'false'))
-            print('Created plot directories:', 
-                os.path.join(self.saveDir, 'true'), 'and', 
-                os.path.join(self.saveDir, 'false'))
+                print('Created plot directories:', 
+                    os.path.join(self.saveDir, 'true'), 'and', 
+                    os.path.join(self.saveDir, 'false'))
         return
         
-    def plotLoop(self, pltWidth=4, autoCorrWidth=2, crossCorrWidth=1, maxDist=1E31):
+    def plotLoop(self, pltWidth=4, autoCorrWidth=2, crossCorrWidth=1):
         """
         This method loops over the detections in the catalog file and plots 
         the dos1 data.
@@ -72,6 +73,14 @@ class ValidateDetections:
         
         # Loop over dates.
         for d in self.dateArr:
+        
+            # If that day's mean separation was outside the self.sep_range 
+            # range, move on
+            medianDist = np.median(self.cDataPrimary['Dist_Total'][d[1]:d[2]])
+            #if  > maxDist:
+            if medianDist < self.sep_range[0] or medianDist > self.sep_range[1]: 
+                continue
+        
             print('Making validation plots from:', d[0])
             # Open file
             d[0] = datetime.combine(d[0], datetime.min.time())
@@ -95,8 +104,8 @@ class ValidateDetections:
             for i, tA in enumerate(self.cDataPrimary['dateTime'][d[1]:d[2]]):
                 # This if statement filters out events detected at 
                 # separations > 100 km.
-                if self.cDataPrimary['Dist_Total'][d[1]+i] > maxDist:
-                    continue
+                #if self.cDataPrimary['Dist_Total'][d[1]+i] > maxDist:
+                #    continue
                 
                 pltRange = [tA-timedelta(seconds=pltWidth), 
                             tA+timedelta(seconds=pltWidth)] 
@@ -127,9 +136,12 @@ class ValidateDetections:
                 self.autoCorrCounts(self.dataA['dateTime'], 
                                     self.dataA['dos2rate'], 
                                     autoCorrRange, ax=self.ax[-2], label='dos2rate', c='b')
-                self.corrCounts(self.dataA['dateTime'],self.dataB['dateTime'], 
-                                self.dataA['dos1rate'], self.dataB['dos1rate'], 
-                                crossCorrRange, ax=self.ax[-1])
+                #self.corrCounts(self.dataA['dateTime'],self.dataB['dateTime'], 
+#                                self.dataA['dos1rate'], #self.dataB['dos1rate'], 
+#                                crossCorrRange, ax=self.ax[-1])
+                self.corrCounts(self.dataA['dateTime'],self.dataA['dateTime'], 
+                                self.dataA['dos1rate'], self.dataA['dos2rate'], 
+                                crossCorrRange, ax=self.ax[-1])                            
                 self.ax[-2].legend(loc=1)
                 self.ax[-1].legend(loc=1)
 
@@ -245,8 +257,8 @@ class ValidateDetections:
             # Print a True/False flag if the first peak is less than a 
             # threshold.
             lag4 = np.where(peakInd == 4)[0] # Check if there is a peak at 0.4 s lag.W
-            if len(lag4) == 1:
-                ax.text(0.5, 0.9, 'Flagged as Noise', va='top', ha='right', 
+            if len(lag4) == 1 and np.percentile(counts[validIdt], 95) > 1000:
+                ax.text(0.5, 0.9, 'Flagged as Noise | 95% {}'.format(np.percentile(counts[validIdt], 95)), va='top', ha='right', 
                         transform=ax.transAxes)
                 # Backwards to that 'false' means bad detection.
                 self.noiseFlag = 'false' 
@@ -345,4 +357,7 @@ if __name__ == '__main__':
     catPathB = ('/home/mike/research/ac6-microburst-scale-sizes/'
                 'data/microburst_catalogues/AC6B_microbursts_v2.txt')
     p = ValidateDetections(sc_id, catPathA, catPathB)
-    p.plotLoop(maxDist=10)
+    p.sep_range = [400, 500]
+    p.plotLoop()
+    p.sep_range = [0, 20]
+    p.plotLoop()

@@ -69,7 +69,6 @@ class ValidateDetections:
         self._findDateBounds() # Get index bounds for each date.
         
         fig, self.ax = plt.subplots(4, figsize=(8, 10))
-        #self.bx = self.ax.twinx()
         
         # Loop over dates.
         for d in self.dateArr:
@@ -77,7 +76,6 @@ class ValidateDetections:
             # If that day's mean separation was outside the self.sep_range 
             # range, move on
             medianDist = np.median(self.cDataPrimary['Dist_Total'][d[1]:d[2]])
-            #if  > maxDist:
             if medianDist < self.sep_range[0] or medianDist > self.sep_range[1]: 
                 continue
         
@@ -153,11 +151,16 @@ class ValidateDetections:
                 # then if max(dos2) > 0.5*max(dos1) then it is noise. 
                 if (len(np.where(peakInd1 == 4)[0]) == 1 and 
                     np.max(self.dataA['dos2rate'][validIdA]) > 0.5*np.max(self.dataA['dos1rate'][validIdA])):
-                    self.ax[-1].text(0.5, 0.9, 'Flagged as Noise', va='top',
-                        ha='right', transform=self.ax[-1].transAxes)
+                    self.noiseFlag = 'false'
+                elif max(dos12corr[len(dos12corr)//2-2 : len(dos12corr)//2+2]) > 0.9:
                     self.noiseFlag = 'false'
                 else:
                     self.noiseFlag = 'true'
+
+                # Annotate the plot if the detection is a false positive
+                if self.noiseFlag == 'false': 
+                    self.ax[-1].text(0.5, 0.9, 'Flagged as Noise', va='top',
+                        ha='right', transform=self.ax[-1].transAxes)
                 
                 # Print a True/False flag if the first peak is less than
                 # a threshold.

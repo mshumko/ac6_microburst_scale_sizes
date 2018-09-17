@@ -130,20 +130,44 @@ class ValidateDetections:
                             tA+timedelta(seconds=autoCorrWidth/2)] 
                 crossCorrRange = [tA-timedelta(seconds=crossCorrWidth/2), 
                             tA+timedelta(seconds=crossCorrWidth/2)]     
-                self.autoCorrCounts(self.dataA['dateTime'], 
+                ac1, lags1, max1, peakInd1 = self.autoCorrCounts(self.dataA['dateTime'], 
                                     self.dataA['dos1rate'], 
                                     autoCorrRange, ax=self.ax[-2])
-                self.autoCorrCounts(self.dataA['dateTime'], 
+                ac2, lags2, max2, peakInd2 = self.autoCorrCounts(self.dataA['dateTime'], 
                                     self.dataA['dos2rate'], 
-                                    autoCorrRange, ax=self.ax[-2], label='dos2rate', c='b')
+                                    autoCorrRange, ax=self.ax[-2], 
+                                    label='dos2rate', c='b')
                 #self.corrCounts(self.dataA['dateTime'],self.dataB['dateTime'], 
 #                                self.dataA['dos1rate'], #self.dataB['dos1rate'], 
 #                                crossCorrRange, ax=self.ax[-1])
-                self.corrCounts(self.dataA['dateTime'],self.dataA['dateTime'], 
-                                self.dataA['dos1rate'], self.dataA['dos2rate'], 
-                                crossCorrRange, ax=self.ax[-1])                            
+                dos12corr, dos12lags = self.corrCounts(
+                                    self.dataA['dateTime'], 
+                                    self.dataA['dateTime'], 
+                                    self.dataA['dos1rate'], 
+                                    self.dataA['dos2rate'], 
+                            crossCorrRange,      ax=self.ax[-1])                            
                 self.ax[-2].legend(loc=1)
                 self.ax[-1].legend(loc=1)
+                
+                # First check that dos1 and dos12 are correlated, then
+                # then if max(dos2) > 0.5*max(dos1) then it is noise. 
+                if (len(np.where(peakInd1 == 4)[0]) == 1 and 
+                    np.max(self.dataA['dos2rate'][validIdA]) > 0.5*np.max(self.dataA['dos1rate'][validIdA])):
+                    self.ax[-1].text(0.5, 0.9, 'Flagged as Noise', va='top',
+                        ha='right', transform=self.ax[-1].transAxes)
+                    self.noiseFlag = 'false'
+                else:
+                    self.noiseFlag = 'true'
+                
+                # Print a True/False flag if the first peak is less than
+                # a threshold.
+                #lag4 = np.where(peakInd == 4)[0] # Check if there is a peak at 0.4 s lag.W
+                #if len(lag4) == 1 and np.percentile(counts[validIdt], 95) > 1000:
+                #    
+                # Backwards to that 'false' means bad detection.
+                #    self.noiseFlag = 'false' 
+                #else:
+                #    self.noiseFlag = 'true'
 
                 saveDate = pltRange[0].replace(
                                 microsecond=0).isoformat().replace(':', '')
@@ -253,18 +277,7 @@ class ValidateDetections:
                 ax.text(lags[pi], ac[pi] - properties["prominences"][i] - 0.2, 
                         round(properties["prominences"][i], 2), 
                         va='bottom', ha='center', color='C1')
-            
-            # Print a True/False flag if the first peak is less than a 
-            # threshold.
-            lag4 = np.where(peakInd == 4)[0] # Check if there is a peak at 0.4 s lag.W
-            if len(lag4) == 1 and np.percentile(counts[validIdt], 95) > 1000:
-                ax.text(0.5, 0.9, 'Flagged as Noise | 95% = {}'.format(np.percentile(counts[validIdt], 95)), va='top', ha='right', 
-                        transform=ax.transAxes)
-                # Backwards to that 'false' means bad detection.
-                self.noiseFlag = 'false' 
-            else:
-                self.noiseFlag = 'true'
-        return ac, lags
+        return ac, lags, max(counts[validIdt]), peakInd
 
     def corrCounts(self, timesA, timesB, countsA, countsB, tRange, ax=None, norm=True):
         """

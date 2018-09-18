@@ -149,11 +149,15 @@ class ValidateDetections:
                 
                 # First check that dos1 and dos12 are correlated, then
                 # then if max(dos2) > 0.5*max(dos1) then it is noise. 
-                if (len(np.where(peakInd1 == 4)[0]) == 1 and 
-                    np.max(self.dataA['dos2rate'][validIdA]) > 0.5*np.max(self.dataA['dos1rate'][validIdA])):
+                if ( (len(np.where(peakInd1 == 4)[0]) == 1 or 
+                        len(np.where(peakInd1 == 2)[0]) == 1 or 
+                        len(np.where(peakInd2 == 4)[0]) == 1 or 
+                        len(np.where(peakInd2 == 2)[0]) == 1) and
+                        (max(self.dataA['dos2rate'][validIdA]) > 1000 or
+                        max(dos12corr) >= 0.9) ):
                     self.noiseFlag = 'false'
-                elif max(dos12corr[len(dos12corr)//2-2 : len(dos12corr)//2+2]) > 0.9:
-                    self.noiseFlag = 'false'
+                #elif max(dos12corr[len(dos12corr)//2-2 : len(dos12corr)//2+2]) > 0.9:
+                #    self.noiseFlag = 'false'
                 else:
                     self.noiseFlag = 'true'
 

@@ -118,13 +118,16 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
             dType='10Hz', plot=False)
         return
 
-    def _getBurstParam(self, ch='dos1rate', n=0.1, a=0.3):
+    def _getBurstParam(self, ch='dos1rate', n=0.1, a=0.5, thresh=5):
         """
         Calculate the burst parameter on the day. This is a CPU intensive task so
         parallize it?
         """
+        validDataIdt = np.where(self.d[ch] != -1E31)[0]
         self.burstParam = burst_parameter.obrien_burst_param(
-            self.d[ch], 0.1, N_WIDTH=n, A_WIDTH=a)
+            self.d[ch][validDataIdt], 0.1, N_WIDTH=n, A_WIDTH=a)
+        self.burstIdt = np.where(self.burstParam > thresh)[0] 
+        self._getPeaks(ch, validDataIdt) # Find peaks
         return
 
     def _getWavelet(self, ch='dos1rate', thresh=0.1, maxWidth=1, SIGNIF_LEVEL=0.25):
@@ -154,6 +157,9 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
         self.peakInd = np.nan*np.ones(len(startInd), dtype=int)
         # Loop over every microburst detection region (consecutive microburst indicies)
         for i, (st, et) in enumerate(zip(startInd, endInd)):
+            if st == et: 
+                # If the same index 
+                et += 1
             # Index nightmare, but works. There may be a better way
             offset = validDataIdt[self.burstIdt[st]]
             self.peakInd[i] = np.argmax(self.d[ch][validDataIdt[self.burstIdt[st:et]]]) + offset
@@ -180,7 +186,11 @@ class TestFindMicrobursts(FindMicrobursts):
             color='r', alpha=0.5)
         self.ax[0].scatter(self.d['dateTime'][validIdt[self.burstIdt]], self.d['dos1rate'][validIdt[self.burstIdt]], c='b', s=50)
         self.ax[0].scatter(self.d['dateTime'][self.peakInd], self.d['dos1rate'][self.peakInd], c='r', s=25)
-        self.ax[1].plot(self.time, self.dataFlt)
+        if hasattr(self, 'time'):
+            self.ax[1].plot(self.d['dateTime'][validIdt], self.dataFlt)
+        else:
+            self.ax[1].plot(self.d['dateTime'][validIdt], self.burstParam)
+            self.ax[1].set_ylim(-10, 10)
         self.ax[0].set_ylim(bottom=0, top=np.max(self.d['dos1rate'][validIdt]))
         self.ax[2].scatter(self.d['dateTime'][self.peakInd], self.d['flag'][self.peakInd], c='r', s=25)
         return
@@ -191,7 +201,7 @@ if __name__ == '__main__':
     for sc_id in ['A', 'B']:
         date = datetime(2016, 10, 14) 
         obj = TestFindMicrobursts(sc_id, date)
-        obj.getMicroburstIdx()
+        obj.getMicroburstIdx(method='obrien')
         #obj.saveData()
         obj.plotTimeseries()
         plt.show()

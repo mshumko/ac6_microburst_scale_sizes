@@ -1,0 +1,224 @@
+# This script creates the "true" microburst dataset to validate microburst
+# detectors against.
+import matplotlib.pyplot as plt
+from matplotlib.dates import date2num, num2date
+from datetime import datetime, timedelta
+import dateutil.parser
+import numpy as np
+#import copy
+import sys
+import csv
+import os
+
+sys.path.insert(0, '/home/mike/research/mission-tools/ac6')
+import read_ac_data
+
+class MakeDataset:
+    """
+    This class implements the pyplot GUI for the user to identify microbursts
+    by hand, and record the times in a file. If a file is not found, this class
+    will make one by default. Otherwise it will load the existing dataset and
+    add the scatter points to the time series before the user can interract with
+    the plot.
+    
+    The default pyplot GUI commands are the same. To add a microburst detection,
+    hover the mouse within ~3 data points of the microburst peak, and click "m".
+    This will add a "*" scatter point at the peak location. If you added a point
+    by accident, click "r" to remove that point. 
+    
+    TO navigate, use the "a", "d", "w", and "x" keys to navigate left, right, 
+    up, and down, respectifully. If y-axis is in log scale, there will be an 
+    error if you press down a few times because a log value of a negative ylim 
+    is not defined.
+    """
+    def __init__(self, date, sc_id, clickWidth=0.5):
+        self.sc_id = sc_id
+        self.date = date
+        self.clickWidth = clickWidth
+        self._loadData() # Read in the dosimeter data
+        
+        fig, self.ax = plt.subplots(figsize=(10, 5))
+        self.bx = self.ax.twinx()
+        
+        # If exists, load the validation dataset 
+        if os.path.isfile('validation_dataset.csv'):
+            self.validationTimes = self._load_validation_dataset()
+            self._plot_existing_detections()
+        else:
+            self.validationTimes = []
+            
+        return
+        
+    def plot(self):
+        """
+        This method returns the times, and count rates for the next plot.
+        """
+        validIdt = np.where(self.d['dos1rate'] != -1E31)[0]
+        self.ax.plot(self.d['dateTime'][validIdt], 
+                        self.d['dos1rate'][validIdt], 'r', label='dos1rate')
+        self.ax.fill_between(self.d['dateTime'][validIdt], 
+            self.d['dos1rate'][validIdt]-np.sqrt(self.d['dos1rate'][validIdt]),
+            self.d['dos1rate'][validIdt]+np.sqrt(self.d['dos1rate'][validIdt]),
+            color='r', alpha=0.5)
+        self.ax.plot(self.d['dateTime'][validIdt], 
+                        self.d['dos2rate'][validIdt], 'b', label='dos2rate')
+        self.ax.fill_between(self.d['dateTime'][validIdt], 
+            self.d['dos2rate'][validIdt]-np.sqrt(self.d['dos2rate'][validIdt]),
+            self.d['dos2rate'][validIdt]+np.sqrt(self.d['dos2rate'][validIdt]),
+            color='b', alpha=0.5)
+            
+        self.ax.set(yscale='log', xlabel='UTC', ylabel='Dos (counts/s)',
+                   ylim=(1, None), 
+                   xlim=(self.d['dateTime'][0], self.d['dateTime'][-1])) 
+        self.ax.legend(loc=2)
+        
+        validL = np.where(self.d['Lm_OPQ'] != -1E31)[0]
+        self.bx.plot(self.d['dateTime'][validL], 
+                        self.d['Lm_OPQ'][validL], c='k')
+        self.bx.set(ylabel='Lm OPQ', ylim=(4, 10))   
+        
+        self.cid = self.ax.figure.canvas.mpl_connect('key_press_event', self)  
+        self.cid = self.ax.figure.canvas.mpl_connect('button_press_event', self)  
+          
+        return
+        
+    def __call__(self, event):
+        """
+        This method is for the pyplot GUI to record the keypress, and call a
+        function that corresponds to the clicked key.
+        """
+        #ix, iy = event.xdata, event.ydata
+        clickTime = num2date(event.xdata).replace(tzinfo=None) 
+        #print('Clicked on point', num2date(ix), iy)
+        
+        # Add or remove detection scatter point.
+        if event.key == 'm': self.addPoint(clickTime)
+        elif event.key == 'r': self.removePoint() # Remove the last detection.
+
+        # Commands to move window left/right/up/down. I did not use "s" key
+        # for down since it is the default key to save figure.
+        elif event.key == 'a': self.windowLeft()
+        elif event.key == 'd': self.windowRight()
+        elif event.key == 'w': self.windowUp()
+        elif event.key == 'x': self.windowDown()
+        
+        self.ax.figure.canvas.draw() # Update plot. 
+        return
+        
+    def show(self):
+        plt.show()
+        return
+        
+    def addPoint(self, clickTime):
+        """ Find peak around click time, and add to plot """
+        dt = timedelta(seconds=self.clickWidth/2)
+        validInd = np.where(
+                    (self.d['dateTime'] > clickTime - dt) & 
+                    (self.d['dateTime'] < clickTime + dt) 
+                           )[0]
+        imaxC = np.argmax(self.d['dos1rate'][validInd])
+        # Add microburst time to self.validationTimes
+        self.validationTimes = np.append(
+                        self.validationTimes,
+                        self.d['dateTime'][imaxC+validInd[0]])
+        self.lastDet = self.ax.scatter(
+                        self.d['dateTime'][imaxC+validInd[0]], 
+                        self.d['dos1rate'][imaxC+validInd[0]], 
+                        s=100, marker='*', color='k')
+        return
+        
+    def removePoint(self):
+        """ Removes the last scatter point"""
+        self.validationTimes = self.validationTimes[:-1]
+        self.lastDet.remove()
+        return 
+        
+    def windowUp(self):
+        """ Move window up. """
+        currLims = self.ax.get_ylim()
+        dy = currLims[1] - currLims[0]
+        newLims = [l + dy for l in currLims]
+        self.ax.set_ylim(*newLims)
+        return
+        
+    def windowDown(self):
+        """ Move window down """
+        currLims = self.ax.get_ylim()
+        dy = currLims[1] - currLims[0]
+        newLims = [l - dy for l in currLims]
+        self.ax.set_ylim(*newLims) 
+        return
+        
+    def windowLeft(self):
+        """ Move window left """
+        currLims = num2date(self.ax.get_xlim())
+        dt = currLims[1] - currLims[0]
+        newLims = [l - dt for l in currLims]
+        self.ax.set_xlim(*newLims)  
+        return
+            
+    def windowRight(self):
+        """ Move window right """
+        currLims = num2date(self.ax.get_xlim())
+        dt = currLims[1] - currLims[0]
+        newLims = [l + dt for l in currLims]
+        self.ax.set_xlim(*newLims) 
+        return
+   
+    def _plot_existing_detections(self):
+        """ 
+        In the set-up phase, this method plots the already found microbursts.
+        """
+        for t in self.validationTimes:
+            idt = np.where(self.d['dateTime'] == t)[0]
+            self.ax.scatter(self.d['dateTime'][idt], 
+                            self.d['dos1rate'][idt], 
+                            s=100, marker='*', color='k')
+        return
+        s
+    def _loadData(self):
+        """
+        Load the AC-6 data.
+
+        10 Hz data keys:
+            'alt', 'lat', 'lon', 'dos1l', 'dos1m', 'dos1rate', 'dos2l', 'dos2m',
+            'dos2rate', 'dos3l', 'dos3m', 'dos3rate', 'flag', 'Subcom', 'Lm_OPQ', 
+            'Bmag_OPQ', 'MLT_OPQ', 'InvLat_OPQ', 'Loss_Cone_Type', 'K_Z', 'Lstar_Z',
+            'hmin_Z', 'Alpha', 'Beta', 'Dist_In_Track', 'Lag_In_Track', 
+            'Dist_Cross_Track_Horiz', 'Dist_Cross_Track_Vert', 'Dist_Total'
+        """
+        self.d = read_ac_data.read_ac_data_wrapper(self.sc_id, self.date,
+            dType='10Hz', plot=False)
+        return
+    
+    def _load_validation_dataset(self):
+        """ Open the current dataset (if exists, and populate the plot."""
+        with open('validation_dataset.csv', 'r') as f:
+            r = csv.reader(f)
+            times = np.squeeze(list(r))
+            print(times)
+        return np.array([dateutil.parser.parse(t) for t in times])
+        
+    def saveCatalog(self, savePath=None):
+        """
+        This method saves the microburst catalog into a csv file in savePath.
+        If savePath is None, it will save to the current directory.
+        """
+        if savePath is None: savePath = 'validation_dataset.csv'
+        
+        with open(savePath, 'w') as f:
+            w = csv.writer(f)
+            for t in sorted(self.validationTimes):
+                w.writerow([t.isoformat()])
+        return
+        
+if __name__ == '__main__':
+    sc_id = 'A'
+    date = datetime(2016, 10, 14)
+    m = MakeDataset(date, sc_id)
+    m.plot()
+    try:
+        m.show()
+    finally:
+        m.saveCatalog()
+        

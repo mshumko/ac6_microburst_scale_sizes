@@ -89,7 +89,7 @@ class MakeDataset:
         """
         if event.key not in ['m', 'e', 'a', 'd', 'w', 'x']:
             return
-            
+
         clickTime = num2date(event.xdata).replace(tzinfo=None) 
         #print('Clicked on point', num2date(ix), iy)
         
@@ -216,19 +216,26 @@ class MakeDataset:
         """
         if savePath is None: savePath = 'validation_dataset.csv'
         
+        # Remove duplicates
+        saveTimes = num2date(list(set(date2num(self.validationTimes))))
+        #saveTimes = [t.replace(tzinfo=None) for t in times]
+
         with open(savePath, 'w') as f:
             w = csv.writer(f)
-            for t in sorted(self.validationTimes):
-                w.writerow([t.isoformat()])
+            for t in saveTimes:
+                w.writerow([t.replace(tzinfo=None).isoformat()])
         return
         
 if __name__ == '__main__':
     sc_id = 'A'
     date = datetime(2016, 10, 14)
     m = MakeDataset(date, sc_id)
-    m.plot()
     try:
+        m.plot()
         m.show()
+    except OverflowError:
+        print('pyplot overflowed!!')
+        pass
     finally:
         m.saveCatalog()
         

@@ -41,12 +41,12 @@ class MakeDataset:
         self.bx = self.ax.twinx()
         
         # If exists, load the validation dataset 
+        self.scatterPts = np.array([])
         if os.path.isfile('validation_dataset.csv'):
             self.validationTimes = self._load_validation_dataset()
             self._plot_existing_detections()
         else:
-            self.validationTimes = []
-            
+            self.validationTimes = np.array([])
         return
         
     def plot(self):
@@ -91,9 +91,9 @@ class MakeDataset:
         clickTime = num2date(event.xdata).replace(tzinfo=None) 
         #print('Clicked on point', num2date(ix), iy)
         
-        # Add or remove detection scatter point.
+        # Add or erace detection scatter point.
         if event.key == 'm': self.addPoint(clickTime)
-        elif event.key == 'e': self.removePoint() # Erace the last detection.
+        elif event.key == 'e': self.removePoint(clickTime) # Erace the last detection.
 
         # Commands to move window left/right/up/down. I did not use "s" key
         # for down since it is the default key to save figure.
@@ -121,23 +121,22 @@ class MakeDataset:
         self.validationTimes = np.append(
                         self.validationTimes,
                         self.d['dateTime'][imaxC+validInd[0]])
-        self.lastDet = self.ax.scatter(
+        self.scatterPts = np.append(self.scatterPts, self.ax.scatter(
                         self.d['dateTime'][imaxC+validInd[0]], 
                         self.d['dos1rate'][imaxC+validInd[0]], 
-                        s=100, marker='*', color='k')
+                        s=100, marker='*', color='k'))
         return
         
-    def removePoint(self):
-        """ Removes the last scatter point"""
-        self.validationTimes = self.validationTimes[:-1]
-        try:
-            self.lastDet.remove()
-        except ValueError as err:
-            if 'x not in list' in str(err):
-                print('Removed latest detection from list,' 
-                       'but not scatter point.')
-            else:
-                raise
+    def removePoint(self, clickTime):
+        """
+        Removes the scatter point and time data closest to time 
+        of the click
+        """
+        dts = [(clickTime - t).total_seconds() for t in self.validationTimes]
+        idt = np.argmin(np.abs(dts))
+
+        self.validationTimes = np.delete(self.validationTimes, idt)
+        self.scatterPts[idt].remove()
         return 
         
     def windowUp(self):
@@ -152,7 +151,9 @@ class MakeDataset:
         """ Move window down """
         currLims = self.ax.get_ylim()
         dy = currLims[1] - currLims[0]
-        newLims = [l - dy for l in currLims]
+        # Max function help avoid windowing down into neagtive 
+        # log values (error).
+        newLims = [max([l - dy, 1]) for l in currLims]
         self.ax.set_ylim(*newLims) 
         return
         
@@ -178,11 +179,12 @@ class MakeDataset:
         """
         for t in self.validationTimes:
             idt = np.where(self.d['dateTime'] == t)[0]
-            self.ax.scatter(self.d['dateTime'][idt], 
+            self.scatterPts = np.append(self.scatterPts,
+                            self.ax.scatter(self.d['dateTime'][idt], 
                             self.d['dos1rate'][idt], 
-                            s=100, marker='*', color='k')
+                            s=100, marker='*', color='k'))
         return
-        s
+
     def _loadData(self):
         """
         Load the AC-6 data.

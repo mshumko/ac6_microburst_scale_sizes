@@ -87,7 +87,9 @@ class MakeDataset:
         This method is for the pyplot GUI to record the keypress, and call a
         function that corresponds to the clicked key.
         """
-        #ix, iy = event.xdata, event.ydata
+        if event.key not in ['m', 'e', 'a', 'd', 'w', 'x']:
+            return
+            
         clickTime = num2date(event.xdata).replace(tzinfo=None) 
         #print('Clicked on point', num2date(ix), iy)
         

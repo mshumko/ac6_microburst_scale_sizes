@@ -93,7 +93,7 @@ class MakeDataset:
         
         # Add or remove detection scatter point.
         if event.key == 'm': self.addPoint(clickTime)
-        elif event.key == 'r': self.removePoint() # Remove the last detection.
+        elif event.key == 'e': self.removePoint() # Erace the last detection.
 
         # Commands to move window left/right/up/down. I did not use "s" key
         # for down since it is the default key to save figure.
@@ -130,7 +130,14 @@ class MakeDataset:
     def removePoint(self):
         """ Removes the last scatter point"""
         self.validationTimes = self.validationTimes[:-1]
-        self.lastDet.remove()
+        try:
+            self.lastDet.remove()
+        except ValueError as err:
+            if 'x not in list' in str(err):
+                print('Removed latest detection from list,' 
+                       'but not scatter point.')
+            else:
+                raise
         return 
         
     def windowUp(self):
@@ -196,7 +203,6 @@ class MakeDataset:
         with open('validation_dataset.csv', 'r') as f:
             r = csv.reader(f)
             times = np.squeeze(list(r))
-            print(times)
         return np.array([dateutil.parser.parse(t) for t in times])
         
     def saveCatalog(self, savePath=None):

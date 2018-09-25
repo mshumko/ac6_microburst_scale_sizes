@@ -51,8 +51,9 @@ class MakeDataset:
         
     def plot(self):
         """
-        This method returns the times, and count rates for the next plot.
+        This method plots the dos1rate, dos2rate, and L time series,
         """
+        # Plot dos1rate with sigma bounds
         validIdt = np.where(self.d['dos1rate'] != -1E31)[0]
         self.ax.plot(self.d['dateTime'][validIdt], 
                         self.d['dos1rate'][validIdt], 'r', label='dos1rate')
@@ -60,25 +61,27 @@ class MakeDataset:
             self.d['dos1rate'][validIdt]-np.sqrt(self.d['dos1rate'][validIdt]),
             self.d['dos1rate'][validIdt]+np.sqrt(self.d['dos1rate'][validIdt]),
             color='r', alpha=0.5)
+        # Plot dos2rate with sigma bounds
         self.ax.plot(self.d['dateTime'][validIdt], 
                         self.d['dos2rate'][validIdt], 'b', label='dos2rate')
         self.ax.fill_between(self.d['dateTime'][validIdt], 
             self.d['dos2rate'][validIdt]-np.sqrt(self.d['dos2rate'][validIdt]),
             self.d['dos2rate'][validIdt]+np.sqrt(self.d['dos2rate'][validIdt]),
             color='b', alpha=0.5)
-            
+        # Subplot settings.    
         self.ax.set(yscale='log', xlabel='UTC', ylabel='Dos (counts/s)',
                    ylim=(1, None), 
                    xlim=(self.d['dateTime'][0], self.d['dateTime'][-1])) 
         self.ax.legend(loc=2)
-        
+        # Plot L shell on the right-hand side y-axis.
         validL = np.where(self.d['Lm_OPQ'] != -1E31)[0]
         self.bx.plot(self.d['dateTime'][validL], 
                         self.d['Lm_OPQ'][validL], c='k')
         self.bx.set(ylabel='Lm OPQ', ylim=(4, 10))   
         
+        # Magical commands to start pyplot's monitoring of key presses.
         self.cid = self.ax.figure.canvas.mpl_connect('key_press_event', self)  
-        self.cid = self.ax.figure.canvas.mpl_connect('button_press_event', self)  
+        #self.cid = self.ax.figure.canvas.mpl_connect('button_press_event', self)  
           
         return
         
@@ -87,11 +90,10 @@ class MakeDataset:
         This method is for the pyplot GUI to record the keypress, and call a
         function that corresponds to the clicked key.
         """
-        if event.key not in ['m', 'e', 'a', 'd', 'w', 'x']:
+        if event.key not in ['m', 'e', 'a', 'd', 'w', 'x', 's']:
             return
 
         clickTime = num2date(event.xdata).replace(tzinfo=None) 
-        #print('Clicked on point', num2date(ix), iy)
         
         # Add or erace detection scatter point.
         if event.key == 'm': self.addPoint(clickTime)
@@ -103,6 +105,10 @@ class MakeDataset:
         elif event.key == 'd': self.windowRight()
         elif event.key == 'w': self.windowUp()
         elif event.key == 'x': self.windowDown()
+        
+        # Save dataset. Same key will attempt to save the plot.
+        # Just say no and it will save.
+        elif event.key == 's': self.saveDataset()
         
         self.ax.figure.canvas.draw() # Update plot. 
         return
@@ -134,11 +140,15 @@ class MakeDataset:
         Removes the scatter point and time data closest to time 
         of the click
         """
+        # Find argument of rthe detection closest to clickTime.
         dts = [(clickTime - t).total_seconds() for t in self.validationTimes]
         idt = np.argmin(np.abs(dts))
 
         self.validationTimes = np.delete(self.validationTimes, idt)
-        self.scatterPts[idt].remove()
+        # Remove pyplot object (.remove() is a plt function)
+        self.scatterPts[idt].remove() 
+        # Remove what remains of the removed object (most likeley None)
+        self.scatterPts = np.delete(self.scatterPts, idt)
         return 
         
     def windowUp(self):
@@ -189,7 +199,7 @@ class MakeDataset:
 
     def _loadData(self):
         """
-        Load the AC-6 data.
+        Load AC-6 data.
 
         10 Hz data keys:
             'alt', 'lat', 'lon', 'dos1l', 'dos1m', 'dos1rate', 'dos2l', 'dos2m',
@@ -203,18 +213,22 @@ class MakeDataset:
         return
     
     def _load_validation_dataset(self):
-        """ Open the current dataset (if exists, and populate the plot."""
+        """ 
+        Open the current dataset (if exists), and populate the plot
+        with scatter points.
+        """
         with open('validation_dataset.csv', 'r') as f:
             r = csv.reader(f)
             times = np.squeeze(list(r))
         return np.array([dateutil.parser.parse(t) for t in times])
         
-    def saveCatalog(self, savePath=None):
+    def saveDataset(self, savePath=None):
         """
-        This method saves the microburst catalog into a csv file in savePath.
+        This method saves the microburst dataset into a csv file in savePath.
         If savePath is None, it will save to the current directory.
         """
         if savePath is None: savePath = 'validation_dataset.csv'
+        print('Saving validation dataset to', savePath)
         
         # Remove duplicates
         saveTimes = num2date(list(set(date2num(self.validationTimes))))
@@ -222,7 +236,7 @@ class MakeDataset:
 
         with open(savePath, 'w') as f:
             w = csv.writer(f)
-            for t in saveTimes:
+            for t in sorted(saveTimes):
                 w.writerow([t.replace(tzinfo=None).isoformat()])
         return
         
@@ -237,5 +251,4 @@ if __name__ == '__main__':
         print('pyplot overflowed!!')
         pass
     finally:
-        m.saveCatalog()
-        
+        m.saveDataset()

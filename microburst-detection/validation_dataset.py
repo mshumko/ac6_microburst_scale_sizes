@@ -1,6 +1,7 @@
 # This script creates the "true" microburst dataset to validate microburst
 # detectors against.
 import matplotlib.pyplot as plt
+#plt.rcParams['agg.path.chunksize'] = 1000000
 from matplotlib.dates import date2num, num2date
 from datetime import datetime, timedelta
 import dateutil.parser
@@ -114,6 +115,7 @@ class MakeDataset:
         # Just say no and it will save.
         elif event.key == 's': self.saveDataset()
         
+        self.bx.set_ylim(4, 8) # Update ylimits to always show L shell.
         self.ax.figure.canvas.draw() # Update plot. 
         return
         

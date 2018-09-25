@@ -24,12 +24,16 @@ class MakeDataset:
     The default pyplot GUI commands are the same. To add a microburst detection,
     hover the mouse within ~3 data points of the microburst peak, and click "m".
     This will add a "*" scatter point at the peak location. If you added a point
-    by accident, click "r" to remove that point. 
+    by accident, click "r" to remove that point (point nearest to the mouse 
+    x-coordinate). 
     
     TO navigate, use the "a", "d", "w", and "x" keys to navigate left, right, 
     up, and down, respectifully. If y-axis is in log scale, there will be an 
     error if you press down a few times because a log value of a negative ylim 
     is not defined.
+
+    To save, press "s". A savefig box will show up. Click cancel, and this code
+    will write to file.
     """
     def __init__(self, date, sc_id, clickWidth=0.5):
         self.sc_id = sc_id

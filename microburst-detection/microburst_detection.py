@@ -28,16 +28,16 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
             self.saveData()
         return
 
-    def getMicroburstIdx(self, thresh=0.1, maxWidth=1, method='wavelet', SIGNIF_LEVEL=0.25):
+    def getMicroburstIdx(self, method='wavelet', **kwargs):
         """
         Use either obrien or wavelet method to calculate the 
         microbrust indicies _getPeak() method will find the peak
         amplitudes of microbursts
         """
         if method == 'obrien':
-            self._getBurstParam()
+            self._getBurstParam(**kwargs)
         else:
-            self._getWavelet(thresh=thresh, maxWidth=maxWidth, SIGNIF_LEVEL=SIGNIF_LEVEL)
+            self._getWavelet(**kwargs)
 
         self._checkMicroburstFlag()
         return

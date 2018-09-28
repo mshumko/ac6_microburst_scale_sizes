@@ -26,6 +26,11 @@ class ConfusionMatrix(microburst_detection.FindMicrobursts):
                                 converters={0:dateutil.parser.parse})
         super().__init__(sc_id, date)
         return
+        
+    def find_microbursts(self, *args, **kwargs):
+        """ Wrapper to find microbursts """
+        self.getMicroburstIdx(*args, **kwargs)
+        return
 
     def confusionMatrix(self):
         """
@@ -40,7 +45,9 @@ class ConfusionMatrix(microburst_detection.FindMicrobursts):
         vNum = pd.to_numeric(self.vData)
         numTrue, self.TPR = self.true_positive_rate(detNum, vNum)
         numFalse, self.FPR = self.false_positive_rate(detNum, vNum)
-        print('Total validation detections', len(vNum), '\n')
+        print('Number of true microbursts', len(vNum))
+        print('Number of detections made', len(self.peakInd), '\n')
+        
         print('Total true positive detections', numTrue)
         print('True positive rate', 100*self.TPR, '%\n')
         print('Total false positive detections', numFalse)
@@ -66,6 +73,41 @@ class ConfusionMatrix(microburst_detection.FindMicrobursts):
         N = len(self._pos_cases()) - len(vNum) # Number of real negative cases
         FPR = numFalse/N
         return numFalse, FPR
+        
+    def plot_detections(self, ax=None):
+        """ 
+        This method evaluates how well the confusion matrix works 
+        """
+        if ax is None:
+            fig, self.ax = plt.subplots()
+        else:
+            self.ax = ax
+        validInd = np.where(self.d['dos1rate'] != -1E31)[0]
+        
+        self.ax.plot(self.d['dateTime'][validInd],
+                    self.d['dos1rate'][validInd], label='dos1rate')
+        
+        # Plot scatter points of valid detections
+        vNum = pd.to_numeric(self.vData)
+        datNum = pd.to_numeric(pd.Series(data=self.d['dateTime']))
+        idv = np.where(np.isin(datNum, vNum))[0]
+        self.ax.scatter(self.d['dateTime'][idv],
+                    self.d['dos1rate'][idv], c='r', s=100, 
+                    label='valid detections')
+                    
+        # Plot scatter points of detected detections
+        #datNum = pd.to_numeric(pd.Series(data=self.d['dateTime']))
+        #idv = np.where(np.isin(datNum, vNum))[0]
+        self.ax.scatter(self.d['dateTime'][self.peakInd],
+                    self.d['dos1rate'][self.peakInd], 
+                    c='b', s=100, marker='x',
+                    label='detected detections')
+                    
+        if ax is None: self.ax.legend()
+        
+        self.ax.set(xlabel='UTC', ylabel='dos1rate [counts/s]', 
+                    yscale='log')
+        return
 
     def _pos_cases(self):
         """
@@ -86,7 +128,9 @@ class ConfusionMatrix(microburst_detection.FindMicrobursts):
 
 if __name__ == '__main__':
     dKwargs = {'method':'wavelet', 'thresh':0.1, 'maxWidth':1,
-                'SIGNIF_LEVEL':0.25}
+                'SIGNIF_LEVEL':0.50}
     c = ConfusionMatrix('A', datetime(2016, 10, 14))
-    c.getMicroburstIdx(**dKwargs)
+    c.find_microbursts(**dKwargs)
     c.confusionMatrix()
+    c.plot_detections()
+    plt.show()

@@ -127,7 +127,7 @@ class ConfusionMatrix(microburst_detection.FindMicrobursts):
         return goodInd
 
 if __name__ == '__main__':
-    dKwargs = {'method':'wavelet', 'thresh':0.1, 'maxWidth':1,
+    dKwargs = {'method':'wavelet', 'thresh':0.1, 'maxWidth':0.5,
                 'SIGNIF_LEVEL':0.50}
     c = ConfusionMatrix('A', datetime(2016, 10, 14))
     c.find_microbursts(**dKwargs)

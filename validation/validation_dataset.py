@@ -200,6 +200,7 @@ class MakeDataset:
             # when removing duplicate detections.)
             idt = np.where((self.d['dateTime'] > t - timedelta(seconds=0.01))
                             & (self.d['dateTime'] < t + timedelta(seconds=0.01)))[0]
+            #idt = np.where(self.d['dateTime'] == t)[0]
             print('plotting time', t, 'idt', idt)
             self.scatterPts = np.append(self.scatterPts,
                             self.ax.scatter(self.d['dateTime'][idt], 
@@ -242,6 +243,11 @@ class MakeDataset:
         
         # Remove duplicates
         saveTimes = num2date(list(set(date2num(self.validationTimes))))
+
+        # Round microseconds e.g. 35.3999 -> 25.4 seconds.
+        saveTimes = [t.replace(
+                    microsecond=int(round(t.microsecond*1E-6, 1)*1E6)) 
+                    for t in saveTimes]
         #saveTimes = [t.replace(tzinfo=None) for t in times]
 
         with open(savePath, 'w') as f:

@@ -195,7 +195,12 @@ class MakeDataset:
         In the set-up phase, this method plots the already found microbursts.
         """
         for t in self.validationTimes:
-            idt = np.where(self.d['dateTime'] == t)[0]
+            # Small window since the database times are not saved to the exact 
+            # data point (I think its a date2num -> num2date conversion quirk
+            # when removing duplicate detections.)
+            idt = np.where((self.d['dateTime'] > t - timedelta(seconds=0.01))
+                            & (self.d['dateTime'] < t + timedelta(seconds=0.01)))[0]
+            print('plotting time', t, 'idt', idt)
             self.scatterPts = np.append(self.scatterPts,
                             self.ax.scatter(self.d['dateTime'][idt], 
                             self.d['dos1rate'][idt], 

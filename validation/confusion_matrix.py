@@ -85,7 +85,9 @@ class ConfusionMatrix(microburst_detection.FindMicrobursts):
         validInd = np.where(self.d['dos1rate'] != -1E31)[0]
         
         self.ax.plot(self.d['dateTime'][validInd],
-                    self.d['dos1rate'][validInd], label='dos1rate')
+                    self.d['dos1rate'][validInd], 'r', label='dos1rate')
+        self.ax.plot(self.d['dateTime'][validInd],
+                    self.d['dos2rate'][validInd], 'b', label='dos2rate')
         
         # Plot scatter points of valid detections
         vNum = pd.to_numeric(self.vData)
@@ -127,7 +129,7 @@ class ConfusionMatrix(microburst_detection.FindMicrobursts):
         return goodInd
 
 if __name__ == '__main__':
-    dKwargs = {'method':'wavelet', 'thresh':0.1, 'maxWidth':0.5,
+    dKwargs = {'method':'wavelet', 'thresh':0.1, 'maxWidth':0.25,
                 'SIGNIF_LEVEL':0.50}
     c = ConfusionMatrix('A', datetime(2016, 10, 14))
     c.find_microbursts(**dKwargs)

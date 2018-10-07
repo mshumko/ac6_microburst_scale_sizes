@@ -63,9 +63,16 @@ class ConfusionMatrix(microburst_detection.FindMicrobursts):
 
     def true_positive_rate(self):
         """ 
-        Find the true positive rate == TP/P = True Positive / vNum
+        Find the true positive rate == TP/P = 
+        True Positive / vNum
         """
-        numTrue = sum(np.isin(self.vNum, self.detNum))
+        numTrue = 0
+        for t in self.d['dateTime'][self.peakInd]:
+            dt = timedelta(seconds = 0.1)
+            if len(np.where((t + dt >= self.vData) & 
+                    (t - dt <= self.vData))[0]):
+                numTrue += 1
+        #numTrue = sum(np.isin(self.vNum, self.detNum))
         TPR = numTrue/len(self.vNum)
         return numTrue, TPR
 
@@ -75,8 +82,14 @@ class ConfusionMatrix(microburst_detection.FindMicrobursts):
         FP is the false positive, or false alarm, or Type 1 error
         N is the number of real negative cases in the data
         """
-        numFalse = sum(np.logical_not(
-                        np.isin(self.detNum, self.vNum)))
+        numFalse = 0
+        for t in self.d['dateTime'][self.peakInd]:
+            dt = timedelta(seconds = 0.1)
+            if not len(np.where((t + dt >= self.vData) & 
+                    (t - dt <= self.vData))[0]):
+                numFalse += 1
+        #numFalse = sum(np.logical_not(
+        #                np.isin(self.detNum, self.vNum)))
         N = len(self._pos_cases()) - len(self.vNum) # Number of real negative cases
         FPR = numFalse/N
         return numFalse, FPR

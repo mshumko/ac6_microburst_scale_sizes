@@ -90,8 +90,8 @@ class ConfusionMatrix(microburst_detection.FindMicrobursts):
                 numFalse += 1
         #numFalse = sum(np.logical_not(
         #                np.isin(self.detNum, self.vNum)))
-        N = len(self._pos_cases()) - len(self.vNum) # Number of real negative cases
-        FPR = numFalse/N
+        #N = len(self._pos_cases()) - len(self.vNum) # Number of real negative cases
+        FPR = numFalse/len(self.vNum)
         return numFalse, FPR
         
     def plot_detections(self, ax=None):

@@ -201,7 +201,7 @@ class MakeDataset:
             idt = np.where((self.d['dateTime'] > t - timedelta(seconds=0.01))
                             & (self.d['dateTime'] < t + timedelta(seconds=0.01)))[0]
             #idt = np.where(self.d['dateTime'] == t)[0]
-            print('plotting time', t, 'idt', idt)
+            #print('plotting time', t, 'idt', idt)
             self.scatterPts = np.append(self.scatterPts,
                             self.ax.scatter(self.d['dateTime'][idt], 
                             self.d['dos1rate'][idt], 

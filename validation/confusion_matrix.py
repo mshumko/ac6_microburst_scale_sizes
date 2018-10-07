@@ -155,6 +155,7 @@ if __name__ == '__main__':
     #dKwargs = {'method':'obrien', 'n':0.1, 'a':0.5, 'thresh':5}
     c = ConfusionMatrix('A', datetime(2016, 10, 14))
     c.find_microbursts(**dKwargs)
+    #c.corrFlag()
     c.confusionMatrix()
     c.plot_detections()
     plt.show()

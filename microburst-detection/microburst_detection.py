@@ -1,7 +1,8 @@
 # This program will catalogue AC6 microbursts
 
 import matplotlib.pyplot as plt
-from datetime import datetime
+import scipy.signal
+from datetime import datetime, timedelta
 import numpy as np
 import copy
 import sys
@@ -41,6 +42,53 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
 
         self._checkMicroburstFlag()
         return
+
+    def corrFlag(self, ACwidth=2, CCwidth=1):
+        """ 
+        This method implements the correlation filters to remove 
+        noise.
+        """
+        tempPeaks = np.array([], dtype=int)
+        for p_i in self.peakInd:
+            t_i = self.d['dateTime'][p_i]
+            autoCorrRange = [t_i-timedelta(seconds=ACwidth/2), 
+                            t_i+timedelta(seconds=ACwidth/2)] 
+            crossCorrRange = [t_i-timedelta(seconds=CCwidth/2), 
+                            t_i+timedelta(seconds=CCwidth/2)]
+            validIdA = np.where(
+                        (self.d['dateTime'] > autoCorrRange[0]) & 
+                        (self.d['dateTime'] < autoCorrRange[1])
+                        )[0]
+            # Autocorrelate dos1
+            ac1, lags1, max1, peakInd1 = self._autoCorrCounts(
+                                    self.d['dateTime'], 
+                                    self.d['dos1rate'], 
+                                    autoCorrRange)
+            # Autocorrelate dos2 (because dos1 and dos2 respond 
+            # similarly to noise)
+            ac2, lags2, max2, peakInd2 = self._autoCorrCounts(
+                                    self.d['dateTime'], 
+                                    self.d['dos2rate'], 
+                                    autoCorrRange)
+            # Cross correlate dos1 and dos2
+            dos12corr, dos12lags = self._crossCorrCounts(
+                                    self.d['dateTime'], 
+                                    self.d['dateTime'], 
+                                    self.d['dos1rate'], 
+                                    self.d['dos2rate'], 
+                                    crossCorrRange)                            
+            # First check that dos1 and dos12 are correlated, then
+            # then if max(dos2) > 0.5*max(dos1) then it is noise. 
+            if not ( (len(np.where(peakInd1 == 4)[0]) == 1 or 
+                    len(np.where(peakInd1 == 2)[0]) == 1 or 
+                    len(np.where(peakInd2 == 4)[0]) == 1 or 
+                    len(np.where(peakInd2 == 2)[0]) == 1) and
+                    (max(self.d['dos2rate'][validIdA]) > 1000 or
+                    max(dos12corr) >= 0.9) ):
+                tempPeaks = np.append(tempPeaks, p_i)    
+        self.peakInd = tempPeaks
+        return
+
 
     def saveData(self, fPath=None):
         """
@@ -103,6 +151,64 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
         self.peakInd = np.array(sorted(sameInd), dtype=int)    
         return
 
+    def _autoCorrCounts(self, times, counts, tRange, norm=True):
+        """
+        This method calculates the autocorrelation of the counts array in
+        the time range specified by tRange. times array is used to identify 
+        which counts to autocorrelate.
+        
+        The ax argument specified the subplot on which to plot the 
+        autocorrelation on. 
+        """
+        validIdt = np.where((counts != -1E31) & 
+                            (times > tRange[0]) & 
+                            (times < tRange[1]))[0]
+        x = counts[validIdt] - counts[validIdt].mean()
+        # mode=same means that some edge effects will be observed. Should be ok.                    
+        ac = np.correlate(x, x, mode='same')
+        ac = ac[ac.size//2:]
+        # Lags are normalized to seconds  
+        lags = np.arange(0, ac.size)/10 
+        
+        if norm:
+            ac /= len(x)*np.var(x)
+            
+        # Identify peaks
+        peakInd, _ = scipy.signal.find_peaks(ac, prominence=0.1)
+        return ac, lags, max(counts[validIdt]), peakInd
+
+    def _crossCorrCounts(self, timesA, timesB, countsA, countsB, tRange, norm=True):
+        """
+        This method calculates the crosscorrelation of the counts array in
+        the time range specified by tRange. times array is used to identify 
+        which counts to autocorrelate. This method also calculates the cross
+        correlation of the two signals to determine if the micorbursts 
+        observed by both AC6 units are coincident.
+        
+        The ax argument specified the subplot on which to plot the 
+        autocorrelation on. 
+        """
+        validIdtA = np.where((countsA != -1E31) & 
+                            (timesA > tRange[0]) & 
+                            (timesA < tRange[1]))[0]
+        x = countsA[validIdtA] - countsA[validIdtA].mean()
+
+        validIdtB = np.where((countsB != -1E31) & 
+                            (timesB > tRange[0]) & 
+                            (timesB < tRange[1]))[0]
+        y = countsB[validIdtB] - countsB[validIdtB].mean()
+
+        cc = np.correlate(x, y, mode='same')
+        # Lags are normalized to seconds  
+        lags = np.arange(-cc.size/2, cc.size/2)/10 
+        
+        if norm:
+            cc /= np.sqrt(len(x)*np.var(x)*len(y)*np.var(y))
+            
+        # Identify peaks
+        #peakInd, _ = scipy.signal.find_peaks(cc)
+        return cc, lags
+
     def _loadData(self):
         """
         Load the AC-6 data.
@@ -138,7 +244,7 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
         # Feed the counts into the wavelet microburst finder
         validDataIdt = np.where(self.d[ch] != -1E31)[0]
         waveletAnalysis.WaveletDetector.__init__(self, self.d[ch][validDataIdt], 
-            self.d['dateTime'][validDataIdt], 0.1, mother='DOG')
+            self.d['dateTime'][validDataIdt], 0.1, mother='DOG', siglvl=0.95)
         self.waveletTransform() # Get wavelet space
         self.waveletFilter(self.s0, maxWidth, SIGNIF_LEVEL=SIGNIF_LEVEL) # Do a band pass and significance filter.
         self.degenerateInvWaveletTransform() # Inverse transform filtered data.

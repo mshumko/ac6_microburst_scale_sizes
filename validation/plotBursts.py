@@ -373,9 +373,9 @@ class ValidateDetections:
 if __name__ == '__main__':
     sc_id = 'A'
     catPathA = ('/home/mike/research/ac6-microburst-scale-sizes/'
-                'data/microburst_catalogues/AC6A_microbursts_v2.txt')
+                'data/microburst_catalogues/AC6A_microbursts_v3.txt')
     catPathB = ('/home/mike/research/ac6-microburst-scale-sizes/'
-                'data/microburst_catalogues/AC6B_microbursts_v2.txt')
+                'data/microburst_catalogues/AC6B_microbursts_v3.txt')
     p = ValidateDetections(sc_id, catPathA, catPathB)
     p.sep_range = [400, 500]
     p.plotLoop()

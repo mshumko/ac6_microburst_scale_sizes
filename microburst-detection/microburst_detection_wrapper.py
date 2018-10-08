@@ -8,6 +8,13 @@ import microburst_detection
 import merge_daily_data
 
 cVersion = 3 #Catalog version
+outPath = ('/home/mike/research/'
+            'ac6-microburst-scale-sizes/data/'
+            'microburst_catalogues/'
+            'AC6A_microbursts_v{}.txt'.format(
+            cVersion))
+if os.path.exists(outPath):
+    raise OSError('Merged catalog already exists. Increment cVersion.')
 
 # Set up logger
 logging.basicConfig(filename=os.path.abspath(
@@ -17,8 +24,8 @@ logging.basicConfig(filename=os.path.abspath(
 progStartTime = time.time()
 
 # Get a list of dates to loop over.
-startDate = datetime(2014, 1, 1)
-endDate = datetime.now()
+startDate = datetime(2014, 6, 21)
+endDate = datetime(2017, 6, 30)
 dDays = (endDate - startDate).days
 dates = [startDate + timedelta(days=i) for i in range(dDays)]
 
@@ -38,7 +45,11 @@ for (sc_id, date) in itertools.product(['A', 'B'], dates):
         else:
             raise
     try:
-        obj.getMicroburstIdx(maxWidth=0.5) # Run the wavelet detector.
+        # Run the wavelet detector.
+        obj.getMicroburstIdx(maxWidth=0.5, thresh=0.05,
+            SIGNIF_LEVEL=0.1) 
+        # Remove noisy detections using correlations.
+        obj.corrFlag()
     except ValueError as err:
         if 'v cannot be empty' in str(err):
             logging.info('AC6-{} no microbursts found on {}.'.format(

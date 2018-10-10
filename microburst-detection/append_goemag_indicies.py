@@ -5,7 +5,9 @@ import csv
 import numpy as np
 import glob
 import dateutil.parser
+import datetime
 import itertools
+from matplotlib.dates import date2num, num2date
 
 import spacepy.datamodel
 
@@ -30,21 +32,29 @@ class AppendGeoMagIdx:
             self._loadAe()
         return
 
-    def appendIndex(self, timeKey='dateTimeA'):
+    def appendIndex(self, timeKey='dateTime'):
         """
         This function will loop over the microburst data set and look for
         matching geomagnetic indicies.
         """
-        self.matchingIndex = np.nan*np.ones(len(self.dataDict['lat']), dtype=int)
-
+        # lat is a random key that I know will be in the catalog.
+        self.matchingIndex = np.nan*np.ones(len(self.dataDict['lat']), dtype=float)
+        nDetTimes = date2num(self.dataDict[timeKey])
+        nIndexTimes = date2num(self.indexTimes)
         # Loop over microburst times
-        for (i, t) in enumerate(self.dataDict[timeKey]):
-            idx = np.where((t >= self.indexTimes[:-1]) & 
-                (t < self.indexTimes[1:]))[0]
-            print(t, idx, self.indexTimes[idx])
-            if len(idx) == 0:
-                break
-            self.matchingIndex[i] = self.index[idx]
+        for (i, t) in enumerate(nDetTimes):
+            dt = np.abs(nIndexTimes - t)
+            idx = np.argmin(dt)
+
+            if dt[idx] < 1/24:
+                # If within an hour window, append
+                self.matchingIndex[i] = self.index[idx]
+            # idx = np.where((t >= self.indexTimes[:-1]) & 
+            #     (t < self.indexTimes[1:]))[0]
+            # print(t, idx, self.indexTimes[idx])
+            # if len(idx) == 0:
+            #     break
+            # self.matchingIndex[i] = self.index[idx]
         print(self.matchingIndex)
         return
 
@@ -61,7 +71,7 @@ class AppendGeoMagIdx:
                 np.concatenate((self.keys, [self.iType.upper()]) 
                 ))
             # Loop over lines and save file.
-            for (i, line) in enumerate(self.data):
+            for (i, line) in enumerate(self.rawData):
                 writer.writerow(
                     np.concatenate( (line, [self.matchingIndex[i]]) )
                     )
@@ -70,49 +80,59 @@ class AppendGeoMagIdx:
     def _loadData(self):
         """
         This function will load in the microburst catalogues
-        from both spacecraft
         """
-        self.data = self._inputDataSkelletons(self.dataPath)
+        #self.data = self._inputDataSkelletons(self.dataPath)
 
         with open(self.dataPath, 'r') as f:
             reader = csv.reader(f)
-            next(reader) # Skip header
-            next(reader)
+            #next(reader) # Skip header
+            self.keys = next(reader)
+            self.rawData = np.array(list(reader))
 
-            for i, line in enumerate(reader): # Read in the data
-                self.data[i] = line
-            # Now format data array into a dictionary for each spacecraft
-            self.dataDict = {}
-            for i, key in enumerate(self.keys):
-                self.dataDict[key] = self.data[:, i]
-            # Loop over all keys but datetimes and set the array types to be floats.
-            for key in itertools.filterfalse(lambda x:'dateTime' in x, self.keys):
-                self.dataDict[key] = self.dataDict[key].astype(float)
+        self.dataDict = {}
+        for i, key in enumerate(self.keys):
+            if 'dateTime' in key:
+                self.dataDict[key] = np.array([dateutil.parser.parse(t) 
+                                            for t in self.rawData[:, i]])
+            else:
+                self.dataDict[key] = self.rawData[:, i].astype(float)
 
-            # Convert datetimes
-            for key in filter(lambda x: 'dateTime' in x, self.keys):
-                self.dataDict[key] = np.array([dateutil.parser.parse(i) 
-                    for i in self.dataDict[key]])
+
+
+            # for i, line in enumerate(reader): # Read in the data
+            #     self.data[i] = line
+            # # Now format data array into a dictionary for each spacecraft
+            # self.dataDict = {}
+            # for i, key in enumerate(self.keys):
+            #     self.dataDict[key] = self.data[:, i]
+            # # Loop over all keys but datetimes and set the array types to be floats.
+            # for key in itertools.filterfalse(lambda x:'dateTime' in x, self.keys):
+            #     self.dataDict[key] = self.dataDict[key].astype(float)
+
+            # # Convert datetimes
+            # for key in filter(lambda x: 'dateTime' in x, self.keys):
+            #     self.dataDict[key] = np.array([dateutil.parser.parse(i) 
+            #         for i in self.dataDict[key]])
         return
 
-    def _inputDataSkelletons(self, fPath):
-        """
-        Create empty dictionary and arrays for microburst catalogues. 
-        """
-        # Scan the file to get number of lines.
-        with open(fPath, 'r') as f:
-            N = sum(1 for row in f) - 2
+    # def _inputDataSkelletons(self, fPath):
+    #     """
+    #     Create empty dictionary and arrays for microburst catalogues. 
+    #     """
+    #     # Scan the file to get number of lines.
+    #     with open(fPath, 'r') as f:
+    #         N = sum(1 for row in f) - 2
 
-        # Get data keys and data from file
-        with open(fPath, 'r') as f:
-            reader = csv.reader(f)
-            next(reader) # Skip first line of header
-            self.keys = next(reader)
-            # Remove comment and empty space chars
-            #self.keys[0] = self.keys[0][2:] 
-            # Empty data file
-            data = np.nan*np.ones((N, len(self.keys)), dtype=object)
-        return data
+    #     # Get data keys and data from file
+    #     with open(fPath, 'r') as f:
+    #         reader = csv.reader(f)
+    #         next(reader) # Skip first line of header
+    #         self.keys = next(reader)
+    #         # Remove comment and empty space chars
+    #         #self.keys[0] = self.keys[0][2:] 
+    #         # Empty data file
+    #         data = np.nan*np.ones((N, len(self.keys)), dtype=object)
+    #     return data
 
     def _loadKp(self):
         """
@@ -122,7 +142,7 @@ class AppendGeoMagIdx:
         self.index = np.nan*np.ones((0, 1), dtype=int)
 
         # Loop over years in the data and load in that index.
-        dataYears = sorted(set([i.year for i in self.dataDict['dateTimeA']]))
+        dataYears = sorted(set([i.year for i in self.dataDict['dateTime']]))
         for year in [2014]:
             fName = '{}_{}.txt'.format(year, self.iType.lower())
             indexData = spacepy.datamodel.readJSONheadedASCII(
@@ -143,7 +163,7 @@ class AppendGeoMagIdx:
         dTypes = ['AE', 'AU', 'AL', 'A0']
         idx = 3 + dTypes.index(aeType)
         
-        dataYears = sorted(set([i.year for i in self.dataDict['dateTimeA']]))
+        dataYears = sorted(set([i.year for i in self.dataDict['dateTime']]))
         for year in dataYears:
             fName = '{}_{}.txt'.format(year, self.iType.lower())
             with open(os.path.join(self.indexDir, fName), 'r') as f:
@@ -161,15 +181,10 @@ class AppendGeoMagIdx:
 
 if __name__ == '__main__':
     iType = 'ae'
-    dataType = 'flashes'
     indexDir = '/home/mike/research/geomag_indicies/ae'
 
-    if dataType == 'flashes':
-        dataPath = ('/home/mike/research/ac6-microburst-scale-sizes/data/'
-                    'flash_catalogues/flash_catalogue_v2.txt')
-    else:
-        dataPath = ('/home/mike/research/ac6-microburst-scale-sizes/data/'
-                    'curtain_catalogues/curtain_catalogue.txt')
+    dataPath = ('/home/mike/research/ac6-microburst-scale-sizes/data/'
+                'microburst_catalogues/AC6B_microbursts_v3.txt')
 
     appendObj = AppendGeoMagIdx(iType, dataPath, indexDir)
     appendObj.appendIndex()

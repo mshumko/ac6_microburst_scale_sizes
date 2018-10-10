@@ -97,6 +97,15 @@ for sc_id in ['A', 'B']:
     r.save_data()
 
 # Append the AE index
+iType = 'ae'
+indexDir = '/home/mike/research/geomag_indicies/ae'
+for sc_id in ['A', 'B']:
+    dataPath = ('/home/mike/research/ac6-microburst-scale-sizes/data/'
+                'microburst_catalogues/'
+                'AC6{}_microbursts_v{}.txt'.format(sc_id, cVersion))
 
+    appendObj = append_goemag_indicies.AppendGeoMagIdx(iType, dataPath, indexDir)
+    appendObj.appendIndex()
+    appendObj.saveData()
 
-logging.info('Program ran in {}'.format(time.time() - progStartTime))
+logging.info('Microbust data pipeline ran in {}'.format(time.time() - progStartTime))

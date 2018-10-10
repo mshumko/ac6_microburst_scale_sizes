@@ -58,7 +58,7 @@ class ReplaceErrorVals:
         """
         # Find all errorrous values in the catalog file.
         errInd = np.where(self.catDict['Lag_In_Track'] == -1E31)[0]
-        print(errInd)
+        #print(errInd)
         # Loop over each error, and find the in-track separation and time 
         # separation values from the separation file given by Bern Blake.
         if 'dateTimeA' in self.catKeys:
@@ -104,13 +104,16 @@ if __name__ == '__main__':
     # r = ReplaceErrorVals('/home/mike/research/ac6/AC6_Separation.csv', 
     #     ('/home/mike/research/ac6-microburst-scale-sizes/'
     #     'data/flash_catalogues/flash_catalogue_v2.txt'))
-    r = ReplaceErrorVals('/home/mike/research/ac6/AC6_Separation.csv', 
-        ('/home/mike/research/ac6-microburst-scale-sizes/'
-        'data/microburst_catalogues/AC6A_microbursts.txt'))
-    r.loadSeprationFile()
-    r.loadCatalog()
-    r.replaceErrors()
-    r.save_data()
+    for sc_id in ['A', 'B']:
+        v = 3
+        dName = 'AC6{}_microbursts_v{}.txt'.format(sc_id.upper(), v)
+        r = ReplaceErrorVals('/home/mike/research/ac6/AC6_Separation.csv', 
+            ('/home/mike/research/ac6-microburst-scale-sizes/'
+            'data/microburst_catalogues/{}'.format(dName)))
+        r.loadSeprationFile()
+        r.loadCatalog()
+        r.replaceErrors()
+        r.save_data()
     
     # Plot the lifetime AC-6 separation
     # plt.plot(r.sepDict['Date/Time'], r.sepDict['In-Track Separation [km]'])

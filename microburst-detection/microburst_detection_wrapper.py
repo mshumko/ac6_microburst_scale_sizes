@@ -6,6 +6,8 @@ import os
 
 import microburst_detection
 import merge_daily_data
+import replace_error_sep_lags
+import append_goemag_indicies
 
 cVersion = 3 #Catalog version
 outPath = ('/home/mike/research/'
@@ -80,5 +82,21 @@ for sc_id in ['a', 'b']:
     if os.path.exists(outPath):
         raise OSError('Merged catalog already exists!')
     merge_daily_data.mergeDailyFiles(sc_id, inPath, outPath)
+
+# Remove separation errors
+for sc_id in ['A', 'B']:
+    dName = 'AC6{}_microbursts_v{}.txt'.format(
+            sc_id.upper(), cVersion)
+    r = replace_error_sep_lags.ReplaceErrorVals(
+        '/home/mike/research/ac6/AC6_Separation.csv', 
+        ('/home/mike/research/ac6-microburst-scale-sizes/'
+        'data/microburst_catalogues/{}'.format(dName)))
+    r.loadSeprationFile()
+    r.loadCatalog()
+    r.replaceErrors()
+    r.save_data()
+
+# Append the AE index
+
 
 logging.info('Program ran in {}'.format(time.time() - progStartTime))

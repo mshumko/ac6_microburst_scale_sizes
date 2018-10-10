@@ -22,7 +22,7 @@ class AppendGeoMagIdx:
         self.indexDir = indexDir
         self.dataPath = dataPath
 
-        self._loadData() # Load microburst data
+        self._loadData() # Load microburst catalog
 
         if self.iType.lower() == 'kp':
             self._loadKp() # Load kp index

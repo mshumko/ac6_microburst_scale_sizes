@@ -46,6 +46,12 @@ class OccuranceRate:
             self.intervals[i, :] = [idL[i_s], idL[i_e-1]]
         return 
 
+    def occurance_rate(self, width=0.5):
+        """ 
+        This method calculates the microburst occurance rates
+        """
+        return
+
     def _load_sc_data(self):
         """ Loads AC-6 10 Hz data """
         print('Loading AC6-{} data from {}'.format(

@@ -121,13 +121,14 @@ if __name__ == '__main__':
     o.occurance_rate()
     startTimes = o.data['dateTime'][o.intervals[:, 0]]
     _, ax = plt.subplots(2, sharex=True)
-    ax[0].plot(startTimes, o.rates)
+    ax[0].scatter(startTimes, o.rates)
 #    plt.bar(startTimes, o.rates, width=passDur align='left')
-    ax[0].set_ylabel('Occurance rate\n(microbursts/pass)')
+    #ax[0].set_ylabel('Occurance rate\n(microbursts/pass)')
+    ax[0].set_ylabel('Microbust duty cycle\n(microburst/pass time')
     
     idt = np.where((o.cat['dateTime'] > startTimes[0]) & 
                     (o.cat['dateTime'] < startTimes[-1]))[0]
-    ax[1].plot(o.cat['dateTime'][idt], o.cat['AE'][idt])
+    ax[1].scatter(o.cat['dateTime'][idt], o.cat['AE'][idt])
     ax[1].set_ylabel('AE (nT)')
     ax[1].set_xlabel('UTC')
     plt.show()

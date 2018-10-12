@@ -46,10 +46,37 @@ class OccuranceRate:
             self.intervals[i, :] = [idL[i_s], idL[i_e-1]]
         return 
 
-    def occurance_rate(self, width=0.5):
+    def occurance_rate(self, mode='static', ):
         """ 
         This method calculates the microburst occurance rates
+        for each pass assuming a microburst width assumption.
+        The width is either a fixed value in seconds or 
+        another class method.
         """
+        if mode == 'static':
+            width = self.static_width(0.5)
+        nDetTime = date2num(self.cat['dateTime'])
+        self.rates = -1*np.ones(self.intervals.shape[0], 
+                                dtype=float)
+        for i, (i_start, i_end) in enumerate(self.intervals):
+            # Find microbursts in ith pass
+            startTime = date2num(self.data['dateTime'][i_start])
+            endTime = date2num(self.data['dateTime'][i_end])
+            idt = np.where((nDetTime > startTime) & 
+                            (nDetTime < endTime))[0]
+            #print('Pass', i, 'len(idt)=', len(idt))
+            pass_duration = (self.data['dateTime'][i_end] -
+                self.data['dateTime'][i_start]).total_seconds()
+            self.rates[i] = 100*width*len(idt)/pass_duration  
+        return
+        
+    def static_width(self, width):
+        """ Returns a constant width """
+        return width
+        
+    def prominence_width(self):
+        raise NotImplementedError('Topological prominence '
+                                    'not working yet')
         return
 
     def _load_sc_data(self):
@@ -91,3 +118,16 @@ class OccuranceRate:
 if __name__ == '__main__':
     o = OccuranceRate('A', datetime.datetime(2016, 10, 14), 3)
     o.radBeltIntervals()
+    o.occurance_rate()
+    startTimes = o.data['dateTime'][o.intervals[:, 0]]
+    _, ax = plt.subplots(2, sharex=True)
+    ax[0].plot(startTimes, o.rates)
+#    plt.bar(startTimes, o.rates, width=passDur align='left')
+    ax[0].set_ylabel('Occurance rate\n(microbursts/pass)')
+    
+    idt = np.where((o.cat['dateTime'] > startTimes[0]) & 
+                    (o.cat['dateTime'] < startTimes[-1]))[0]
+    ax[1].plot(o.cat['dateTime'][idt], o.cat['AE'][idt])
+    ax[1].set_ylabel('AE (nT)')
+    ax[1].set_xlabel('UTC')
+    plt.show()

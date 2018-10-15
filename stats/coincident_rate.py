@@ -114,6 +114,7 @@ class OccuranceRate:
         
         # detrend microburst time series
         detrended = scipy.signal.detrend(self.data['dos1rate'][indicies])
+        _, properties = scipy.signal.find_peaks(detrended, prominence=None)
 
         if testPlot:
             saveDir = '/home/mike/temp_plots'
@@ -133,8 +134,8 @@ class OccuranceRate:
                         )
             for a in self.ax:
                 a.cla()
-            self.ax[0].set_ylim(top=self.data['dos1rate'][self.data['dateTime'][indicies]==t])
-            self.ax[1].set_ylim(top=detrended[self.data['dateTime'][indicies]==t])
+            #self.ax[0].set_ylim(top=self.data['dos1rate'][self.data['dateTime'][indicies]==t])
+            #self.ax[1].set_ylim(top=detrended[self.data['dateTime'][indicies]==t])
 
         return 0.5
 

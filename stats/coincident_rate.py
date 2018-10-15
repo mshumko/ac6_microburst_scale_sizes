@@ -5,8 +5,10 @@ import datetime
 import dateutil.parser
 import csv
 import itertools
+import scipy.signal
 import sys
 import os 
+import functools
 
 sys.path.insert(0, '/home/mike/research/mission-tools/ac6')
 import read_ac_data
@@ -34,10 +36,10 @@ class OccuranceRate:
         """
         # Find the start/end indicies of each rad belt pass.
         L = np.abs(self.data['Lm_OPQ'])
-        MLT = self.data['MLT_OPQ']
-        # idL = np.where((L > lbound) & (L < ubound))[0]
-        idL = np.where((L > lbound) & (L < ubound) & 
-                        (MLT > 0) & (MLT < 12))[0]
+        #MLT = self.data['MLT_OPQ']
+        idL = np.where((L > lbound) & (L < ubound))[0]
+        #idL = np.where((L > lbound) & (L < ubound) & 
+        #                (MLT > 0) & (MLT < 12))[0]
         conv = np.convolve([1, -1], idL, mode = 'valid') - 1
         consecutiveFlag = np.where(conv != 0)[0] + 1
         startInd = np.insert(consecutiveFlag, 0, 0)
@@ -49,38 +51,92 @@ class OccuranceRate:
             self.intervals[i, :] = [idL[i_s], idL[i_e-1]]
         return 
 
-    def occurance_rate(self, mode='static', ):
+    def occurance_rate(self, mode='static', **kwargs):
         """ 
         This method calculates the microburst occurance rates
         for each pass assuming a microburst width assumption.
         The width is either a fixed value in seconds or 
         another class method.
         """
+        verbose = kwargs.get('verbose', False)
+        testPlot = kwargs.get('testPlot', True)
+        
         if mode == 'static':
-            width = self.static_width(0.5)
+            w = kwargs.get('static_width', 0.5)
+            width = functools.partial(self.static_width, w)
+        elif mode == 'prominence':
+            width = self.prominence_width
+
         nDetTime = date2num(self.cat['dateTime'])
-        self.rates = -1*np.ones(self.intervals.shape[0], 
+        self.rates = np.zeros(self.intervals.shape[0], 
                                 dtype=float)
-        for i, (i_start, i_end) in enumerate(self.intervals):
+        if testPlot:
+            _, self.ax = plt.subplots(2, sharex=True)
+        for i, (i_start, i_end) in enumerate(self.intervals):                
             # Find microbursts in ith pass
-            startTime = date2num(self.data['dateTime'][i_start])
-            endTime = date2num(self.data['dateTime'][i_end])
-            idt = np.where((nDetTime > startTime) & 
-                            (nDetTime < endTime))[0]
-            #print('Pass', i, 'len(idt)=', len(idt))
-            pass_duration = (self.data['dateTime'][i_end] -
-                self.data['dateTime'][i_start]).total_seconds()
-            self.rates[i] = 100*width*len(idt)/pass_duration  
+            startTime = self.data['dateTime'][i_start]
+            endTime = self.data['dateTime'][i_end]
+            idt = np.where((nDetTime > date2num(startTime)) & 
+                            (nDetTime < date2num(endTime)))[0]       
+            if verbose: 
+                print('Processing pass', i, 'len(idt)=', len(idt))
+
+            # determine the duration of each microburst
+            for t_i in idt:
+                self.rates[i] += width(self.cat['dateTime'][t_i])
+            pass_duration = (endTime - startTime).total_seconds()
+            self.rates /= pass_duration
         return
         
-    def static_width(self, width):
+    def static_width(self, width, t):
         """ Returns a constant width """
         return width
         
-    def prominence_width(self):
-        raise NotImplementedError('Topological prominence '
-                                    'not working yet')
-        return
+    def prominence_width(self, t, testPlot=True):
+        """ 
+        This method implements an algorithm to calculate the microburst 
+        width based on its topological prominence.
+
+        scipy.signal.find_peaks()
+        prominences : ndarray
+        The calculated prominences for each peak in peaks.
+
+        left_bases, right_bases : ndarray
+        The peaks’ bases as indices in x to the left and right of each peak. 
+        The higher base of each pair is a peak’s lowest contour line.
+        """
+        # Detrend microburst time
+        window_width = 2
+        lt = t - datetime.timedelta(seconds=window_width)
+        ut = t + datetime.timedelta(seconds=window_width)
+        indicies = np.where((self.data['dateTime'] > lt) & 
+                           (self.data['dateTime'] < ut))[0]
+        
+        # detrend microburst time series
+        detrended = scipy.signal.detrend(self.data['dos1rate'][indicies])
+
+        if testPlot:
+            saveDir = '/home/mike/temp_plots'
+            if not os.path.exists(saveDir):
+                print('made dir', saveDir)
+                os.makedirs(saveDir)
+            #f, ax = plt.subplots(2, sharex=True)
+            self.ax[0].plot(self.data['dateTime'][indicies], 
+                        self.data['dos1rate'][indicies])
+            self.ax[1].plot(self.data['dateTime'][indicies], detrended)
+            for a in self.ax:
+                a.axvline(t)
+                
+            plt.savefig(os.path.join(saveDir,
+                        '{}_microburst_validation.png'.format(
+                        t.replace(microsecond=0).isoformat()))
+                        )
+            for a in self.ax:
+                a.cla()
+            self.ax[0].set_ylim(top=self.data['dos1rate'][self.data['dateTime'][indicies]==t])
+            self.ax[1].set_ylim(top=detrended[self.data['dateTime'][indicies]==t])
+
+        return 0.5
 
     def _load_sc_data(self):
         """ Loads AC-6 10 Hz data """
@@ -121,7 +177,7 @@ class OccuranceRate:
 if __name__ == '__main__':
     o = OccuranceRate('A', datetime.datetime(2016, 10, 14), 3)
     o.radBeltIntervals()
-    o.occurance_rate()
+    o.occurance_rate(mode='prominence')
     startTimes = o.data['dateTime'][o.intervals[:, 0]]
     _, ax = plt.subplots(2, sharex=True)
     ax[0].scatter(startTimes, o.rates)

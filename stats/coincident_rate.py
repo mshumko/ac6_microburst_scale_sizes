@@ -34,7 +34,10 @@ class OccuranceRate:
         """
         # Find the start/end indicies of each rad belt pass.
         L = np.abs(self.data['Lm_OPQ'])
-        idL = np.where((L > lbound) & (L < ubound))[0]
+        MLT = self.data['MLT_OPQ']
+        # idL = np.where((L > lbound) & (L < ubound))[0]
+        idL = np.where((L > lbound) & (L < ubound) & 
+                        (MLT > 0) & (MLT < 12))[0]
         conv = np.convolve([1, -1], idL, mode = 'valid') - 1
         consecutiveFlag = np.where(conv != 0)[0] + 1
         startInd = np.insert(consecutiveFlag, 0, 0)
@@ -124,11 +127,14 @@ if __name__ == '__main__':
     ax[0].scatter(startTimes, o.rates)
 #    plt.bar(startTimes, o.rates, width=passDur align='left')
     #ax[0].set_ylabel('Occurance rate\n(microbursts/pass)')
-    ax[0].set_ylabel('Microbust duty cycle\n(microburst/pass time')
+    ax[0].set_ylabel('Microbust duty cycle\n(microburst/pass time)')
     
     idt = np.where((o.cat['dateTime'] > startTimes[0]) & 
                     (o.cat['dateTime'] < startTimes[-1]))[0]
+
     ax[1].scatter(o.cat['dateTime'][idt], o.cat['AE'][idt])
+
     ax[1].set_ylabel('AE (nT)')
-    ax[1].set_xlabel('UTC')
+    ax[-1].set_xlabel('UTC')
+    plt.tight_layout()
     plt.show()

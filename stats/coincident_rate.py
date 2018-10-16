@@ -113,8 +113,19 @@ class OccuranceRate:
                            (self.data['dateTime'] < ut))[0]
         
         # detrend microburst time series
+        iPeak = np.where(self.data['dateTime'][indicies] == t)[0]
+        print(t, iPeak, len(indicies))
+        if len(iPeak) != 1: raise ValueError('0 or > 1 peaks found!')
         detrended = scipy.signal.detrend(self.data['dos1rate'][indicies])
-        _, properties = scipy.signal.find_peaks(detrended, prominence=None)
+        try:
+            width = scipy.signal.peak_widths(detrended, iPeak, rel_height=0.5)
+        except ValueError as err:
+            if 'is not a valid peak' in str(err):
+                peaks, _ = scipy.signal.find_peaks(detrended, prominence=None)
+                iPeak = peaks[np.argmin(np.abs(peaks - len(indicies)//2))]
+                print(iPeak)
+                width = scipy.signal.peak_widths(detrended, [iPeak], rel_height=0.5)
+        print('widths', width, '\n')
 
         if testPlot:
             saveDir = '/home/mike/temp_plots'
@@ -122,11 +133,19 @@ class OccuranceRate:
                 print('made dir', saveDir)
                 os.makedirs(saveDir)
             #f, ax = plt.subplots(2, sharex=True)
-            self.ax[0].plot(self.data['dateTime'][indicies], 
-                        self.data['dos1rate'][indicies])
-            self.ax[1].plot(self.data['dateTime'][indicies], detrended)
-            for a in self.ax:
-                a.axvline(t)
+            # self.ax[0].plot(self.data['dateTime'][indicies], 
+            #             self.data['dos1rate'][indicies])
+            # self.ax[0].plot(self.data['dateTime'][indicies], 
+            #             self.data['dos1rate'][indicies]-detrended)
+            self.ax[0].plot(self.data['dos1rate'][indicies])
+            self.ax[0].plot(self.data['dos1rate'][indicies]-detrended)
+            self.ax[1].plot(detrended)
+            self.ax[1].hlines(*width[1:])
+            # self.ax[1].axhline(width[1][0], 
+            #         xmin=self.data['dateTime'][indicies[int(width[2][0])]], 
+            #         xmax=self.data['dateTime'][indicies[int(width[3][0])]])
+            #for a in self.ax:
+            #    a.axvline(t)
                 
             plt.savefig(os.path.join(saveDir,
                         '{}_microburst_validation.png'.format(

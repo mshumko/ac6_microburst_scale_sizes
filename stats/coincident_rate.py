@@ -16,8 +16,17 @@ import read_ac_data
 class OccuranceRate:
     def __init__(self, sc_id, date, catV, catPath=None):
         """
-        For a given spacecraft on a given day, this class calculates
-        the microburst occurance rate (with an assumption about width.)
+        NAME: OccuranceRate
+        USE:  Calculates the 
+        INPUT: 
+        AUTHOR: Mykhaylo Shumko
+        RETURNS: 
+        MOD:     2018-10-23
+        """
+        """
+        For a given spacecraft, "sc_id" for a given day, this class calculates
+        the microburst occurance rate (with an assumption about 
+        width). 
         """
         self.sc_id = sc_id
         self.date = date
@@ -188,6 +197,10 @@ class OccuranceRate:
         for key in filter(lambda x: 'dateTime' in x, self.cat.keys()):
             self.cat[key] = np.array([dateutil.parser.parse(i) 
                 for i in self.cat[key]])
+        return
+
+class CoincidenceRate(OccuranceRate):
+    def __init__(self):
         return
 
 if __name__ == '__main__':

@@ -60,12 +60,17 @@ class OccuranceRate:
         """
         verbose = kwargs.get('verbose', False)
         testPlot = kwargs.get('testPlot', True)
+        rel_height = kwargs.get('rel_height', 1)
         
         if mode == 'static':
             w = kwargs.get('static_width', 0.5)
             width = functools.partial(self.static_width, w)
         elif mode == 'prominence':
-            width = self.prominence_width
+            #width = self.prominence_width
+            width = functools.partial(self.prominence_width, 
+                                      rel_height=rel_height, 
+                                      testPlot=testPlot)
+            
 
         nDetTime = date2num(self.cat['dateTime'])
         self.rates = np.zeros(self.intervals.shape[0], 
@@ -85,14 +90,17 @@ class OccuranceRate:
             for t_i in idt:
                 self.rates[i] += width(self.cat['dateTime'][t_i])
             pass_duration = (endTime - startTime).total_seconds()
-            self.rates /= pass_duration
+            if verbose:
+                print('rates =', self.rates[i], 
+                    'duration=', pass_duration)
+            self.rates[i] /= pass_duration
         return
         
     def static_width(self, width, t):
         """ Returns a constant width """
         return width
         
-    def prominence_width(self, t, testPlot=True):
+    def prominence_width(self, t, testPlot=True, rel_height=0.5):
         """ 
         This method implements an algorithm to calculate the microburst 
         width based on its topological prominence.
@@ -105,8 +113,9 @@ class OccuranceRate:
         The peaks’ bases as indices in x to the left and right of each peak. 
         The higher base of each pair is a peak’s lowest contour line.
         """
+        print(rel_height)
         # Detrend microburst time
-        window_width = 2
+        window_width = 1
         lt = t - datetime.timedelta(seconds=window_width)
         ut = t + datetime.timedelta(seconds=window_width)
         indicies = np.where((self.data['dateTime'] > lt) & 
@@ -114,38 +123,28 @@ class OccuranceRate:
         
         # detrend microburst time series
         iPeak = np.where(self.data['dateTime'][indicies] == t)[0]
-        print(t, iPeak, len(indicies))
         if len(iPeak) != 1: raise ValueError('0 or > 1 peaks found!')
         detrended = scipy.signal.detrend(self.data['dos1rate'][indicies])
         try:
-            width = scipy.signal.peak_widths(detrended, iPeak, rel_height=0.5)
+            width = scipy.signal.peak_widths(detrended, iPeak, 
+                                            rel_height=0.5)
         except ValueError as err:
             if 'is not a valid peak' in str(err):
-                peaks, _ = scipy.signal.find_peaks(detrended, prominence=None)
+                peaks, _ = scipy.signal.find_peaks(detrended, 
+                                            prominence=None)
                 iPeak = peaks[np.argmin(np.abs(peaks - len(indicies)//2))]
-                print(iPeak)
-                width = scipy.signal.peak_widths(detrended, [iPeak], rel_height=0.5)
-        print('widths', width, '\n')
-
+                width = scipy.signal.peak_widths(detrended, [iPeak],
+                                                 rel_height=rel_height)
         if testPlot:
             saveDir = '/home/mike/temp_plots'
             if not os.path.exists(saveDir):
                 print('made dir', saveDir)
                 os.makedirs(saveDir)
-            #f, ax = plt.subplots(2, sharex=True)
-            # self.ax[0].plot(self.data['dateTime'][indicies], 
-            #             self.data['dos1rate'][indicies])
-            # self.ax[0].plot(self.data['dateTime'][indicies], 
-            #             self.data['dos1rate'][indicies]-detrended)
             self.ax[0].plot(self.data['dos1rate'][indicies])
             self.ax[0].plot(self.data['dos1rate'][indicies]-detrended)
             self.ax[1].plot(detrended)
             self.ax[1].hlines(*width[1:])
-            # self.ax[1].axhline(width[1][0], 
-            #         xmin=self.data['dateTime'][indicies[int(width[2][0])]], 
-            #         xmax=self.data['dateTime'][indicies[int(width[3][0])]])
-            #for a in self.ax:
-            #    a.axvline(t)
+            self.ax[1].set_ylim(top=1.5*detrended[iPeak])
                 
             plt.savefig(os.path.join(saveDir,
                         '{}_microburst_validation.png'.format(
@@ -153,10 +152,7 @@ class OccuranceRate:
                         )
             for a in self.ax:
                 a.cla()
-            #self.ax[0].set_ylim(top=self.data['dos1rate'][self.data['dateTime'][indicies]==t])
-            #self.ax[1].set_ylim(top=detrended[self.data['dateTime'][indicies]==t])
-
-        return 0.5
+        return 0.1*width[0][0]
 
     def _load_sc_data(self):
         """ Loads AC-6 10 Hz data """
@@ -197,7 +193,9 @@ class OccuranceRate:
 if __name__ == '__main__':
     o = OccuranceRate('A', datetime.datetime(2016, 10, 14), 3)
     o.radBeltIntervals()
+    #for h in np.arange(0.5, 1.1, 0.5):
     o.occurance_rate(mode='prominence')
+    #print('rel_height =', h)
     startTimes = o.data['dateTime'][o.intervals[:, 0]]
     _, ax = plt.subplots(2, sharex=True)
     ax[0].scatter(startTimes, o.rates)

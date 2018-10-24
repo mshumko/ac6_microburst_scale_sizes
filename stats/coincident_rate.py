@@ -200,7 +200,7 @@ class OccuranceRate:
         return
 
 class CoincidenceRate(OccuranceRate):
-    def __init__(self):
+    def __init__(self, date):
         return
 
 if __name__ == '__main__':
@@ -209,6 +209,8 @@ if __name__ == '__main__':
     #for h in np.arange(0.5, 1.1, 0.5):
     o.occurance_rate(mode='prominence')
     #print('rel_height =', h)
+    
+    ### PLOT OCCURANCE RATE TIMESERIES ###
     startTimes = o.data['dateTime'][o.intervals[:, 0]]
     _, ax = plt.subplots(2, sharex=True)
     ax[0].scatter(startTimes, o.rates)

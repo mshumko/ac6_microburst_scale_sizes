@@ -336,7 +336,7 @@ class CoincidenceRate:
                           (catBtimes < bRange[1]))[0]
             # Loop over bursts from AC6A.              
             for bA in iA:
-                flag, cc = self.cross_correlate(bA)
+                flag, cc = self.cross_correlate('A', bA, ccOverlap)
                 # Save to the appropriate array. 
                 if flag == 't':
                     self.tBurst = np.vstack((self.tBurst, 
@@ -351,7 +351,7 @@ class CoincidenceRate:
                     [cr.occurA.data['dateTime'][bA], cc]))
             # Loop over bursts from AC6B.              
             for bB in iB:
-                flag, cc = self.cross_correlate(bB)
+                flag, cc = self.cross_correlate('B', bB, ccOverlap)
                 # Save to the appropriate array. 
                 if flag == 't':
                     self.tBurst = np.vstack((self.tBurst, 
@@ -362,6 +362,28 @@ class CoincidenceRate:
                 elif flag == 'a':
                     self.aBurst = np.vstack((self.aBurst, 
                     [cr.occurA.data['dateTime'][bB], cc]))
+        return
+        
+    def cross_correlate(self, sc_id, i, ccOverlap, ccWindow=0.5):
+        """
+        NAME:   cross_correlate
+        USE:    This method takes in a microburst indicie, and
+                calculates the cross-correlation for that time 
+                series with the time series of the other 
+                spacecraft at the same time, and same position.
+                
+        INPUT:  sc_id     - Spacecraft id. Either 'A' or 'B'.
+                i         - Index of the detection for sc_id.
+                ccOverlap - Cross correlation overlap.
+                ccWindow  - Cross correlation window width.
+        AUTHOR: Mykhaylo Shumko
+        RETURNS: flag - Detection type. Can be 't' for temporal
+                        peak, 's' for spatial peak, and 'a' for 
+                        ambigrious.
+                 cc   - Max cross-correlation value
+        MOD:     2018-10-25
+        """
+        
         return
 
 def sec2day(s):

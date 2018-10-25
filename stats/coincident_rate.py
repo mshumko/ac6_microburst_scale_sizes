@@ -268,6 +268,7 @@ class CoincidenceRate:
 
 if __name__ == '__main__':
     cr = CoincidenceRate(datetime.datetime(2016, 10, 14), 3)
+    #cr = CoincidenceRate(datetime.datetime(2015, 8, 28), 3)
     cr.radBeltIntervals()
     #print(cr.occrA.intervals)
     #print(cr.occrB.intervals)
@@ -279,13 +280,13 @@ if __name__ == '__main__':
     # np.savetxt('ac6a_pass_times.csv', tA, delimiter=',')
     # np.savetxt('ac6b_pass_times.csv', tB, delimiter=',')
 
-    with open('ac6a_pass_times.csv', 'w') as f:
-        w = csv.writer(f)
-        w.writerows(cr.occurA.data['dateTime'][cr.occurA.intervals])
+    # with open('ac6a_pass_times.csv', 'w') as f:
+    #     w = csv.writer(f)
+    #     w.writerows(cr.occurA.data['dateTime'][cr.occurA.intervals])
 
-    with open('ac6b_pass_times.csv', 'w') as f:
-        w = csv.writer(f)
-        w.writerows(cr.occurB.data['dateTime'][cr.occurB.intervals])
+    # with open('ac6b_pass_times.csv', 'w') as f:
+    #     w = csv.writer(f)
+    #     w.writerows(cr.occurB.data['dateTime'][cr.occurB.intervals])
 
     # ### CODE TO TEST THE OCCURANCE RATE TIMESERIES ###
     # o = OccuranceRate('A', datetime.datetime(2016, 10, 14), 3)
@@ -309,3 +310,26 @@ if __name__ == '__main__':
     # ax[-1].set_xlabel('UTC')
     # plt.tight_layout()
     # plt.show()
+
+    tAn = date2num(cr.occurA.data['dateTime'][cr.occurA.intervals])
+    tBn = date2num(cr.occurB.data['dateTime'][cr.occurB.intervals])
+    tA = cr.occurA.data['dateTime'][cr.occurA.intervals]
+    tB = cr.occurB.data['dateTime'][cr.occurB.intervals]
+
+    def sec2day(s):
+        """ Convert seconds to fraction of a day."""
+        return s/86400
+
+    # Find matching indicies
+    # Loop pver start times of one array
+    for i, t in enumerate(tAn[:, 0]):
+        # Look for start times of second array within 5 minutes
+        dt = np.abs(tBn[:, 0] - t)
+        idmin = np.argmin(dt)
+        if dt[idmin] < sec2day(5*60):
+            print('Found match! (i, t_A) =', i, tA[i, 0], 
+                '(idmin, tB[idmin]) =', idmin, tB[idmin, 0] )
+        else:
+            print('No match (i, t_A) =', i, tA[i, 0], 
+                '(idmin, tB[idmin]) =', idmin, tB[idmin, 0] )
+

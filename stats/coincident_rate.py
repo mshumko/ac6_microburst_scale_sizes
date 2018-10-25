@@ -6,12 +6,12 @@ import dateutil.parser
 import csv
 import itertools
 import scipy.signal
-import sys
+#import sys
 import os 
 import functools
 
-sys.path.insert(0, '/home/mike/research/mission-tools/ac6')
-import read_ac_data
+#sys.path.insert(0, '/home/mike/research/mission_tools/ac6')
+import mission_tools.ac6.read_ac_data as read_ac_data
 
 class OccuranceRate:
     def __init__(self, sc_id, date, catV, catPath=None):
@@ -50,7 +50,7 @@ class OccuranceRate:
         self._load_sc_data()
 
         if catPath is None:
-            catPath = ('/home/mike/research/ac6-microburst-scale-sizes'
+            catPath = ('/home/mike/research/ac6_microburst_scale_sizes'
                       '/data/microburst_catalogues')
         self._load_catalog(catPath, catV)
         return
@@ -258,13 +258,115 @@ class CoincidenceRate:
     
     def radBeltIntervals(self):
         """
-        This method calculates the radiation belt passes and combines 
-        the pass times from both spacecraft for a more direct 
-        comparison. 
+        NAME:  radBeltIntervals
+        USE:   This method calculates the radiation belt 
+               passes from both spacecraft.
+        INPUT: None
+        AUTHOR: Mykhaylo Shumko
+        RETURNS: self.passes - an array(nPasses x 4) where
+                            the columns indicate, in order,
+                            start/stop indicies for AC6A, 
+                            followed by indicies for AC6B 
+                            for the matching passes.
+        MOD:     2018-10-25
         """
+        # Calculate rad belt pass intervals from each 
+        # spacecraft.
         self.occurA.radBeltIntervals()
         self.occurB.radBeltIntervals()
+
+        self.passes = np.zeros((0, 4), dtype=object)
+
+        tAn = date2num(cr.occurA.data['dateTime'][cr.occurA.intervals])
+        tBn = date2num(cr.occurB.data['dateTime'][cr.occurB.intervals])
+
+        # Find matching indicies by looping over start times of AC6A 
+        # pass interval array
+        for i, t in enumerate(tAn[:, 0]):
+            # For each start time in AC6A, look for a corresponding 
+            # start times in AC6B data within 5 minutes
+            dt = np.abs(tBn[:, 0] - t)
+            idmin = np.argmin(dt)
+            if dt[idmin] < sec2day(5*60):
+                newRow = np.concatenate((self.occurA.intervals[i], 
+                                        self.occurB.intervals[idmin]
+                                        ))
+                self.passes = np.vstack((self.passes, newRow))
         return
+
+    def sortBursts(self, ccThresh=0.8, ccOverlap=1):
+        """
+        NAME:   sortBursts
+        USE:    This method loops through every pass for which there
+                is data from both spacecraft, and for each detecton
+                made by either AC6A or AC6B, checks if there is a 
+                correlated peak at the same time, and in the same
+                position. Uses cross-correlations (CC)
+        INPUT:  ccThresh = 0.8 - CC threshold for detection.
+                ccOverLap = 1  - CC overlap, to account for Poisson 
+                                 statistics for short-duration 
+                                 microbursts and small timing offsets
+                                (little to none expected).
+        AUTHOR: Mykhaylo Shumko
+        RETURNS: self.tBurst - array(nDet, 2) of temporal microbursts
+                 self.sBurst - array(nDet, 2) of curtains
+                 self.aBurst - array(nDet, 2) of ambigious bursts
+                 First column is time, second is cross correlation
+                 value.
+        MOD:     2018-10-25
+        """
+        self.tBurst = np.zeros((0, 2), dtype=object) 
+        self.sBurst = np.zeros((0, 2), dtype=object) 
+        self.aBurst = np.zeros((0, 2), dtype=object) 
+        
+        # Convert detection times to numbers for easy comparison.
+        catAtimes = date2num(self.occurA.cat['dateTime'])
+        catBtimes = date2num(self.occurB.cat['dateTime'])
+
+        # Loop over passes
+        for (passAi, passAf, passBi, passBf) in self.passes:
+            # Find all bursts separately detected on AC6A/B 
+            aRange = date2num([cr.occurA.data['dateTime'][passAi],
+                             cr.occurA.data['dateTime'][passAf]])
+            bRange = date2num([cr.occurB.data['dateTime'][passBi],
+                             cr.occurAB.data['dateTime'][passBf]])
+            iA = np.where((catAtimes > aRange[0]) & 
+                          (catAtimes < aRange[1]))[0]
+            iB = np.where((catBtimes > bRange[0]) & 
+                          (catBtimes < bRange[1]))[0]
+            # Loop over bursts from AC6A.              
+            for bA in iA:
+                flag, cc = self.cross_correlate(bA)
+                # Save to the appropriate array. 
+                if flag == 't':
+                    self.tBurst = np.vstack((self.tBurst, 
+                    [cr.occurA.data['dateTime'][bA], cc]))
+                # Likeliy need to do something special 
+                # with curtains. 
+                elif flag == 's':
+                    self.sBurst = np.vstack((self.sBurst, 
+                    [cr.occurA.data['dateTime'][bA], cc]))
+                elif flag == 'a':
+                    self.aBurst = np.vstack((self.aBurst, 
+                    [cr.occurA.data['dateTime'][bA], cc]))
+            # Loop over bursts from AC6B.              
+            for bB in iB:
+                flag, cc = self.cross_correlate(bB)
+                # Save to the appropriate array. 
+                if flag == 't':
+                    self.tBurst = np.vstack((self.tBurst, 
+                    [cr.occurA.data['dateTime'][bB], cc]))
+                elif flag == 's':
+                    self.sBurst = np.vstack((self.sBurst, 
+                    [cr.occurA.data['dateTime'][bB], cc]))
+                elif flag == 'a':
+                    self.aBurst = np.vstack((self.aBurst, 
+                    [cr.occurA.data['dateTime'][bB], cc]))
+        return
+
+def sec2day(s):
+    """ Convert seconds to fraction of a day."""
+    return s/86400
 
 if __name__ == '__main__':
     cr = CoincidenceRate(datetime.datetime(2016, 10, 14), 3)
@@ -311,25 +413,21 @@ if __name__ == '__main__':
     # plt.tight_layout()
     # plt.show()
 
-    tAn = date2num(cr.occurA.data['dateTime'][cr.occurA.intervals])
-    tBn = date2num(cr.occurB.data['dateTime'][cr.occurB.intervals])
-    tA = cr.occurA.data['dateTime'][cr.occurA.intervals]
-    tB = cr.occurB.data['dateTime'][cr.occurB.intervals]
+    # tAn = date2num(cr.occurA.data['dateTime'][cr.occurA.intervals])
+    # tBn = date2num(cr.occurB.data['dateTime'][cr.occurB.intervals])
+    # tA = cr.occurA.data['dateTime'][cr.occurA.intervals]
+    # tB = cr.occurB.data['dateTime'][cr.occurB.intervals]
 
-    def sec2day(s):
-        """ Convert seconds to fraction of a day."""
-        return s/86400
-
-    # Find matching indicies
-    # Loop pver start times of one array
-    for i, t in enumerate(tAn[:, 0]):
-        # Look for start times of second array within 5 minutes
-        dt = np.abs(tBn[:, 0] - t)
-        idmin = np.argmin(dt)
-        if dt[idmin] < sec2day(5*60):
-            print('Found match! (i, t_A) =', i, tA[i, 0], 
-                '(idmin, tB[idmin]) =', idmin, tB[idmin, 0] )
-        else:
-            print('No match (i, t_A) =', i, tA[i, 0], 
-                '(idmin, tB[idmin]) =', idmin, tB[idmin, 0] )
+    # # Find matching indicies
+    # # Loop pver start times of one array
+    # for i, t in enumerate(tAn[:, 0]):
+    #     # Look for start times of second array within 5 minutes
+    #     dt = np.abs(tBn[:, 0] - t)
+    #     idmin = np.argmin(dt)
+    #     if dt[idmin] < sec2day(5*60):
+    #         print('Found match! (i, t_A) =', i, tA[i, 0], 
+    #             '(idmin, tB[idmin]) =', idmin, tB[idmin, 0] )
+    #     else:
+    #         print('No match (i, t_A) =', i, tA[i, 0], 
+    #             '(idmin, tB[idmin]) =', idmin, tB[idmin, 0] )
 

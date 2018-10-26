@@ -369,10 +369,32 @@ class CoincidenceRate:
                 elif flag == 'a':
                     self.aBurst = np.vstack((self.aBurst, 
                     [self.occurB.cat['dateTime'][bB], cc]))
-        self.tBurst = np.array(sorted(self.tBurst, key=lambda x : x[0]))
-        self.sBurst = np.array(sorted(self.sBurst, key=lambda x : x[0]))
-        self.aBurst = np.array(sorted(self.aBurst, key=lambda x : x[0]))
+        
         return
+        
+    def sortArrays(self):
+        """ 
+        This method sorts and removes duplicated from the sorted
+        burst arrays and.
+        """
+        # Remove duplicates. This only removes elements whenever
+        # both time and cc are the same (true in this case since
+        # CC is symmetric).
+        self.tBursts = list({ (i[0], i[1]) for i 
+                        in self.tBursts})
+        self.sBursts = list({ (i[0], i[1]) for i 
+                        in self.sBursts})
+        self.aBursts = list({ (i[0], i[1]) for i 
+                        in self.aBursts})
+        
+        # Sort times
+        self.tBurst = np.array(sorted(
+                               self.tBurst, key=lambda x : x[0]))
+        self.sBurst = np.array(sorted(
+                               self.sBurst, key=lambda x : x[0]))
+        self.aBurst = np.array(sorted(
+                               self.aBurst, key=lambda x : x[0]))
+        return 
 
     def cross_correlate(self, sc_id, i, ccOverlap, ccWindow=0.5):
         """
@@ -406,7 +428,7 @@ class CoincidenceRate:
         else:
             return 'c', ccS
 
-    def _correlate_time(self, sc_id, i, ccOverlap, ccWindow=0.5):
+    def _correlate_time(self, sc_id, i, ccOverlap, ccWindow=2):
         """ Cross correlate data at the same times """
         # Find the center time of that burst
         if sc_id.upper() == 'A':
@@ -444,43 +466,49 @@ class CoincidenceRate:
         This method plots detections and their temporal and spatial
         cross-correlations.
         """
+        from matplotlib.backends.backend_pdf import PdfPages
         fig, ax = plt.subplots(2, sharex=True)
+        
+        saveName = '{}_microburst_validation.pdf'.format(
+                    datetime.datetime.now().date())
+        
+        with PdfPages(saveName) as pdf:
+            for (t, cc) in self.tBurst:
+                idtA = np.where(
+                    (self.occurA.data['dateTime'] > t-datetime.timedelta(seconds=window/2)) &  
+                    (self.occurA.data['dateTime'] < t+datetime.timedelta(seconds=window/2)) &
+                    (self.occurA.data['dos1rate'] != -1E31)
+                    )[0]     
+                idtB = np.where(
+                    (self.occurB.data['dateTime'] > t-datetime.timedelta(seconds=window/2)) &  
+                    (self.occurB.data['dateTime'] < t+datetime.timedelta(seconds=window/2)) &
+                    (self.occurB.data['dos1rate'] != -1E31)
+                    )[0]
 
-        for (t, cc) in self.tBurst:
-            idtA = np.where(
-                (self.occurA.data['dateTime'] > t-datetime.timedelta(seconds=window/2)) &  
-                (self.occurA.data['dateTime'] < t+datetime.timedelta(seconds=window/2)) &
-                (self.occurA.data['dos1rate'] != -1E31)
-                )[0]     
-            idtB = np.where(
-                (self.occurB.data['dateTime'] > t-datetime.timedelta(seconds=window/2)) &  
-                (self.occurB.data['dateTime'] < t+datetime.timedelta(seconds=window/2)) &
-                (self.occurB.data['dos1rate'] != -1E31)
-                )[0]
-
-            saveDir = '/home/mike/temp_plots'
-            if not os.path.exists(saveDir):
-                print('made dir', saveDir)
-                os.makedirs(saveDir)
-            ax[0].plot(self.occurA.data['dateTime'][idtA], 
-                        self.occurA.data['dos1rate'][idtA], 
-                        label='AC6A')
-            ax[0].plot(self.occurB.data['dateTime'][idtB], 
-                        self.occurB.data['dos1rate'][idtB], 
-                        label='AC6B')
-            ax[0].text(0.1, 0.9, 'CC={}'.format(cc), 
-                        transform=ax[0].transAxes)
-            ax[0].axvline(t)
-            ax[0].legend(loc=1)
-                
-            plt.savefig(os.path.join(saveDir,
-                        '{}_microburst_cross_correlation_'
-                        'validation.png'.format(
-                        t.replace(microsecond=0).isoformat()))
-                        )
-            for a in ax:
-                a.cla()
-
+                saveDir = '/home/mike/temp_plots'
+                if not os.path.exists(saveDir):
+                    print('made dir', saveDir)
+                    os.makedirs(saveDir)
+                ax[0].plot(self.occurA.data['dateTime'][idtA], 
+                            self.occurA.data['dos1rate'][idtA], 
+                            label='AC6A')
+                ax[0].plot(self.occurB.data['dateTime'][idtB], 
+                            self.occurB.data['dos1rate'][idtB], 
+                            label='AC6B')
+                ax[0].text(0.1, 0.9, 'CC={}'.format(cc), 
+                            transform=ax[0].transAxes)
+                ax[0].set(title='{} | AC6 microburst validation'
+                            ''.format(t.replace(microsecond=0).isoformat()))
+                ax[0].axvline(t)
+                ax[0].legend(loc=1)
+                pdf.savefig()    
+#                plt.savefig(os.path.join(saveDir,
+#                            '{}_microburst_cross_correlation_'
+#                            'validation.png'.format(
+#                            t.replace(microsecond=0).isoformat()))
+#                            )
+                for a in ax:
+                    a.cla()
         return
 
 def sec2day(s):

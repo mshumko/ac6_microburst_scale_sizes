@@ -294,7 +294,7 @@ class CoincidenceRate:
                 self.passes = np.vstack((self.passes, newRow))
         return
 
-    def sortBursts(self, ccThresh=0.8, ccOverlap=1):
+    def sortBursts(self, ccThresh=0.8, ccOverlap=2):
         """
         NAME:   sortBursts
         USE:    This method loops through every pass for which there
@@ -324,46 +324,56 @@ class CoincidenceRate:
         catBtimes = date2num(self.occurB.cat['dateTime'])
 
         # Loop over passes
-        for (passAi, passAf, passBi, passBf) in self.passes:
-            # Find all bursts separately detected on AC6A/B 
-            aRange = date2num([cr.occurA.data['dateTime'][passAi],
-                             cr.occurA.data['dateTime'][passAf]])
-            bRange = date2num([cr.occurB.data['dateTime'][passBi],
-                             cr.occurAB.data['dateTime'][passBf]])
-            iA = np.where((catAtimes > aRange[0]) & 
-                          (catAtimes < aRange[1]))[0]
-            iB = np.where((catBtimes > bRange[0]) & 
-                          (catBtimes < bRange[1]))[0]
+        for i, (passAi, passAf, passBi, passBf) in enumerate(self.passes):
+            print('Processing pass', i)
+            # Find ime range for this pass. 
+            aRange = date2num([self.occurA.data['dateTime'][passAi],
+                             self.occurA.data['dateTime'][passAf]])
+            bRange = date2num([self.occurB.data['dateTime'][passBi],
+                             self.occurB.data['dateTime'][passBf]])
+            # Find all bursts separately detected on AC6A/B for 
+            # this pass
+            burstsA = np.where((catAtimes > aRange[0]) & 
+                            (catAtimes < aRange[1]))[0]
+            burstsB = np.where((catBtimes > bRange[0]) & 
+                            (catBtimes < bRange[1]))[0]
+            print('Found {} AC6A bursts and {} AC6B bursts'.format(
+                len(burstsA), len(burstsB)))
+
             # Loop over bursts from AC6A.              
-            for bA in iA:
+            for bA in burstsA:
                 flag, cc = self.cross_correlate('A', bA, ccOverlap)
                 # Save to the appropriate array. 
                 if flag == 't':
                     self.tBurst = np.vstack((self.tBurst, 
-                    [cr.occurA.data['dateTime'][bA], cc]))
+                    [self.occurA.cat['dateTime'][bA], cc]))
                 # Likeliy need to do something special 
                 # with curtains. 
                 elif flag == 's':
                     self.sBurst = np.vstack((self.sBurst, 
-                    [cr.occurA.data['dateTime'][bA], cc]))
+                    [self.occurA.cat['dateTime'][bA], cc]))
                 elif flag == 'a':
                     self.aBurst = np.vstack((self.aBurst, 
-                    [cr.occurA.data['dateTime'][bA], cc]))
+                    [self.occurA.cat['dateTime'][bA], cc]))
+
             # Loop over bursts from AC6B.              
-            for bB in iB:
+            for bB in burstsB:
                 flag, cc = self.cross_correlate('B', bB, ccOverlap)
                 # Save to the appropriate array. 
                 if flag == 't':
                     self.tBurst = np.vstack((self.tBurst, 
-                    [cr.occurA.data['dateTime'][bB], cc]))
+                    [self.occurB.cat['dateTime'][bB], cc]))
                 elif flag == 's':
                     self.sBurst = np.vstack((self.sBurst, 
-                    [cr.occurA.data['dateTime'][bB], cc]))
+                    [self.occurB.cat['dateTime'][bB], cc]))
                 elif flag == 'a':
                     self.aBurst = np.vstack((self.aBurst, 
-                    [cr.occurA.data['dateTime'][bB], cc]))
+                    [self.occurB.cat['dateTime'][bB], cc]))
+        self.tBurst = np.array(sorted(self.tBurst, key=lambda x : x[0]))
+        self.sBurst = np.array(sorted(self.sBurst, key=lambda x : x[0]))
+        self.aBurst = np.array(sorted(self.aBurst, key=lambda x : x[0]))
         return
-        
+
     def cross_correlate(self, sc_id, i, ccOverlap, ccWindow=0.5):
         """
         NAME:   cross_correlate
@@ -383,7 +393,94 @@ class CoincidenceRate:
                  cc   - Max cross-correlation value
         MOD:     2018-10-25
         """
-        
+        # Time cross-correlation coefficient
+        ccT = self._correlate_time(sc_id, i, ccOverlap, ccWindow)
+        # Space cross-correlation coefficient
+        ccS = self._correlate_space(sc_id, i, ccOverlap, ccWindow)
+        # Logic on if the detection is a microburst, curtain, or 
+        # ambigious 
+        if ccT == ccS:
+            return 'a', ccT
+        elif ccT > ccS:
+            return 't', ccT
+        else:
+            return 'c', ccS
+
+    def _correlate_time(self, sc_id, i, ccOverlap, ccWindow=0.5):
+        """ Cross correlate data at the same times """
+        # Find the center time of that burst
+        if sc_id.upper() == 'A':
+            t = self.occurA.cat['dateTime'][i]
+        else:
+            t = self.occurB.cat['dateTime'][i]
+        # Cross correlate in time.
+        tWindowA = np.where(
+                (cr.occurA.data['dateTime'] > t-datetime.timedelta(seconds=ccWindow/2)) &  
+                (cr.occurA.data['dateTime'] < t+datetime.timedelta(seconds=ccWindow/2)) &
+                (cr.occurA.data['dos1rate'] != -1E31)
+                )[0]     
+        tWindowB = np.where(
+                (cr.occurB.data['dateTime'] > t-datetime.timedelta(seconds=ccWindow/2)) &  
+                (cr.occurB.data['dateTime'] < t+datetime.timedelta(seconds=ccWindow/2)) &
+                (cr.occurB.data['dos1rate'] != -1E31)
+                )[0]
+        # Widen the CC window.
+        tWindowB = np.insert(tWindowB, 0, tWindowB[0]-ccOverlap//2)
+        tWindowB = np.append(tWindowB, tWindowB[0]+ccOverlap//2)
+
+        x = cr.occurA.data['dos1rate'][tWindowA] - cr.occurA.data['dos1rate'][tWindowA].mean()
+        y = cr.occurB.data['dos1rate'][tWindowB] - cr.occurB.data['dos1rate'][tWindowB].mean()
+        ccArr = np.correlate(x, y, mode='same')/np.sqrt(len(x)*len(y)*np.var(x)*np.var(y))
+        return max(ccArr)
+
+    def _correlate_space(self, sc_id, i, ccOverlap, ccWindow=0.5):
+        """
+        Cross correlate data at the same place.
+        """
+        return -100
+
+    def test_plots(self, window=5):
+        """ 
+        This method plots detections and their temporal and spatial
+        cross-correlations.
+        """
+        fig, ax = plt.subplots(2, sharex=True)
+
+        for (t, cc) in self.tBurst:
+            idtA = np.where(
+                (self.occurA.data['dateTime'] > t-datetime.timedelta(seconds=window/2)) &  
+                (self.occurA.data['dateTime'] < t+datetime.timedelta(seconds=window/2)) &
+                (self.occurA.data['dos1rate'] != -1E31)
+                )[0]     
+            idtB = np.where(
+                (self.occurB.data['dateTime'] > t-datetime.timedelta(seconds=window/2)) &  
+                (self.occurB.data['dateTime'] < t+datetime.timedelta(seconds=window/2)) &
+                (self.occurB.data['dos1rate'] != -1E31)
+                )[0]
+
+            saveDir = '/home/mike/temp_plots'
+            if not os.path.exists(saveDir):
+                print('made dir', saveDir)
+                os.makedirs(saveDir)
+            ax[0].plot(self.occurA.data['dateTime'][idtA], 
+                        self.occurA.data['dos1rate'][idtA], 
+                        label='AC6A')
+            ax[0].plot(self.occurB.data['dateTime'][idtB], 
+                        self.occurB.data['dos1rate'][idtB], 
+                        label='AC6B')
+            ax[0].text(0.1, 0.9, 'CC={}'.format(cc), 
+                        transform=ax[0].transAxes)
+            ax[0].axvline(t)
+            ax[0].legend(loc=1)
+                
+            plt.savefig(os.path.join(saveDir,
+                        '{}_microburst_cross_correlation_'
+                        'validation.png'.format(
+                        t.replace(microsecond=0).isoformat()))
+                        )
+            for a in ax:
+                a.cla()
+
         return
 
 def sec2day(s):
@@ -394,6 +491,11 @@ if __name__ == '__main__':
     cr = CoincidenceRate(datetime.datetime(2016, 10, 14), 3)
     #cr = CoincidenceRate(datetime.datetime(2015, 8, 28), 3)
     cr.radBeltIntervals()
+    cr.sortBursts()
+    cr.test_plots()
+
+    # plt.scatter(cr.tBurst[:, 0], cr.tBurst[:, 1])
+    # plt.xlim(cr.tBurst[0, 0], cr.tBurst[-1, 0]); plt.show()
     #print(cr.occrA.intervals)
     #print(cr.occrB.intervals)
 

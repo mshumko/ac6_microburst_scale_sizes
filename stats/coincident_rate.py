@@ -507,7 +507,7 @@ class CoincidenceRate:
         cross-correlations.
         """
         from matplotlib.backends.backend_pdf import PdfPages
-        _, ax = plt.subplots(2, sharex=True)  
+        _, ax = plt.subplots(2, sharex=False)  
 
         if not os.path.exists(saveDir):
             os.makedirs(saveDir)
@@ -550,14 +550,16 @@ class CoincidenceRate:
             (self.occurB.data['dos1rate'] != -1E31)
             )[0]
         dt = self.occurB.data['Lag_In_Track'][idtB[0]] # in-track lag
-        # Shift AC6B times by dt.
-        bTimes = np.array([t - dt for t in self.occurB.data['dateTime'][idtB]])
-
-        idtB_shifted = np.where(
-            (self.occurB.data['dateTime'] > t-timedelta(seconds=window/2)) &  
-            (self.occurB.data['dateTime'] < t+timedelta(seconds=window/2)) &
-            (self.occurB.data['dos1rate'] != -1E31)
+        # Find the AC6B indicies at the same positon (for the counts array)
+        idShiftedCounts = np.where(
+            (self.occurB.data['dateTime'] > t-timedelta(seconds=window/2+dt)) &  
+            (self.occurB.data['dateTime'] < t+timedelta(seconds=window/2+dt))
             )[0]
+        # For each point in idShiftedCounts, undo the lag shift to be align the
+        # plot with AC6A.
+        shiftedTimes = [t + timedelta(dt) for t in 
+                    self.occurB.data['dateTime'][idShiftedCounts]]
+        
 
         ax[0].plot(self.occurA.data['dateTime'][idtA], 
                     self.occurA.data['dos1rate'][idtA], 
@@ -571,6 +573,16 @@ class CoincidenceRate:
                     ''.format(t.replace(microsecond=0).isoformat()))
         ax[0].axvline(t)
         ax[0].legend(loc=1)
+
+        ax[1].plot(self.occurA.data['dateTime'][idtA], 
+                    self.occurA.data['dos1rate'][idtA], 
+                    'r', label='AC6A')
+        # ax[1].plot(shiftedTimes, 
+        #             self.occurB.data['dos1rate'][idShiftedCounts], 
+        #             'b', label='AC6B')
+        ax[1].set(xlabel='UTC', ylabel='dos1rate')
+        ax[1].text(0.1, 0.9, 'AC6-B shift ={}'.format(round(dt, 1)), 
+                    transform=ax[1].transAxes)
         return
 
     # def _test_plots_space(self, ax, tA, tB, lag, cc, window):

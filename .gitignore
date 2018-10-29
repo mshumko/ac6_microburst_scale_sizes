@@ -8,3 +8,4 @@ data/daily_microburst_catalogues/*
 *.synctex.gz
 /plots/*
 /data/z_daily_microburst_catalogues/*
+*validation.pdf

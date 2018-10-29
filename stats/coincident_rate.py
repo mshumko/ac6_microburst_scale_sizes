@@ -517,7 +517,11 @@ class CoincidenceRate:
         savePath = os.path.join(saveDir, '{}_microburst_validation.pdf'.format(
                     datetime.now().date()))
         with PdfPages(savePath) as pdf:
+            i = 0
             for (t, cc) in self.tBurst:
+                print('interation=', i, 'out of=', len(self.tBurst))
+                i+=1
+
                 self._test_plots_microbursts(ax, t, cc, window)
                 #self._test_plots_space(ax[1], tA, tB, lag, cc, window)
                 pdf.savefig()    
@@ -557,7 +561,7 @@ class CoincidenceRate:
             )[0]
         # For each point in idShiftedCounts, undo the lag shift to be align the
         # plot with AC6A.
-        shiftedTimes = [t + timedelta(dt) for t in 
+        shiftedTimes = [t - timedelta(seconds=dt) for t in 
                     self.occurB.data['dateTime'][idShiftedCounts]]
         
 
@@ -574,12 +578,15 @@ class CoincidenceRate:
         ax[0].axvline(t)
         ax[0].legend(loc=1)
 
+        print('AC6A unshifted time range:', self.occurA.data['dateTime'][idtA[0]], self.occurA.data['dateTime'][idtA[-1]])
+        print('AC6B shifted time range:', shiftedTimes[0], shiftedTimes[-1])
+
         ax[1].plot(self.occurA.data['dateTime'][idtA], 
                     self.occurA.data['dos1rate'][idtA], 
                     'r', label='AC6A')
-        # ax[1].plot(shiftedTimes, 
-        #             self.occurB.data['dos1rate'][idShiftedCounts], 
-        #             'b', label='AC6B')
+        ax[1].plot(shiftedTimes, 
+                    self.occurB.data['dos1rate'][idShiftedCounts], 
+                    'b', label='AC6B')
         ax[1].set(xlabel='UTC', ylabel='dos1rate')
         ax[1].text(0.1, 0.9, 'AC6-B shift ={}'.format(round(dt, 1)), 
                     transform=ax[1].transAxes)

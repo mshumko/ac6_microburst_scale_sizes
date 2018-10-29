@@ -486,10 +486,10 @@ class CoincidenceRate:
                 (cr.occurA.data['dos1rate'] != -1E31)
                 )[0]     
             tWindowB = np.where(
-                    (cr.occurB.data['dateTime'] > t-timedelta(seconds=ccWindow/2)) &  
-                    (cr.occurB.data['dateTime'] < t+timedelta(seconds=ccWindow/2)) &
-                    (cr.occurB.data['dos1rate'] != -1E31)
-                    )[0]
+                (cr.occurB.data['dateTime'] > t-timedelta(seconds=ccWindow/2)) &  
+                (cr.occurB.data['dateTime'] < t+timedelta(seconds=ccWindow/2)) &
+                (cr.occurB.data['dos1rate'] != -1E31)
+                )[0]
 
         # Widen the CC window.
         tWindowB = np.insert(tWindowB, 0, tWindowB[0]-ccOverlap//2)
@@ -514,28 +514,25 @@ class CoincidenceRate:
             print('Made plot directory:', saveDir)
 
         # Iterate over the microburst detections.
-        savePath = os.path.join(saveDir, '{}_microburst_validation.pdf'.format(
-                    datetime.now().date()))
-        with PdfPages(savePath) as pdf:
-            i = 0
-            for (t, cc) in self.tBurst:
-                print('interation=', i, 'out of=', len(self.tBurst))
-                i+=1
-
-                self._test_plots_microbursts(ax, t, cc, window)
-                #self._test_plots_space(ax[1], tA, tB, lag, cc, window)
-                pdf.savefig()    
-                for a in ax:
-                    a.cla()
-        # # Iterate over the curtain detections.            
-        # savePath = os.path.join(saveDir, '{}_curtain_validation.pdf'.format(
+        # savePath = os.path.join(saveDir, '{}_microburst_validation.pdf'.format(
         #             datetime.now().date()))
         # with PdfPages(savePath) as pdf:
-        #     for (tA, tB, lag, cc) in self.sBurst:
-        #         self._test_plots_space(ax[1], tA, tB, lag, cc, window)
+        #     for (t, cc) in self.tBurst:
+        #         self._test_plots_microbursts(ax, t, cc, window)
+        #         #self._test_plots_space(ax[1], tA, tB, lag, cc, window)
         #         pdf.savefig()    
         #         for a in ax:
         #             a.cla()
+            #plt.close()
+        # Iterate over the curtain detections.            
+        savePath = os.path.join(saveDir, '{}_curtain_validation.pdf'.format(
+                    datetime.now().date()))
+        with PdfPages(savePath) as pdf:
+            for (tA, tB, _, cc) in self.sBurst:
+                self._test_plots_curtains(ax, tA, tB, cc, window)
+                pdf.savefig()    
+                for a in ax:
+                    a.cla()
         return
 
     def _test_plots_microbursts(self, ax, t, cc, window):
@@ -578,9 +575,7 @@ class CoincidenceRate:
         ax[0].axvline(t)
         ax[0].legend(loc=1)
 
-        print('AC6A unshifted time range:', self.occurA.data['dateTime'][idtA[0]], self.occurA.data['dateTime'][idtA[-1]])
-        print('AC6B shifted time range:', shiftedTimes[0], shiftedTimes[-1])
-
+        # Plot spatially aligned time series.
         ax[1].plot(self.occurA.data['dateTime'][idtA], 
                     self.occurA.data['dos1rate'][idtA], 
                     'r', label='AC6A')
@@ -592,32 +587,59 @@ class CoincidenceRate:
                     transform=ax[1].transAxes)
         return
 
-    # def _test_plots_space(self, ax, tA, tB, lag, cc, window):
-    #     """ This helper method plots the time-aligned time series."""
-    #     idtA = np.where(
-    #         (self.occurA.data['dateTime'] > t-timedelta(seconds=window/2)) &  
-    #         (self.occurA.data['dateTime'] < t+timedelta(seconds=window/2)) &
-    #         (self.occurA.data['dos1rate'] != -1E31)
-    #         )[0]     
-    #     idtB = np.where(
-    #         (self.occurB.data['dateTime'] > t-timedelta(seconds=window/2)) &  
-    #         (self.occurB.data['dateTime'] < t+timedelta(seconds=window/2)) &
-    #         (self.occurB.data['dos1rate'] != -1E31)
-    #         )[0]
+    def _test_plots_curtains(self, ax, tA, tB, cc, window):
+        """ 
+        This helper method plots the curtain time series with 
+        the shifted and unshifted data.
+        """
+        idtA = np.where(
+            (self.occurA.data['dateTime'] > tA-timedelta(seconds=window/2)) &  
+            (self.occurA.data['dateTime'] < tA+timedelta(seconds=window/2)) &
+            (self.occurA.data['dos1rate'] != -1E31)
+            )[0]     
+        idtB = np.where(
+            (self.occurB.data['dateTime'] > tA-timedelta(seconds=window/2)) &  
+            (self.occurB.data['dateTime'] < tA+timedelta(seconds=window/2)) &
+            (self.occurB.data['dos1rate'] != -1E31)
+            )[0]
+        dt = (tA - tB).total_seconds() # in-track lag in seconds
+        # Find the AC6B indicies at the same positon (for the counts array)
+        idtB_shifted = np.where(
+            (self.occurB.data['dateTime'] > tB-timedelta(seconds=window/2)) &  
+            (self.occurB.data['dateTime'] < tB+timedelta(seconds=window/2)) &
+            (self.occurB.data['dos1rate'] != -1E31)
+            )[0]
+        # For each point in idShiftedCounts, undo the lag shift to be align the
+        # plot with AC6A.
+        shiftedTimes = [t - timedelta(seconds=dt) for t in 
+                    self.occurB.data['dateTime'][idtB_shifted]]
+        
 
-    #     ax.plot(self.occurA.data['dateTime'][idtA], 
-    #                 self.occurA.data['dos1rate'][idtA], 
-    #                 label='AC6A')
-    #     ax.plot(self.occurB.data['dateTime'][idtB], 
-    #                 self.occurB.data['dos1rate'][idtB], 
-    #                 label='AC6B')
-    #     ax.text(0.1, 0.9, 'CC={}'.format(cc), 
-    #                 transform=ax[0].transAxes)
-    #     ax.set(title='{} | AC6 microburst validation'
-    #                 ''.format(t.replace(microsecond=0).isoformat()))
-    #     ax.axvline(t)
-    #     ax.legend(loc=1)
-    #     return
+        ax[0].plot(self.occurA.data['dateTime'][idtA], 
+                    self.occurA.data['dos1rate'][idtA], 
+                    'r', label='AC6A')
+        ax[0].plot(self.occurB.data['dateTime'][idtB], 
+                    self.occurB.data['dos1rate'][idtB], 
+                    'b', label='AC6B')
+        ax[0].set(title='{} | AC6 curtain validation'
+                    ''.format(tA.replace(microsecond=0).isoformat()))
+        ax[0].axvline(tA, c='r')
+        ax[0].axvline(tB, c='b')
+        ax[0].legend(loc=1)
+
+        # Plot spatially aligned time series.
+        ax[1].text(0.1, 0.9, 'CC={}'.format(cc), 
+                    transform=ax[1].transAxes)
+        ax[1].plot(self.occurA.data['dateTime'][idtA], 
+                    self.occurA.data['dos1rate'][idtA], 
+                    'r', label='AC6A')
+        ax[1].plot(shiftedTimes, 
+                    self.occurB.data['dos1rate'][idtB_shifted], 
+                    'b', label='AC6B')
+        ax[1].set(xlabel='UTC', ylabel='dos1rate')
+        ax[1].text(0.1, 0.9, 'AC6-B shift ={}'.format(round(dt, 1)), 
+                    transform=ax[1].transAxes)
+        return
 
 def sec2day(s):
     """ Convert seconds to fraction of a day."""

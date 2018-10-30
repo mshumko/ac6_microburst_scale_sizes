@@ -294,7 +294,7 @@ class CoincidenceRate:
                 self.passes = np.vstack((self.passes, newRow))
         return
 
-    def sortBursts(self, ccThresh=0.8, ccOverlap=2):
+    def sortBursts(self, ccThresh=0.8, ccWindow=2, ccOverlap=2):
         """
         NAME:   sortBursts
         USE:    This method loops through every pass for which there
@@ -303,8 +303,9 @@ class CoincidenceRate:
                 correlated peak at the same time, and in the same
                 position. Uses cross-correlations (CC)
         INPUT:  ccThresh = 0.8 - CC threshold for detection.
-                ccOverLap = 1  - CC overlap, to account for Poisson 
-                                 statistics for short-duration 
+                ccWindow = 2 -   CC window width.
+                ccOverLap = 2  - CC overlap, to account for statistical 
+                                 variation for short-duration 
                                  microbursts and small timing offsets
                                  (little to none expected).
         AUTHOR: Mykhaylo Shumko
@@ -346,11 +347,11 @@ class CoincidenceRate:
             for bA in burstsA:
                 # Calculate the shifted and unshifted time bounds.
                 idtA, idtB, idtA_shifted, idtB_shifted = \
-                                                self._get_time_bounds('A', bA)
+                    self._get_time_bounds('A', bA, ccWindow, ccOverlap)
+
                 tCC = self.CC(idtA, idtB)
                 sCC = self.CC(idtA, idtB_shifted)
             
-                #_, bB, lag, tCC, sCC  = self.cross_correlate('A', bA, ccOverlap)
                 line = [self.occurA.cat['dateTime'][bA], 
                         self.occurA.cat['dateTime'][bB], tCC, sCC]
                 self.bursts = np.vstack((self.bursts, line))
@@ -359,18 +360,54 @@ class CoincidenceRate:
             for bB in burstsB:
                 # Calculate the shifted and unshifted time bounds.
                 idtA, idtB, idtA_shifted, idtB_shifted = \
-                                                self._get_time_bounds('B', bB)
-                #tA, tB, lag, tCC, sCC = self.cross_correlate('B', bB, ccOverlap)
+                    self._get_time_bounds('B', bB, ccWindow, ccOverlap)
+
                 line = [self.occurA.cat['dateTime'][tA], 
                         self.occurA.cat['dateTime'][bB], tCC, sCC]
                 self.bursts = np.vstack((self.bursts, line))
         return
         
-    def _get_time_bounds(self, sc_id, i):
+    def _get_time_bounds(self, sc_id, i, ccWindow, ccOverlap):
         """ 
         This method calculates the time aligned and space-aligned
         indicies for cross-correlation.
         """
+        dt = timedelta(seconds=ccWindow/2)
+        # Find the correct center time from either AC6A or B.
+        if sc_id.upper() == 'A':
+            t0 = self.occurA.data['dateTime'][i]
+        else:
+            t0 = self.occurB.data['dateTime'][i]
+
+        # Get temporally-aligned indicies
+        idtA = np.where((self.occurA.data['dateTime'] > t0-dt) 
+                        & (self.occurA.data['dateTime'] < t0+dt)
+                        & (self.occurA.data['dos1rate'] != -1E31))[0]
+        idtB = np.where((self.occurB.data['dateTime'] > t0-dt) 
+                        & (self.occurB.data['dateTime'] < t0+dt)
+                        & (self.occurB.data['dos1rate'] != -1E31))[0]
+
+        # Get spatially aligned indicies
+        # In this first if statemtn, we are calling this function 
+        # with AC6A sc_id, the shifted timeseries will be the same.
+        if sc_id.upper() == 'A':
+            idtA_shifted = idtA 
+            timeLag = self.occurA.cat['Lag_In_Track'][i]
+            dt_lagged = dt - timedelta(seconds=timeLag)
+            idtB_shifted = np.where(
+                (self.occurB.data['dateTime'] > t0-dt_lagged) &  
+                (self.occurB.data['dateTime'] < t0+dt_lagged) &
+                (self.occurB.data['dos1rate'] != -1E31)
+                )[0]
+        else:
+            idtB_shifted = idtB 
+            timeLag = self.occurB.cat['Lag_In_Track'][i]
+            dt_lagged = dt + timedelta(seconds=timeLag)
+            idtA_shifted = np.where(
+                (self.occurA.data['dateTime'] > t0-dt_lagged) &  
+                (self.occurA.data['dateTime'] < t0+dt_lagged) &
+                (self.occurA.data['dos1rate'] != -1E31)
+                )[0]
         
         return idtA, idtB, idtA_shifted, idtB_shifted
         
@@ -394,6 +431,22 @@ class CoincidenceRate:
         self.aBurst = np.array(sorted(
                                self.aBurst, key=lambda x : x[0]))
         return 
+
+    def CC(self, iA, iB):
+        """ 
+        This method calculates the normalized cross-correlation 
+        between two AC6 time series indexed by iA and iB.
+        """
+        # Mean subtraction.
+        x = (cr.occurA.data['dos1rate'][iA] - 
+            cr.occurA.data['dos1rate'][iA].mean() )
+        y = (cr.occurB.data['dos1rate'][iB] - 
+            cr.occurB.data['dos1rate'][iB].mean() )
+        # Cross-correlate
+        ccArr = np.correlate(x, y, mode='same')
+        # Normalization
+        ccArr /= np.sqrt(len(x)*len(y)*np.var(x)*np.var(y)) 
+        return max(ccArr)
 
     def cross_correlate(self, sc_id, i, ccOverlap, ccWindow=0.5):
         """

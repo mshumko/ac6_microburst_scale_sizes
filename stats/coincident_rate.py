@@ -306,19 +306,18 @@ class CoincidenceRate:
                 ccOverLap = 1  - CC overlap, to account for Poisson 
                                  statistics for short-duration 
                                  microbursts and small timing offsets
-                                (little to none expected).
+                                 (little to none expected).
         AUTHOR: Mykhaylo Shumko
-        RETURNS: self.tBurst - array(nDet, 2) of temporal microbursts
-                 self.sBurst - array(nDet, 3) of curtains with AC6A 
-                               time, AC6B time, and CC.
-                 self.aBurst - array(nDet, 2) of ambigious bursts
-                 First column is time, second is cross correlation
-                 value.
-        MOD:     2018-10-25
+        RETURNS: self.bursts - array(nBursts, 4) where the columns
+                                are the "tA" (burst time on AC6A assumed 
+                                to the the same for AC6B if aligned by
+                                time), "tB_shifted" time at AC6B s.t. 
+                                the time series is aligned in space, and
+                                "tCC", "sCC" which are the temporal and
+                                spatial cross correlations. 
+        MOD:     2018-10-29
         """
-        self.tBurst = np.zeros((0, 2), dtype=object) 
-        self.sBurst = np.zeros((0, 4), dtype=object) 
-        self.aBurst = np.zeros((0, 2), dtype=object) 
+        self.tBursts = np.zeros((0, 4), dtype=object) 
         
         # Convert detection times to numbers for easy comparison.
         catAtimes = date2num(self.occurA.cat['dateTime'])
@@ -341,37 +340,39 @@ class CoincidenceRate:
             print('Found {} AC6A bursts and {} AC6B bursts'.format(
                 len(burstsA), len(burstsB)))
 
+            # NEED TO FIGURE OUT WHAT IS BEING SAVED TO THE FILES
+            
             # Loop over bursts from AC6A.              
             for bA in burstsA:
-                flag, cc, t2, timeLag  = self.cross_correlate('A', bA, ccOverlap)
-                # Save to the appropriate array. 
-                if flag == 't':
-                    self.tBurst = np.vstack((self.tBurst, 
-                    [self.occurA.cat['dateTime'][bA], cc]))
-                # Likeliy need to do something special 
-                # with curtains. 
-                elif flag == 's':
-                    self.sBurst = np.vstack((self.sBurst, 
-                    [self.occurA.cat['dateTime'][bA], t2, timeLag, cc]))
-                elif flag == 'a':
-                    self.aBurst = np.vstack((self.aBurst, 
-                    [self.occurA.cat['dateTime'][bA], cc]))
+                # Calculate the shifted and unshifted time bounds.
+                idtA, idtB, idtA_shifted, idtB_shifted = \
+                                                self._get_time_bounds('A', bA)
+                tCC = self.CC(idtA, idtB)
+                sCC = self.CC(idtA, idtB_shifted)
+            
+                #_, bB, lag, tCC, sCC  = self.cross_correlate('A', bA, ccOverlap)
+                line = [self.occurA.cat['dateTime'][bA], 
+                        self.occurA.cat['dateTime'][bB], tCC, sCC]
+                self.bursts = np.vstack((self.bursts, line))
 
             # Loop over bursts from AC6B.              
             for bB in burstsB:
-                flag, cc, t2, timeLag = self.cross_correlate('B', bB, ccOverlap)
-                # Save to the appropriate array. 
-                if flag == 't':
-                    self.tBurst = np.vstack((self.tBurst, 
-                    [self.occurB.cat['dateTime'][bB], cc]))
-                elif flag == 's':
-                    self.sBurst = np.vstack((self.sBurst, 
-                    [t2, self.occurB.cat['dateTime'][bB], timeLag, cc]))
-                elif flag == 'a':
-                    self.aBurst = np.vstack((self.aBurst, 
-                    [self.occurB.cat['dateTime'][bB], cc]))
-        
+                # Calculate the shifted and unshifted time bounds.
+                idtA, idtB, idtA_shifted, idtB_shifted = \
+                                                self._get_time_bounds('B', bB)
+                #tA, tB, lag, tCC, sCC = self.cross_correlate('B', bB, ccOverlap)
+                line = [self.occurA.cat['dateTime'][tA], 
+                        self.occurA.cat['dateTime'][bB], tCC, sCC]
+                self.bursts = np.vstack((self.bursts, line))
         return
+        
+    def _get_time_bounds(self, sc_id, i):
+        """ 
+        This method calculates the time aligned and space-aligned
+        indicies for cross-correlation.
+        """
+        
+        return idtA, idtB, idtA_shifted, idtB_shifted
         
     def sortArrays(self):
         """ 
@@ -381,12 +382,9 @@ class CoincidenceRate:
         # Remove duplicates. This only removes elements whenever
         # both time and cc are the same (true in this case since
         # CC is symmetric).
-        self.tBursts = list({ (i[0], i[1]) for i 
-                        in self.tBursts})
-        self.sBursts = list({ (i[0], i[1]) for i 
-                        in self.sBursts})
-        self.aBursts = list({ (i[0], i[1]) for i 
-                        in self.aBursts})
+        self.tBursts = list({tuple(i) for i in self.tBursts})
+        self.sBursts = list({tuple(i) for i in self.sBursts})
+        self.aBursts = list({tuple(i) for i in self.aBursts})
         
         # Sort times
         self.tBurst = np.array(sorted(
@@ -651,65 +649,3 @@ if __name__ == '__main__':
     cr.radBeltIntervals()
     cr.sortBursts()
     cr.test_plots()
-
-    # plt.scatter(cr.tBurst[:, 0], cr.tBurst[:, 1])
-    # plt.xlim(cr.tBurst[0, 0], cr.tBurst[-1, 0]); plt.show()
-    #print(cr.occrA.intervals)
-    #print(cr.occrB.intervals)
-
-    # tA = np.array([t.isoformat() for t in 
-    #         cr.occurA.data['dateTime'][cr.occurA.intervals]])
-    # tB = np.array([t.isoformat() for t in 
-    #         cr.occurB.data['dateTime'][cr.occurB.intervals]])
-    # np.savetxt('ac6a_pass_times.csv', tA, delimiter=',')
-    # np.savetxt('ac6b_pass_times.csv', tB, delimiter=',')
-
-    # with open('ac6a_pass_times.csv', 'w') as f:
-    #     w = csv.writer(f)
-    #     w.writerows(cr.occurA.data['dateTime'][cr.occurA.intervals])
-
-    # with open('ac6b_pass_times.csv', 'w') as f:
-    #     w = csv.writer(f)
-    #     w.writerows(cr.occurB.data['dateTime'][cr.occurB.intervals])
-
-    # ### CODE TO TEST THE OCCURANCE RATE TIMESERIES ###
-    # o = OccuranceRate('A', datetime(2016, 10, 14), 3)
-    # o.radBeltIntervals()
-    # #for h in np.arange(0.5, 1.1, 0.5):
-    # o.occurance_rate(mode='prominence')
-    # #print('rel_height =', h)
-    
-    # ### PLOT OCCURANCE RATE TIMESERIES ###
-    # startTimes = o.data['dateTime'][o.intervals[:, 0]]
-    # _, ax = plt.subplots(2, sharex=True)
-    # ax[0].scatter(startTimes, o.rates)
-    # ax[0].set_ylabel('Microbust duty cycle\n(microburst/pass time)')
-    
-    # idt = np.where((o.cat['dateTime'] > startTimes[0]) & 
-    #                 (o.cat['dateTime'] < startTimes[-1]))[0]
-
-    # ax[1].scatter(o.cat['dateTime'][idt], o.cat['AE'][idt])
-
-    # ax[1].set_ylabel('AE (nT)')
-    # ax[-1].set_xlabel('UTC')
-    # plt.tight_layout()
-    # plt.show()
-
-    # tAn = date2num(cr.occurA.data['dateTime'][cr.occurA.intervals])
-    # tBn = date2num(cr.occurB.data['dateTime'][cr.occurB.intervals])
-    # tA = cr.occurA.data['dateTime'][cr.occurA.intervals]
-    # tB = cr.occurB.data['dateTime'][cr.occurB.intervals]
-
-    # # Find matching indicies
-    # # Loop pver start times of one array
-    # for i, t in enumerate(tAn[:, 0]):
-    #     # Look for start times of second array within 5 minutes
-    #     dt = np.abs(tBn[:, 0] - t)
-    #     idmin = np.argmin(dt)
-    #     if dt[idmin] < sec2day(5*60):
-    #         print('Found match! (i, t_A) =', i, tA[i, 0], 
-    #             '(idmin, tB[idmin]) =', idmin, tB[idmin, 0] )
-    #     else:
-    #         print('No match (i, t_A) =', i, tA[i, 0], 
-    #             '(idmin, tB[idmin]) =', idmin, tB[idmin, 0] )
-

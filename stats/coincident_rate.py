@@ -309,16 +309,17 @@ class CoincidenceRate:
                                  microbursts and small timing offsets
                                  (little to none expected).
         AUTHOR: Mykhaylo Shumko
-        RETURNS: self.bursts - array(nBursts, 4) where the columns
-                                are the "tA" (burst time on AC6A assumed 
-                                to the the same for AC6B if aligned by
-                                time), "tB_shifted" time at AC6B s.t. 
-                                the time series is aligned in space, and
-                                "tCC", "sCC" which are the temporal and
-                                spatial cross correlations. 
+        RETURNS: self.bursts - array(nBursts, 5) where the columns
+                               are: 
+                               t0 =  center time for microburst 
+                               observation (time-aligned).
+                               t_sA = center time for AC6A shifted
+                               t_sB = center time for AC6B shifted 
+                               tCC  = temporal CC 
+                               sCC  = spatial CC 
         MOD:     2018-10-29
         """
-        self.tBursts = np.zeros((0, 4), dtype=object) 
+        self.bursts = np.zeros((0, 5), dtype=object) 
         
         # Convert detection times to numbers for easy comparison.
         catAtimes = date2num(self.occurA.cat['dateTime'])
@@ -346,24 +347,27 @@ class CoincidenceRate:
             # Loop over bursts from AC6A.              
             for bA in burstsA:
                 # Calculate the shifted and unshifted time bounds.
-                idtA, idtB, idtA_shifted, idtB_shifted = \
+                idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB = \
                     self._get_index_bounds('A', bA, ccWindow, ccOverlap)
-
+                # CC in time and space
                 tCC = self.CC(idtA, idtB)
-                sCC = self.CC(idtA, idtB_shifted)
-            
-                line = [self.occurA.cat['dateTime'][bA], 
-                        self.occurA.cat['dateTime'][bB], tCC, sCC]
+                sCC = self.CC(idtA_shifted, idtB_shifted)
+                # Save data
+                line = [t0, t_sA, t_sB, tCC, sCC]
+                print('In AC6A loop --- t0=', t0, 't_sA=', t_sA, 't_sB=', t_sB)
                 self.bursts = np.vstack((self.bursts, line))
 
             # Loop over bursts from AC6B.              
             for bB in burstsB:
                 # Calculate the shifted and unshifted time bounds.
-                idtA, idtB, idtA_shifted, idtB_shifted = \
+                idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB = \
                     self._get_index_bounds('B', bB, ccWindow, ccOverlap)
-
-                line = [self.occurA.cat['dateTime'][tA], 
-                        self.occurA.cat['dateTime'][bB], tCC, sCC]
+                # CC in time and space
+                tCC = self.CC(idtA, idtB)
+                sCC = self.CC(idtA_shifted, idtB_shifted)
+                # Save data
+                line = [t0, t_sA, t_sB, tCC, sCC]
+                print('In AC6B loop --- t0=', t0, 't_sA=', t_sA, 't_sB=', t_sB)
                 self.bursts = np.vstack((self.bursts, line))
         return
         
@@ -387,6 +391,7 @@ class CoincidenceRate:
                                 center time if sc_id == A.
         """
         dt = timedelta(seconds=ccWindow/2)
+        overlapW = timedelta(seconds=ccOverlap/20)
         # Find the correct center time from either AC6A or B.
         if sc_id.upper() == 'A':
             t0 = self.occurA.data['dateTime'][i]
@@ -394,11 +399,12 @@ class CoincidenceRate:
             t0 = self.occurB.data['dateTime'][i]
 
         #### Get temporally-aligned indicies ######
-        idtA = np.where((self.occurA.data['dateTime'] > t0-dt) 
+        idtA = np.where(  (self.occurA.data['dateTime'] > t0-dt) 
                         & (self.occurA.data['dateTime'] < t0+dt)
                         & (self.occurA.data['dos1rate'] != -1E31))[0]
-        idtB = np.where((self.occurB.data['dateTime'] > t0-dt) 
-                        & (self.occurB.data['dateTime'] < t0+dt)
+        # The overlapW windens the index array to accomidate a CC lag.
+        idtB = np.where(  (self.occurB.data['dateTime'] > t0-dt-overlapW) 
+                        & (self.occurB.data['dateTime'] < t0+dt+overlapW)
                         & (self.occurB.data['dos1rate'] != -1E31))[0]
 
         ####### Get spatially aligned indicies ######
@@ -412,8 +418,8 @@ class CoincidenceRate:
             idtA_shifted = idtA 
             timeLag = timedelta(seconds=self.occurA.cat['Lag_In_Track'][i])
             idtB_shifted = np.where(
-                (self.occurB.data['dateTime'] > t0-dt-timeLag) &  
-                (self.occurB.data['dateTime'] < t0+dt-timeLag) &
+                (self.occurB.data['dateTime'] > t0-dt-timeLag-overlapW) &  
+                (self.occurB.data['dateTime'] < t0+dt-timeLag+overlapW) &
                 (self.occurB.data['dos1rate'] != -1E31)
                 )[0]
             t_sA = t0
@@ -422,8 +428,8 @@ class CoincidenceRate:
             idtB_shifted = idtB 
             timeLag = timedelta(seconds=self.occurB.cat['Lag_In_Track'][i])
             idtA_shifted = np.where(
-                (self.occurA.data['dateTime'] > t0-dt+timeLag) &  
-                (self.occurA.data['dateTime'] < t0+dt+timeLag) &
+                (self.occurA.data['dateTime'] > t0-dt+timeLag-overlapW) &  
+                (self.occurA.data['dateTime'] < t0+dt+timeLag+overlapW) &
                 (self.occurA.data['dos1rate'] != -1E31)
                 )[0]
             t_sA = t0 + timeLag
@@ -467,109 +473,109 @@ class CoincidenceRate:
         ccArr /= np.sqrt(len(x)*len(y)*np.var(x)*np.var(y)) 
         return max(ccArr)
 
-    def cross_correlate(self, sc_id, i, ccOverlap, ccWindow=0.5):
-        """
-        NAME:   cross_correlate
-        USE:    This method takes in a microburst indicie, and
-                calculates the cross-correlation for that time 
-                series with the time series of the other 
-                spacecraft at the same time, and same position.
+    # def cross_correlate(self, sc_id, i, ccOverlap, ccWindow=0.5):
+    #     """
+    #     NAME:   cross_correlate
+    #     USE:    This method takes in a microburst indicie, and
+    #             calculates the cross-correlation for that time 
+    #             series with the time series of the other 
+    #             spacecraft at the same time, and same position.
                 
-        INPUT:  sc_id     - Spacecraft id. Either 'A' or 'B'.
-                i         - Index of the detection for sc_id.
-                ccOverlap - Cross correlation overlap.
-                ccWindow  - Cross correlation window width.
-        AUTHOR: Mykhaylo Shumko
-        RETURNS: flag - Detection type. Can be 't' for temporal
-                        peak, 's' for spatial peak, and 'a' for 
-                        ambigrious.
-                 cc   - Max cross-correlation value
-        MOD:     2018-10-25
-        """
-        # Time cross-correlation coefficient
-        ccT = self._correlate_time(sc_id, i, ccOverlap, ccWindow)
-        # Space cross-correlation coefficient
-        t, t2, ccS, timeLag = self._correlate_space(sc_id, i, ccOverlap, ccWindow)
-        # Logic on if the detection is a microburst, curtain, or 
-        # ambigious 
-        if ccT == ccS:
-            return 'a', ccT, None, None
-        elif ccT > ccS:
-            return 't', ccT, None, None
-        else:
-            return 's', ccS, t2, timeLag
+    #     INPUT:  sc_id     - Spacecraft id. Either 'A' or 'B'.
+    #             i         - Index of the detection for sc_id.
+    #             ccOverlap - Cross correlation overlap.
+    #             ccWindow  - Cross correlation window width.
+    #     AUTHOR: Mykhaylo Shumko
+    #     RETURNS: flag - Detection type. Can be 't' for temporal
+    #                     peak, 's' for spatial peak, and 'a' for 
+    #                     ambigrious.
+    #              cc   - Max cross-correlation value
+    #     MOD:     2018-10-25
+    #     """
+    #     # Time cross-correlation coefficient
+    #     ccT = self._correlate_time(sc_id, i, ccOverlap, ccWindow)
+    #     # Space cross-correlation coefficient
+    #     t, t2, ccS, timeLag = self._correlate_space(sc_id, i, ccOverlap, ccWindow)
+    #     # Logic on if the detection is a microburst, curtain, or 
+    #     # ambigious 
+    #     if ccT == ccS:
+    #         return 'a', ccT, None, None
+    #     elif ccT > ccS:
+    #         return 't', ccT, None, None
+    #     else:
+    #         return 's', ccS, t2, timeLag
 
-    def _correlate_time(self, sc_id, i, ccOverlap, ccWindow=2):
-        """ Cross correlate data at the same times """
-        # Find the center time of that burst
-        if sc_id.upper() == 'A':
-            t = self.occurA.cat['dateTime'][i]
-        else:
-            t = self.occurB.cat['dateTime'][i]
-        # Cross correlate in time.
-        tWindowA = np.where(
-                (cr.occurA.data['dateTime'] > t-timedelta(seconds=ccWindow/2)) &  
-                (cr.occurA.data['dateTime'] < t+timedelta(seconds=ccWindow/2)) &
-                (cr.occurA.data['dos1rate'] != -1E31)
-                )[0]     
-        tWindowB = np.where(
-                (cr.occurB.data['dateTime'] > t-timedelta(seconds=ccWindow/2)) &  
-                (cr.occurB.data['dateTime'] < t+timedelta(seconds=ccWindow/2)) &
-                (cr.occurB.data['dos1rate'] != -1E31)
-                )[0]
-        # Widen the CC window.
-        tWindowB = np.insert(tWindowB, 0, tWindowB[0]-ccOverlap//2)
-        tWindowB = np.append(tWindowB, tWindowB[0]+ccOverlap//2)
+    # def _correlate_time(self, sc_id, i, ccOverlap, ccWindow=2):
+    #     """ Cross correlate data at the same times """
+    #     # Find the center time of that burst
+    #     if sc_id.upper() == 'A':
+    #         t = self.occurA.cat['dateTime'][i]
+    #     else:
+    #         t = self.occurB.cat['dateTime'][i]
+    #     # Cross correlate in time.
+    #     tWindowA = np.where(
+    #             (cr.occurA.data['dateTime'] > t-timedelta(seconds=ccWindow/2)) &  
+    #             (cr.occurA.data['dateTime'] < t+timedelta(seconds=ccWindow/2)) &
+    #             (cr.occurA.data['dos1rate'] != -1E31)
+    #             )[0]     
+    #     tWindowB = np.where(
+    #             (cr.occurB.data['dateTime'] > t-timedelta(seconds=ccWindow/2)) &  
+    #             (cr.occurB.data['dateTime'] < t+timedelta(seconds=ccWindow/2)) &
+    #             (cr.occurB.data['dos1rate'] != -1E31)
+    #             )[0]
+    #     # Widen the CC window.
+    #     tWindowB = np.insert(tWindowB, 0, tWindowB[0]-ccOverlap//2)
+    #     tWindowB = np.append(tWindowB, tWindowB[0]+ccOverlap//2)
 
-        x = cr.occurA.data['dos1rate'][tWindowA] - cr.occurA.data['dos1rate'][tWindowA].mean()
-        y = cr.occurB.data['dos1rate'][tWindowB] - cr.occurB.data['dos1rate'][tWindowB].mean()
-        ccArr = np.correlate(x, y, mode='same')/np.sqrt(len(x)*len(y)*np.var(x)*np.var(y))
-        return max(ccArr)
+    #     x = cr.occurA.data['dos1rate'][tWindowA] - cr.occurA.data['dos1rate'][tWindowA].mean()
+    #     y = cr.occurB.data['dos1rate'][tWindowB] - cr.occurB.data['dos1rate'][tWindowB].mean()
+    #     ccArr = np.correlate(x, y, mode='same')/np.sqrt(len(x)*len(y)*np.var(x)*np.var(y))
+    #     return max(ccArr)
 
-    def _correlate_space(self, sc_id, i, ccOverlap, ccWindow=0.5):
-        """
-        Cross correlate data at the same place.
-        """
-        # Depending on the spacecraft, find the correct indicies 
-        # for the spatial CC.
-        if sc_id.upper() == 'A':
-            t = self.occurA.cat['dateTime'][i] # A center time
-            timeLag = self.occurA.cat['Lag_In_Track'][i]
-            t2 = t - timedelta(seconds=timeLag) # B center time.
-            tWindowA = np.where(
-                (cr.occurA.data['dateTime'] > t-timedelta(seconds=ccWindow/2)) &  
-                (cr.occurA.data['dateTime'] < t+timedelta(seconds=ccWindow/2)) &
-                (cr.occurA.data['dos1rate'] != -1E31)
-                )[0]     
-            tWindowB = np.where(
-                (cr.occurB.data['dateTime'] > t-timedelta(seconds=ccWindow/2-timeLag)) &  
-                (cr.occurB.data['dateTime'] < t+timedelta(seconds=ccWindow/2-timeLag)) &
-                (cr.occurB.data['dos1rate'] != -1E31)
-                )[0]
-        else:
-            t = self.occurB.cat['dateTime'][i] # B center time
-            timeLag = self.occurB.cat['Lag_In_Track'][i]
-            t2 = t + timedelta(seconds=timeLag) # A center time.
-            tWindowA = np.where(
-                (cr.occurA.data['dateTime'] > t-timedelta(seconds=ccWindow/2+timeLag)) &  
-                (cr.occurA.data['dateTime'] < t+timedelta(seconds=ccWindow/2+timeLag)) &
-                (cr.occurA.data['dos1rate'] != -1E31)
-                )[0]     
-            tWindowB = np.where(
-                (cr.occurB.data['dateTime'] > t-timedelta(seconds=ccWindow/2)) &  
-                (cr.occurB.data['dateTime'] < t+timedelta(seconds=ccWindow/2)) &
-                (cr.occurB.data['dos1rate'] != -1E31)
-                )[0]
+    # def _correlate_space(self, sc_id, i, ccOverlap, ccWindow=0.5):
+    #     """
+    #     Cross correlate data at the same place.
+    #     """
+    #     # Depending on the spacecraft, find the correct indicies 
+    #     # for the spatial CC.
+    #     if sc_id.upper() == 'A':
+    #         t = self.occurA.cat['dateTime'][i] # A center time
+    #         timeLag = self.occurA.cat['Lag_In_Track'][i]
+    #         t2 = t - timedelta(seconds=timeLag) # B center time.
+    #         tWindowA = np.where(
+    #             (cr.occurA.data['dateTime'] > t-timedelta(seconds=ccWindow/2)) &  
+    #             (cr.occurA.data['dateTime'] < t+timedelta(seconds=ccWindow/2)) &
+    #             (cr.occurA.data['dos1rate'] != -1E31)
+    #             )[0]     
+    #         tWindowB = np.where(
+    #             (cr.occurB.data['dateTime'] > t-timedelta(seconds=ccWindow/2-timeLag)) &  
+    #             (cr.occurB.data['dateTime'] < t+timedelta(seconds=ccWindow/2-timeLag)) &
+    #             (cr.occurB.data['dos1rate'] != -1E31)
+    #             )[0]
+    #     else:
+    #         t = self.occurB.cat['dateTime'][i] # B center time
+    #         timeLag = self.occurB.cat['Lag_In_Track'][i]
+    #         t2 = t + timedelta(seconds=timeLag) # A center time.
+    #         tWindowA = np.where(
+    #             (cr.occurA.data['dateTime'] > t-timedelta(seconds=ccWindow/2+timeLag)) &  
+    #             (cr.occurA.data['dateTime'] < t+timedelta(seconds=ccWindow/2+timeLag)) &
+    #             (cr.occurA.data['dos1rate'] != -1E31)
+    #             )[0]     
+    #         tWindowB = np.where(
+    #             (cr.occurB.data['dateTime'] > t-timedelta(seconds=ccWindow/2)) &  
+    #             (cr.occurB.data['dateTime'] < t+timedelta(seconds=ccWindow/2)) &
+    #             (cr.occurB.data['dos1rate'] != -1E31)
+    #             )[0]
 
-        # Widen the CC window.
-        tWindowB = np.insert(tWindowB, 0, tWindowB[0]-ccOverlap//2)
-        tWindowB = np.append(tWindowB, tWindowB[0]+ccOverlap//2)
+    #     # Widen the CC window.
+    #     tWindowB = np.insert(tWindowB, 0, tWindowB[0]-ccOverlap//2)
+    #     tWindowB = np.append(tWindowB, tWindowB[0]+ccOverlap//2)
 
-        # Correlate the two signals
-        x = cr.occurA.data['dos1rate'][tWindowA] - cr.occurA.data['dos1rate'][tWindowA].mean()
-        y = cr.occurB.data['dos1rate'][tWindowB] - cr.occurB.data['dos1rate'][tWindowB].mean()
-        ccArr = np.correlate(x, y, mode='same')/np.sqrt(len(x)*len(y)*np.var(x)*np.var(y))
-        return t, t2, max(ccArr), timeLag
+    #     # Correlate the two signals
+    #     x = cr.occurA.data['dos1rate'][tWindowA] - cr.occurA.data['dos1rate'][tWindowA].mean()
+    #     y = cr.occurB.data['dos1rate'][tWindowB] - cr.occurB.data['dos1rate'][tWindowB].mean()
+    #     ccArr = np.correlate(x, y, mode='same')/np.sqrt(len(x)*len(y)*np.var(x)*np.var(y))
+    #     return t, t2, max(ccArr), timeLag
 
     def test_plots(self, window=5, saveDir='/home/mike/temp_plots'):
         """ 
@@ -720,4 +726,4 @@ if __name__ == '__main__':
     #cr = CoincidenceRate(datetime(2015, 8, 28), 3)
     cr.radBeltIntervals()
     cr.sortBursts()
-    cr.test_plots()
+    #cr.test_plots()

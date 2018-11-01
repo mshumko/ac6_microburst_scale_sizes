@@ -55,7 +55,7 @@ class OccuranceRate:
         self._load_catalog(catPath, catV)
         return
 
-    def radBeltIntervals(self, lbound=4, ubound=8, dawnFilter=False):
+    def radBeltIntervals(self, lbound=3, ubound=10, dawnFilter=False):
         """
         This method finds all of the radiation belt passes in a day 
         and separates it into start/end indicies.
@@ -431,7 +431,7 @@ class CoincidenceRate:
                 (self.occurB.data['dos1rate'] != -1E31)
                 )[0]
             t_sA = t0
-            t_sB = t0 - timeLag
+            t_sB = t0 + timeLag
         else:
             idtB_shifted = idtB 
             timeLag = timedelta(seconds=self.occurB.cat['Lag_In_Track'][i])
@@ -440,7 +440,7 @@ class CoincidenceRate:
                 (self.occurA.data['dateTime'] < t0+dt+timeLag+overlapW) &
                 (self.occurA.data['dos1rate'] != -1E31)
                 )[0]
-            t_sA = t0 + timeLag
+            t_sA = t0 - timeLag
             t_sB = t0
         return idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB
         
@@ -554,7 +554,7 @@ class CoincidenceRate:
             )[0]
 
         time_lag = self.occurA.data['Lag_In_Track'][idtA[0]]
-        shifted_times = [t + timedelta(seconds=time_lag) 
+        shifted_times = [t - timedelta(seconds=time_lag) 
                     for t in self.occurB.data['dateTime'][idtB]]
 
         ax.plot(self.occurA.data['dateTime'][idtA], 

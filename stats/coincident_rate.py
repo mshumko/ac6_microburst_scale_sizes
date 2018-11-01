@@ -369,6 +369,8 @@ class CoincidenceRate:
                 line = [t0, t_sA, t_sB, tCC, sCC]
                 print('In AC6B loop --- t0=', t0, 't_sA=', t_sA, 't_sB=', t_sB)
                 self.bursts = np.vstack((self.bursts, line))
+            # Sort detections
+            self.sortArrays()
         return
         
     def _get_index_bounds(self, sc_id, i, ccWindow, ccOverlap):
@@ -438,23 +440,10 @@ class CoincidenceRate:
         
     def sortArrays(self):
         """ 
-        This method sorts and removes duplicated from the sorted
-        burst arrays and.
+        This method sorts self.bursts
         """
-        # Remove duplicates. This only removes elements whenever
-        # both time and cc are the same (true in this case since
-        # CC is symmetric).
-        self.tBursts = list({tuple(i) for i in self.tBursts})
-        self.sBursts = list({tuple(i) for i in self.sBursts})
-        self.aBursts = list({tuple(i) for i in self.aBursts})
-        
-        # Sort times
-        self.tBurst = np.array(sorted(
-                               self.tBurst, key=lambda x : x[0]))
-        self.sBurst = np.array(sorted(
-                               self.sBurst, key=lambda x : x[0]))
-        self.aBurst = np.array(sorted(
-                               self.aBurst, key=lambda x : x[0]))
+        # Sort by time, and move around all of the columns with it.
+        self.bursts = sorted(self.bursts, key=lambda x:x[0])
         return 
 
     def CC(self, iA, iB):

@@ -347,7 +347,7 @@ class CoincidenceRate:
             for bA in burstsA:
                 # Calculate the shifted and unshifted time bounds.
                 idtA, idtB, idtA_shifted, idtB_shifted = \
-                    self._get_time_bounds('A', bA, ccWindow, ccOverlap)
+                    self._get_index_bounds('A', bA, ccWindow, ccOverlap)
 
                 tCC = self.CC(idtA, idtB)
                 sCC = self.CC(idtA, idtB_shifted)
@@ -360,17 +360,31 @@ class CoincidenceRate:
             for bB in burstsB:
                 # Calculate the shifted and unshifted time bounds.
                 idtA, idtB, idtA_shifted, idtB_shifted = \
-                    self._get_time_bounds('B', bB, ccWindow, ccOverlap)
+                    self._get_index_bounds('B', bB, ccWindow, ccOverlap)
 
                 line = [self.occurA.cat['dateTime'][tA], 
                         self.occurA.cat['dateTime'][bB], tCC, sCC]
                 self.bursts = np.vstack((self.bursts, line))
         return
         
-    def _get_time_bounds(self, sc_id, i, ccWindow, ccOverlap):
+    def _get_index_bounds(self, sc_id, i, ccWindow, ccOverlap):
         """ 
         This method calculates the time aligned and space-aligned
-        indicies for cross-correlation.
+        indicies for cross-correlation. As for the time shifts,
+        refer to AC6 data README which specifies that the 
+        Lag_In_Track == t_A - t_B.
+
+        OUTPUT:
+            first two outputs - time-aligned indicies for 
+                                AC6A and AC6B, respectfully.
+            second two outputs - space-aligned indicies for 
+                                AC6A and AC6B, respectfully.
+            last three outputs - time-aligned time, shifted 
+                                time for AC6A (same as 
+                                time-aligned time if sc_id == 'A')
+                                and last output is shifted time
+                                for AC6B which will be the shifted 
+                                center time if sc_id == A.
         """
         dt = timedelta(seconds=ccWindow/2)
         # Find the correct center time from either AC6A or B.
@@ -379,7 +393,7 @@ class CoincidenceRate:
         else:
             t0 = self.occurB.data['dateTime'][i]
 
-        # Get temporally-aligned indicies
+        #### Get temporally-aligned indicies ######
         idtA = np.where((self.occurA.data['dateTime'] > t0-dt) 
                         & (self.occurA.data['dateTime'] < t0+dt)
                         & (self.occurA.data['dos1rate'] != -1E31))[0]
@@ -387,29 +401,34 @@ class CoincidenceRate:
                         & (self.occurB.data['dateTime'] < t0+dt)
                         & (self.occurB.data['dos1rate'] != -1E31))[0]
 
-        # Get spatially aligned indicies
-        # In this first if statemtn, we are calling this function 
-        # with AC6A sc_id, the shifted timeseries will be the same.
+        ####### Get spatially aligned indicies ######
+        # If sc_id is 'A', then, the spatial indicies are the 
+        # same for AC6A, but shifted for AC6B. Since 
+        #               lag = t_A - t_B
+        # this implies that t_B_shifted = t_A - lag. If sc_id 
+        # is 'B', then everything is opposite, i.e. 
+        # t_A_shifted = t_B + lag
         if sc_id.upper() == 'A':
             idtA_shifted = idtA 
-            timeLag = self.occurA.cat['Lag_In_Track'][i]
-            dt_lagged = dt - timedelta(seconds=timeLag)
+            timeLag = timedelta(seconds=self.occurA.cat['Lag_In_Track'][i])
             idtB_shifted = np.where(
-                (self.occurB.data['dateTime'] > t0-dt_lagged) &  
-                (self.occurB.data['dateTime'] < t0+dt_lagged) &
+                (self.occurB.data['dateTime'] > t0-dt-timeLag) &  
+                (self.occurB.data['dateTime'] < t0+dt-timeLag) &
                 (self.occurB.data['dos1rate'] != -1E31)
                 )[0]
+            t_sA = t0
+            t_sB = t0 - timeLag
         else:
             idtB_shifted = idtB 
-            timeLag = self.occurB.cat['Lag_In_Track'][i]
-            dt_lagged = dt + timedelta(seconds=timeLag)
+            timeLag = timedelta(seconds=self.occurB.cat['Lag_In_Track'][i])
             idtA_shifted = np.where(
-                (self.occurA.data['dateTime'] > t0-dt_lagged) &  
-                (self.occurA.data['dateTime'] < t0+dt_lagged) &
+                (self.occurA.data['dateTime'] > t0-dt+timeLag) &  
+                (self.occurA.data['dateTime'] < t0+dt+timeLag) &
                 (self.occurA.data['dos1rate'] != -1E31)
                 )[0]
-        
-        return idtA, idtB, idtA_shifted, idtB_shifted
+            t_sA = t0 + timeLag
+            t_sB = t0
+        return idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB
         
     def sortArrays(self):
         """ 

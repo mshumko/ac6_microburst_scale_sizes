@@ -277,8 +277,8 @@ class CoincidenceRate:
 
         self.passes = np.zeros((0, 4), dtype=object)
 
-        tAn = date2num(cr.occurA.data['dateTime'][cr.occurA.intervals])
-        tBn = date2num(cr.occurB.data['dateTime'][cr.occurB.intervals])
+        tAn = date2num(self.occurA.data['dateTime'][self.occurA.intervals])
+        tBn = date2num(self.occurB.data['dateTime'][self.occurB.intervals])
 
         # Find matching indicies by looping over start times of AC6A 
         # pass interval array
@@ -327,12 +327,16 @@ class CoincidenceRate:
 
         # Loop over passes
         for i, (passAi, passAf, passBi, passBf) in enumerate(self.passes):
-            print('Processing pass', i)
+            print('\nProcessing pass', i)
             # Find ime range for this pass. 
             aRange = date2num([self.occurA.data['dateTime'][passAi],
                              self.occurA.data['dateTime'][passAf]])
             bRange = date2num([self.occurB.data['dateTime'][passBi],
                              self.occurB.data['dateTime'][passBf]])
+            print('AC6A pass Range=', self.occurA.data['dateTime'][passAi],
+                                    self.occurA.data['dateTime'][passAf])
+            print('AC6B pass Range=', self.occurB.data['dateTime'][passBi],
+                                    self.occurB.data['dateTime'][passBf])
             # Find all bursts separately detected on AC6A/B for 
             # this pass
             burstsA = np.where((catAtimes > aRange[0]) & 
@@ -341,6 +345,8 @@ class CoincidenceRate:
                             (catBtimes < bRange[1]))[0]
             print('Found {} AC6A bursts and {} AC6B bursts'.format(
                 len(burstsA), len(burstsB)))
+            # print(self.occurA.cat['dateTime'][burstsA], 
+            #     self.occurB.cat['dateTime'][burstsB])
 
             # NEED TO FIGURE OUT WHAT IS BEING SAVED TO THE FILES
             
@@ -354,7 +360,7 @@ class CoincidenceRate:
                 sCC = self.CC(idtA_shifted, idtB_shifted)
                 # Save data
                 line = [t0, t_sA, t_sB, tCC, sCC]
-                print('In AC6A loop --- t0=', t0, 't_sA=', t_sA, 't_sB=', t_sB)
+                #print('In AC6A loop --- t0=', t0, 't_sA=', t_sA, 't_sB=', t_sB)
                 self.bursts = np.vstack((self.bursts, line))
 
             # Loop over bursts from AC6B.              
@@ -367,7 +373,7 @@ class CoincidenceRate:
                 sCC = self.CC(idtA_shifted, idtB_shifted)
                 # Save data
                 line = [t0, t_sA, t_sB, tCC, sCC]
-                print('In AC6B loop --- t0=', t0, 't_sA=', t_sA, 't_sB=', t_sB)
+                #print('In AC6B loop --- t0=', t0, 't_sA=', t_sA, 't_sB=', t_sB)
                 self.bursts = np.vstack((self.bursts, line))
             # Sort detections
             self.sortArrays()
@@ -396,9 +402,9 @@ class CoincidenceRate:
         overlapW = timedelta(seconds=ccOverlap/20)
         # Find the correct center time from either AC6A or B.
         if sc_id.upper() == 'A':
-            t0 = self.occurA.data['dateTime'][i]
+            t0 = self.occurA.cat['dateTime'][i]
         else:
-            t0 = self.occurB.data['dateTime'][i]
+            t0 = self.occurB.cat['dateTime'][i]
 
         #### Get temporally-aligned indicies ######
         idtA = np.where(  (self.occurA.data['dateTime'] > t0-dt) 

@@ -539,8 +539,8 @@ class CoincidenceRate:
         aligned timeseries.
         """
         t0, t_sA, t_sB, _, sCC = burstInfo
-        time_lag = max([np.abs((t0-t_sA).total_seconds()), 
-                        np.abs((t0-t_sB).total_seconds())])
+        # time_lag = max([np.abs((t0-t_sA).total_seconds()), 
+        #                 np.abs((t0-t_sB).total_seconds())])
         # Make time-aligned plots in ax[0]
         idtA = np.where(
             (self.occurA.data['dateTime'] > t_sA-timedelta(seconds=windowWidth/2)) &  
@@ -552,131 +552,31 @@ class CoincidenceRate:
             (self.occurB.data['dateTime'] < t_sB+timedelta(seconds=windowWidth/2)) &
             (self.occurB.data['dos1rate'] != -1E31)
             )[0]
+
+        time_lag = self.occurA.data['Lag_In_Track'][idtA[0]]
+        shifted_times = [t + timedelta(seconds=time_lag) 
+                    for t in self.occurB.data['dateTime'][idtB]]
+
         ax.plot(self.occurA.data['dateTime'][idtA], 
                     self.occurA.data['dos1rate'][idtA], 
                     'r', label='AC6A')
-        ax.plot(self.occurB.data['dateTime'][idtB], 
+        ax.plot(shifted_times, 
                     self.occurB.data['dos1rate'][idtB], 
                     'b', label='AC6B')
         ax.text(0.1, 0.8, 'space_CC={:.2f}\nAC6-B shift={:.2f}'.format(sCC, time_lag), 
                     transform=ax.transAxes)
-        ax.axvline(t_sA, c='r')
-        ax.axvline(t_sB, c='b')
+        #ax.axvline(t_sA, c='r')
+        #ax.axvline(t_sB, c='b')
         #ax.legend(loc=1)
         return
-
-    def _test_plots_microbursts(self, ax, t, cc, window):
-        """ 
-        This helper method plots the microburst time series with 
-        the shifted and unshifted data.
-        """
-        idtA = np.where(
-            (self.occurA.data['dateTime'] > t-timedelta(seconds=window/2)) &  
-            (self.occurA.data['dateTime'] < t+timedelta(seconds=window/2)) &
-            (self.occurA.data['dos1rate'] != -1E31)
-            )[0]     
-        idtB = np.where(
-            (self.occurB.data['dateTime'] > t-timedelta(seconds=window/2)) &  
-            (self.occurB.data['dateTime'] < t+timedelta(seconds=window/2)) &
-            (self.occurB.data['dos1rate'] != -1E31)
-            )[0]
-        dt = self.occurB.data['Lag_In_Track'][idtB[0]] # in-track lag
-        # Find the AC6B indicies at the same positon (for the counts array)
-        idShiftedCounts = np.where(
-            (self.occurB.data['dateTime'] > t-timedelta(seconds=window/2+dt)) &  
-            (self.occurB.data['dateTime'] < t+timedelta(seconds=window/2+dt))
-            )[0]
-        # For each point in idShiftedCounts, undo the lag shift to be align the
-        # plot with AC6A.
-        shiftedTimes = [t - timedelta(seconds=dt) for t in 
-                    self.occurB.data['dateTime'][idShiftedCounts]]
         
-
-        ax[0].plot(self.occurA.data['dateTime'][idtA], 
-                    self.occurA.data['dos1rate'][idtA], 
-                    'r', label='AC6A')
-        ax[0].plot(self.occurB.data['dateTime'][idtB], 
-                    self.occurB.data['dos1rate'][idtB], 
-                    'b', label='AC6B')
-        ax[0].text(0.1, 0.9, 'CC={}'.format(cc), 
-                    transform=ax[0].transAxes)
-        ax[0].set(title='{} | AC6 microburst validation'
-                    ''.format(t.replace(microsecond=0).isoformat()))
-        ax[0].axvline(t)
-        ax[0].legend(loc=1)
-
-        # Plot spatially aligned time series.
-        ax[1].plot(self.occurA.data['dateTime'][idtA], 
-                    self.occurA.data['dos1rate'][idtA], 
-                    'r', label='AC6A')
-        ax[1].plot(shiftedTimes, 
-                    self.occurB.data['dos1rate'][idShiftedCounts], 
-                    'b', label='AC6B')
-        ax[1].set(xlabel='UTC', ylabel='dos1rate')
-        ax[1].text(0.1, 0.9, 'AC6-B shift ={}'.format(round(dt, 1)), 
-                    transform=ax[1].transAxes)
-        return
-
-    def _test_plots_curtains(self, ax, tA, tB, cc, window):
-        """ 
-        This helper method plots the curtain time series with 
-        the shifted and unshifted data.
-        """
-        idtA = np.where(
-            (self.occurA.data['dateTime'] > tA-timedelta(seconds=window/2)) &  
-            (self.occurA.data['dateTime'] < tA+timedelta(seconds=window/2)) &
-            (self.occurA.data['dos1rate'] != -1E31)
-            )[0]     
-        idtB = np.where(
-            (self.occurB.data['dateTime'] > tA-timedelta(seconds=window/2)) &  
-            (self.occurB.data['dateTime'] < tA+timedelta(seconds=window/2)) &
-            (self.occurB.data['dos1rate'] != -1E31)
-            )[0]
-        dt = (tA - tB).total_seconds() # in-track lag in seconds
-        # Find the AC6B indicies at the same positon (for the counts array)
-        idtB_shifted = np.where(
-            (self.occurB.data['dateTime'] > tB-timedelta(seconds=window/2)) &  
-            (self.occurB.data['dateTime'] < tB+timedelta(seconds=window/2)) &
-            (self.occurB.data['dos1rate'] != -1E31)
-            )[0]
-        # For each point in idShiftedCounts, undo the lag shift to be align the
-        # plot with AC6A.
-        shiftedTimes = [t - timedelta(seconds=dt) for t in 
-                    self.occurB.data['dateTime'][idtB_shifted]]
-        
-
-        ax[0].plot(self.occurA.data['dateTime'][idtA], 
-                    self.occurA.data['dos1rate'][idtA], 
-                    'r', label='AC6A')
-        ax[0].plot(self.occurB.data['dateTime'][idtB], 
-                    self.occurB.data['dos1rate'][idtB], 
-                    'b', label='AC6B')
-        ax[0].set(title='{} | AC6 curtain validation'
-                    ''.format(tA.replace(microsecond=0).isoformat()))
-        ax[0].axvline(tA, c='r')
-        ax[0].axvline(tB, c='b')
-        ax[0].legend(loc=1)
-
-        # Plot spatially aligned time series.
-        ax[1].text(0.1, 0.9, 'CC={}'.format(cc), 
-                    transform=ax[1].transAxes)
-        ax[1].plot(self.occurA.data['dateTime'][idtA], 
-                    self.occurA.data['dos1rate'][idtA], 
-                    'r', label='AC6A')
-        ax[1].plot(shiftedTimes, 
-                    self.occurB.data['dos1rate'][idtB_shifted], 
-                    'b', label='AC6B')
-        ax[1].set(xlabel='UTC', ylabel='dos1rate')
-        ax[1].text(0.1, 0.9, 'AC6-B shift ={}'.format(round(dt, 1)), 
-                    transform=ax[1].transAxes)
-        return
-
 def sec2day(s):
     """ Convert seconds to fraction of a day."""
     return s/86400
 
 if __name__ == '__main__':
-    cr = CoincidenceRate(datetime(2016, 10, 14), 3)
+    #cr = CoincidenceRate(datetime(2016, 10, 14), 3)
+    cr = CoincidenceRate(datetime(2017, 1, 11), 3)
     #cr = CoincidenceRate(datetime(2015, 8, 28), 3)
     cr.radBeltIntervals()
     cr.sortBursts()

@@ -294,7 +294,7 @@ class CoincidenceRate:
                 self.passes = np.vstack((self.passes, newRow))
         return
 
-    def sortBursts(self, ccThresh=0.8, ccWindow=2, ccOverlap=2):
+    def sortBursts(self, ccThresh=0.8, ccWindow=8, ccOverlap=2, testPlots=True):
         """
         NAME:   sortBursts
         USE:    This method loops through every pass for which there
@@ -333,10 +333,6 @@ class CoincidenceRate:
                              self.occurA.data['dateTime'][passAf]])
             bRange = date2num([self.occurB.data['dateTime'][passBi],
                              self.occurB.data['dateTime'][passBf]])
-            print('AC6A pass Range=', self.occurA.data['dateTime'][passAi],
-                                    self.occurA.data['dateTime'][passAf])
-            print('AC6B pass Range=', self.occurB.data['dateTime'][passBi],
-                                    self.occurB.data['dateTime'][passBf])
             # Find all bursts separately detected on AC6A/B for 
             # this pass
             burstsA = np.where((catAtimes > aRange[0]) & 
@@ -345,10 +341,6 @@ class CoincidenceRate:
                             (catBtimes < bRange[1]))[0]
             print('Found {} AC6A bursts and {} AC6B bursts'.format(
                 len(burstsA), len(burstsB)))
-            # print(self.occurA.cat['dateTime'][burstsA], 
-            #     self.occurB.cat['dateTime'][burstsB])
-
-            # NEED TO FIGURE OUT WHAT IS BEING SAVED TO THE FILES
             
             # Loop over bursts from AC6A.              
             for bA in burstsA:
@@ -360,8 +352,10 @@ class CoincidenceRate:
                 sCC = self.CC(idtA_shifted, idtB_shifted)
                 # Save data
                 line = [t0, t_sA, t_sB, tCC, sCC]
-                #print('In AC6A loop --- t0=', t0, 't_sA=', t_sA, 't_sB=', t_sB)
                 self.bursts = np.vstack((self.bursts, line))
+                if testPlots:
+                    args = (idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB)
+                    self._index_test_plot('A', args)
 
             # Loop over bursts from AC6B.              
             for bB in burstsB:
@@ -373,10 +367,43 @@ class CoincidenceRate:
                 sCC = self.CC(idtA_shifted, idtB_shifted)
                 # Save data
                 line = [t0, t_sA, t_sB, tCC, sCC]
-                #print('In AC6B loop --- t0=', t0, 't_sA=', t_sA, 't_sB=', t_sB)
                 self.bursts = np.vstack((self.bursts, line))
+                if testPlots:
+                    args = (idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB)
+                    self._index_test_plot('B', args)
             # Sort detections
             self.sortArrays()
+        return
+
+    def _index_test_plot(self, sc_id, indexArgs, saveDir='/home/mike/temp_plots'):
+        """ 
+        This is a test method to check if the CC-indicies are correctly 
+        identified. 
+        """
+        idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB = indexArgs
+        print('In AC6-{} loop. Making test plot for time {}'.format(sc_id, t0))
+        _, ax = plt.subplots(3, figsize=(6, 10))  
+
+        if not os.path.exists(saveDir):
+            os.makedirs(saveDir)
+            print('Made plot directory:', saveDir)
+        savePath = os.path.join(saveDir, '{}_AC6{}_microburst_validation.png'.format(
+                    t0.replace(microsecond=0), sc_id.upper()))
+        ax[0].plot(self.occurA.data['dateTime'][idtA], 
+                    self.occurA.data['dos1rate'][idtA], c='r', label='AC6A')
+        ax[0].plot(self.occurB.data['dateTime'][idtB], 
+                    self.occurB.data['dos1rate'][idtB], c='b', label='AC6B')
+        ax[0].set_title('AC6{} validation'.format(sc_id))
+        ax[0].set_ylabel('Unshifted')
+        ax[0].legend(loc=1)
+        ax[1].plot(self.occurA.data['dateTime'][idtA_shifted], 
+                    self.occurA.data['dos1rate'][idtA_shifted], c='r')
+        ax[2].plot(self.occurB.data['dateTime'][idtB_shifted], 
+                    self.occurB.data['dos1rate'][idtB_shifted], c='b')
+        ax[1].set_ylabel('Shifted')
+        ax[2].set_ylabel('Shifted')
+        plt.savefig(savePath, dpi=200)
+        plt.close()
         return
         
     def _get_index_bounds(self, sc_id, i, ccWindow, ccOverlap):
@@ -580,4 +607,4 @@ if __name__ == '__main__':
     #cr = CoincidenceRate(datetime(2015, 8, 28), 3)
     cr.radBeltIntervals()
     cr.sortBursts()
-    cr.test_plots()
+    #cr.test_plots()

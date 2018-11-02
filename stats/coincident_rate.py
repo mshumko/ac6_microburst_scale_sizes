@@ -374,37 +374,6 @@ class CoincidenceRate:
             # Sort detections
             self.sortArrays()
         return
-
-    def _index_test_plot(self, sc_id, indexArgs, saveDir='/home/mike/temp_plots'):
-        """ 
-        This is a test method to check if the CC-indicies are correctly 
-        identified. 
-        """
-        idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB = indexArgs
-        print('In AC6-{} loop. Making test plot for time {}'.format(sc_id, t0))
-        _, ax = plt.subplots(3, figsize=(6, 10))  
-
-        if not os.path.exists(saveDir):
-            os.makedirs(saveDir)
-            print('Made plot directory:', saveDir)
-        savePath = os.path.join(saveDir, '{}_AC6{}_microburst_validation.png'.format(
-                    t0.replace(microsecond=0), sc_id.upper()))
-        ax[0].plot(self.occurA.data['dateTime'][idtA], 
-                    self.occurA.data['dos1rate'][idtA], c='r', label='AC6A')
-        ax[0].plot(self.occurB.data['dateTime'][idtB], 
-                    self.occurB.data['dos1rate'][idtB], c='b', label='AC6B')
-        ax[0].set_title('AC6{} validation'.format(sc_id))
-        ax[0].set_ylabel('Unshifted')
-        ax[0].legend(loc=1)
-        ax[1].plot(self.occurA.data['dateTime'][idtA_shifted], 
-                    self.occurA.data['dos1rate'][idtA_shifted], c='r')
-        ax[2].plot(self.occurB.data['dateTime'][idtB_shifted], 
-                    self.occurB.data['dos1rate'][idtB_shifted], c='b')
-        ax[1].set_ylabel('Shifted')
-        ax[2].set_ylabel('Shifted')
-        plt.savefig(savePath, dpi=200)
-        plt.close()
-        return
         
     def _get_index_bounds(self, sc_id, i, ccWindow, ccOverlap):
         """ 
@@ -453,8 +422,8 @@ class CoincidenceRate:
             idtA_shifted = idtA 
             timeLag = timedelta(seconds=self.occurA.cat['Lag_In_Track'][i])
             idtB_shifted = np.where(
-                (self.occurB.data['dateTime'] > t0-dt-timeLag-overlapW) &  
-                (self.occurB.data['dateTime'] < t0+dt-timeLag+overlapW) &
+                (self.occurB.data['dateTime'] > t0-dt+timeLag-overlapW) &  
+                (self.occurB.data['dateTime'] < t0+dt+timeLag+overlapW) &
                 (self.occurB.data['dos1rate'] != -1E31)
                 )[0]
             t_sA = t0
@@ -463,8 +432,8 @@ class CoincidenceRate:
             idtB_shifted = idtB 
             timeLag = timedelta(seconds=self.occurB.cat['Lag_In_Track'][i])
             idtA_shifted = np.where(
-                (self.occurA.data['dateTime'] > t0-dt+timeLag-overlapW) &  
-                (self.occurA.data['dateTime'] < t0+dt+timeLag+overlapW) &
+                (self.occurA.data['dateTime'] > t0-dt-timeLag-overlapW) &  
+                (self.occurA.data['dateTime'] < t0+dt-timeLag+overlapW) &
                 (self.occurA.data['dos1rate'] != -1E31)
                 )[0]
             t_sA = t0 - timeLag
@@ -495,6 +464,40 @@ class CoincidenceRate:
         ccArr /= np.sqrt(len(x)*len(y)*np.var(x)*np.var(y)) 
         return max(ccArr)
 
+    #################################################################
+    #################### TEST METHODS ###############################
+    #################################################################
+    def _index_test_plot(self, sc_id, indexArgs, saveDir='/home/mike/temp_plots'):
+        """ 
+        This is a test method to check if the CC-indicies are correctly 
+        picked. 
+        """
+        idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB = indexArgs
+        print('In AC6-{} loop. Making test plot for time {}'.format(sc_id, t0))
+        _, ax = plt.subplots(3, figsize=(9, 10))  
+
+        if not os.path.exists(saveDir):
+            os.makedirs(saveDir)
+            print('Made plot directory:', saveDir)
+        savePath = os.path.join(saveDir, '{}_AC6{}_microburst_validation.png'.format(
+                    t0.replace(microsecond=0), sc_id.upper()))
+        ax[0].plot(self.occurA.data['dateTime'][idtA], 
+                    self.occurA.data['dos1rate'][idtA], c='r', label='AC6A')
+        ax[0].plot(self.occurB.data['dateTime'][idtB], 
+                    self.occurB.data['dos1rate'][idtB], c='b', label='AC6B')
+        ax[0].set_title('AC6{} validation'.format(sc_id))
+        ax[0].set_ylabel('Unshifted')
+        ax[0].legend(loc=1)
+        ax[1].plot(self.occurA.data['dateTime'][idtA_shifted], 
+                    self.occurA.data['dos1rate'][idtA_shifted], c='r')
+        ax[2].plot(self.occurB.data['dateTime'][idtB_shifted], 
+                    self.occurB.data['dos1rate'][idtB_shifted], c='b')
+        ax[1].set_ylabel('Shifted')
+        ax[2].set_ylabel('Shifted')
+        plt.savefig(savePath, dpi=200)
+        plt.close()
+        return
+    
     def test_plots(self, plot_window=5, saveDir='/home/mike/temp_plots'):
         """ 
         This method plots detections and their temporal and spatial
@@ -596,6 +599,8 @@ class CoincidenceRate:
         #ax.axvline(t_sB, c='b')
         #ax.legend(loc=1)
         return
+
+    
         
 def sec2day(s):
     """ Convert seconds to fraction of a day."""

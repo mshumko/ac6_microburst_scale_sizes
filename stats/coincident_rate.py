@@ -490,8 +490,10 @@ class CoincidenceRate:
         ax[0].legend(loc=1)
         ax[1].plot(self.occurA.data['dateTime'][idtA_shifted], 
                     self.occurA.data['dos1rate'][idtA_shifted], c='r')
+        ax[1].axvline(t_sA, c='r')
         ax[2].plot(self.occurB.data['dateTime'][idtB_shifted], 
                     self.occurB.data['dos1rate'][idtB_shifted], c='b')
+        ax[2].axvline(t_sB, c='b')
         ax[1].set_ylabel('Shifted')
         ax[2].set_ylabel('Shifted')
         plt.savefig(savePath, dpi=200)

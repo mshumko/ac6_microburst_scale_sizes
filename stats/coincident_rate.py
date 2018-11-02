@@ -294,7 +294,7 @@ class CoincidenceRate:
                 self.passes = np.vstack((self.passes, newRow))
         return
 
-    def sortBursts(self, ccThresh=0.8, ccWindow=8, ccOverlap=2, testPlots=True):
+    def sortBursts(self, ccThresh=0.8, ccWindow=0.5, ccOverlap=2, testPlots=False):
         """
         NAME:   sortBursts
         USE:    This method loops through every pass for which there
@@ -595,7 +595,7 @@ class CoincidenceRate:
         ax.plot(shifted_times, 
                     self.occurB.data['dos1rate'][idtB], 
                     'b', label='AC6B')
-        ax.text(0.1, 0.8, 'space_CC={:.2f}\nAC6-B shift={:.2f}'.format(sCC, time_lag), 
+        ax.text(0, 0.8, 'space_CC={:.2f}\nAC6-B shift={:.2f}'.format(sCC, time_lag), 
                     transform=ax.transAxes)
         #ax.axvline(t_sA, c='r')
         #ax.axvline(t_sB, c='b')
@@ -614,4 +614,4 @@ if __name__ == '__main__':
     #cr = CoincidenceRate(datetime(2015, 8, 28), 3)
     cr.radBeltIntervals()
     cr.sortBursts()
-    #cr.test_plots()
+    cr.test_plots()

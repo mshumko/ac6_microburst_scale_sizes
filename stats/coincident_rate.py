@@ -294,7 +294,7 @@ class CoincidenceRate:
                 self.passes = np.vstack((self.passes, newRow))
         return
 
-    def sortBursts(self, ccThresh=0.8, ccWindow=0.5, ccOverlap=2, testPlots=False):
+    def sortBursts(self, ccThresh=0.8, ccWindow=1, ccOverlap=2, testPlots=False):
         """
         NAME:   sortBursts
         USE:    This method loops through every pass for which there
@@ -320,6 +320,7 @@ class CoincidenceRate:
         MOD:     2018-10-29
         """
         self.bursts = np.zeros((0, 5), dtype=object) 
+        self.ccWindow = ccWindow 
         
         # Convert detection times to numbers for easy comparison.
         catAtimes = date2num(self.occurA.cat['dateTime'])
@@ -506,7 +507,7 @@ class CoincidenceRate:
         cross-correlations.
         """
         from matplotlib.backends.backend_pdf import PdfPages
-        _, ax = plt.subplots(2, sharex=False)  
+        _, ax = plt.subplots(4, sharex=False, figsize=(8, 10))  
 
         if not os.path.exists(saveDir):
             os.makedirs(saveDir)
@@ -517,8 +518,8 @@ class CoincidenceRate:
                     datetime.now().date()))
         with PdfPages(savePath) as pdf:
             for row in self.bursts:
-                self._make_time_plots(ax[0], plot_window, row)
-                self._make_space_plots(ax[1], plot_window, row)
+                self._make_time_plots(ax[:2], plot_window, row)
+                self._make_space_plots(ax[2:], plot_window, row)
                 #self._test_plots_space(ax[1], tA, tB, lag, cc, window)
                 pdf.savefig()    
                 for a in ax:
@@ -551,18 +552,40 @@ class CoincidenceRate:
             (self.occurB.data['dateTime'] < t0+timedelta(seconds=windowWidth/2)) &
             (self.occurB.data['dos1rate'] != -1E31)
             )[0]
-        ax.plot(self.occurA.data['dateTime'][idtA], 
+
+        if hasattr(ax, '__len__'):
+            # Plot the mean-subtracted values
+            meanA = self.occurA.data['dos1rate'][idtA].mean()
+            meanB = self.occurB.data['dos1rate'][idtB].mean()
+
+            maxC = np.max([np.max(self.occurA.data['dos1rate'][idtA] - meanA), 
+                           np.max(self.occurB.data['dos1rate'][idtB] - meanB)])
+
+            ax[1].plot(self.occurA.data['dateTime'][idtA], 
+                    self.occurA.data['dos1rate'][idtA]-meanA, 
+                    'r', label='AC6A')
+            ax[1].plot(self.occurB.data['dateTime'][idtB], 
+                        self.occurB.data['dos1rate'][idtB]-meanB, 
+                        'b', label='AC6B')
+            ax[1].set_ylabel('Mean subtracted')
+            ax[1].hlines(maxC, t0-timedelta(seconds=self.ccWindow/2),
+                         t0+timedelta(seconds=self.ccWindow/2), 
+                          colors='grey')
+        else:
+            ax = [ax]
+
+        ax[0].plot(self.occurA.data['dateTime'][idtA], 
                     self.occurA.data['dos1rate'][idtA], 
                     'r', label='AC6A')
-        ax.plot(self.occurB.data['dateTime'][idtB], 
+        ax[0].plot(self.occurB.data['dateTime'][idtB], 
                     self.occurB.data['dos1rate'][idtB], 
                     'b', label='AC6B')
-        ax.text(0.1, 0.9, 'Time_CC={:.2f}'.format(tCC), 
-                    transform=ax.transAxes)
-        ax.set(title='{} | AC6 microburst validation'
+        ax[0].text(0, 0.9, 'Time_CC={:.2f}'.format(tCC), 
+                    transform=ax[0].transAxes)
+        ax[0].set(title='{} | AC6 microburst validation'
                     ''.format(t0.replace(microsecond=0).isoformat()))
-        ax.axvline(t0)
-        ax.legend(loc=1)
+        ax[0].axvline(t0)
+        ax[0].legend(loc=1)
         return
 
     def _make_space_plots(self, ax, windowWidth, burstInfo):
@@ -589,14 +612,31 @@ class CoincidenceRate:
         shifted_times = [t - timedelta(seconds=time_lag) 
                     for t in self.occurB.data['dateTime'][idtB]]
 
-        ax.plot(self.occurA.data['dateTime'][idtA], 
+        if hasattr(ax, '__len__'):
+            # Plot the mean-subtracted values
+            meanA = self.occurA.data['dos1rate'][idtA].mean()
+            ax[1].plot(self.occurA.data['dateTime'][idtA], 
+                    self.occurA.data['dos1rate'][idtA]-meanA, 
+                    'r', label='AC6A')
+            meanB = self.occurB.data['dos1rate'][idtB].mean()
+            ax[1].plot(shifted_times, 
+                        self.occurB.data['dos1rate'][idtB]-meanB, 
+                        'b', label='AC6B')
+            ax[1].set_ylabel('Mean subtracted')
+            # ax[1].hlines(0, t0-timedelta(seconds=self.ccWindow//2),
+            #              t0+timedelta(seconds=self.ccWindow//2), 
+            #               colors='r')
+        else:
+            ax = [ax]
+                        
+        ax[0].plot(self.occurA.data['dateTime'][idtA], 
                     self.occurA.data['dos1rate'][idtA], 
                     'r', label='AC6A')
-        ax.plot(shifted_times, 
+        ax[0].plot(shifted_times, 
                     self.occurB.data['dos1rate'][idtB], 
                     'b', label='AC6B')
-        ax.text(0, 0.8, 'space_CC={:.2f}\nAC6-B shift={:.2f}'.format(sCC, time_lag), 
-                    transform=ax.transAxes)
+        ax[0].text(0, 1, 'space_CC={:.2f}\nAC6-B shift={:.2f}'.format(sCC, time_lag), 
+                    transform=ax[0].transAxes, va='top')
         #ax.axvline(t_sA, c='r')
         #ax.axvline(t_sB, c='b')
         #ax.legend(loc=1)
@@ -609,8 +649,8 @@ def sec2day(s):
     return s/86400
 
 if __name__ == '__main__':
-    #cr = CoincidenceRate(datetime(2016, 10, 14), 3)
-    cr = CoincidenceRate(datetime(2017, 1, 11), 3)
+    cr = CoincidenceRate(datetime(2016, 10, 14), 3)
+    #cr = CoincidenceRate(datetime(2017, 1, 11), 3)
     #cr = CoincidenceRate(datetime(2015, 8, 28), 3)
     cr.radBeltIntervals()
     cr.sortBursts()

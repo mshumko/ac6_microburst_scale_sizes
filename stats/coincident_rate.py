@@ -460,7 +460,7 @@ class CoincidenceRate:
         y = (cr.occurB.data['dos1rate'][iB] - 
             cr.occurB.data['dos1rate'][iB].mean() )
         # Cross-correlate
-        ccArr = np.correlate(x, y, mode='same')
+        ccArr = np.correlate(x, y, mode='valid')
         # Normalization
         ccArr /= np.sqrt(len(x)*len(y)*np.var(x)*np.var(y)) 
         return max(ccArr)

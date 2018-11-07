@@ -359,7 +359,7 @@ class CoincidenceRate:
                     args = (idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB)
                     self._index_test_plot('A', args)
                 if testData:
-                    self.save_training_data('a', idtA)
+                    self.save_training_data('a', idtA, ccWindow)
 
             # Loop over bursts from AC6B.              
             for bB in burstsB:
@@ -376,7 +376,7 @@ class CoincidenceRate:
                     args = (idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB)
                     self._index_test_plot('B', args)
                 if testData:
-                    self.save_training_data('b', idtB)
+                    self.save_training_data('b', idtB, ccWindow)
             # Sort detections
             self.sortArrays()
         return
@@ -470,7 +470,7 @@ class CoincidenceRate:
         ccArr /= np.sqrt(len(x)*len(y)*np.var(x)*np.var(y)) 
         return max(ccArr)
 
-    def save_training_data(self, sc_id, idx):
+    def save_training_data(self, sc_id, idx, ccWindow):
         """
         This method saves the microburst detection to a csv file.
         First coolumn is the time, and the other columns are 
@@ -478,17 +478,19 @@ class CoincidenceRate:
         """
         savePath = './../data/train/ac6{}_training_data.csv'.format(
                     sc_id.lower())
+        N = int(ccWindow*10-1)
+        print(N)
         with open(savePath, 'a') as f:
             w = csv.writer(f)
             if sc_id.upper() == 'A':
                 w.writerow(np.concatenate((
                             [self.occurA.data['dateTime'][idx[len(idx)//2]]], 
-                            self.occurA.data['dos1rate'][idx]
+                            self.occurA.data['dos1rate'][idx[:N]]
                                         )))
             else:
                 w.writerow(np.concatenate((
                             [self.occurB.data['dateTime'][idx[len(idx)//2]]], 
-                            self.occurB.data['dos1rate'][idx]
+                            self.occurB.data['dos1rate'][idx[:N]]
                                         )))
         return
     #################################################################

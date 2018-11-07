@@ -294,7 +294,8 @@ class CoincidenceRate:
                 self.passes = np.vstack((self.passes, newRow))
         return
 
-    def sortBursts(self, ccThresh=0.8, ccWindow=1, ccOverlap=2, testPlots=False):
+    def sortBursts(self, ccThresh=0.8, ccWindow=2, ccOverlap=2, 
+                    testPlots=False, testData=False):
         """
         NAME:   sortBursts
         USE:    This method loops through every pass for which there
@@ -357,6 +358,8 @@ class CoincidenceRate:
                 if testPlots:
                     args = (idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB)
                     self._index_test_plot('A', args)
+                if testData:
+                    self.save_training_data('a', idtA)
 
             # Loop over bursts from AC6B.              
             for bB in burstsB:
@@ -372,6 +375,8 @@ class CoincidenceRate:
                 if testPlots:
                     args = (idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB)
                     self._index_test_plot('B', args)
+                if testData:
+                    self.save_training_data('b', idtB)
             # Sort detections
             self.sortArrays()
         return
@@ -404,11 +409,11 @@ class CoincidenceRate:
             t0 = self.occurB.cat['dateTime'][i]
 
         #### Get temporally-aligned indicies ######
-        idtA = np.where(  (self.occurA.data['dateTime'] > t0-dt) 
+        idtA = np.where(  (self.occurA.data['dateTime'] >= t0-dt) 
                         & (self.occurA.data['dateTime'] < t0+dt)
                         & (self.occurA.data['dos1rate'] != -1E31))[0]
         # The overlapW windens the index array to accomidate a CC lag.
-        idtB = np.where(  (self.occurB.data['dateTime'] > t0-dt-overlapW) 
+        idtB = np.where(  (self.occurB.data['dateTime'] >= t0-dt-overlapW) 
                         & (self.occurB.data['dateTime'] < t0+dt+overlapW)
                         & (self.occurB.data['dos1rate'] != -1E31))[0]
 
@@ -423,7 +428,7 @@ class CoincidenceRate:
             idtA_shifted = idtA 
             timeLag = timedelta(seconds=self.occurA.cat['Lag_In_Track'][i])
             idtB_shifted = np.where(
-                (self.occurB.data['dateTime'] > t0-dt+timeLag-overlapW) &  
+                (self.occurB.data['dateTime'] >= t0-dt+timeLag-overlapW) &  
                 (self.occurB.data['dateTime'] < t0+dt+timeLag+overlapW) &
                 (self.occurB.data['dos1rate'] != -1E31)
                 )[0]
@@ -433,7 +438,7 @@ class CoincidenceRate:
             idtB_shifted = idtB 
             timeLag = timedelta(seconds=self.occurB.cat['Lag_In_Track'][i])
             idtA_shifted = np.where(
-                (self.occurA.data['dateTime'] > t0-dt-timeLag-overlapW) &  
+                (self.occurA.data['dateTime'] >= t0-dt-timeLag-overlapW) &  
                 (self.occurA.data['dateTime'] < t0+dt-timeLag+overlapW) &
                 (self.occurA.data['dos1rate'] != -1E31)
                 )[0]
@@ -455,16 +460,37 @@ class CoincidenceRate:
         between two AC6 time series indexed by iA and iB.
         """
         # Mean subtraction.
-        x = (cr.occurA.data['dos1rate'][iA] - 
-            cr.occurA.data['dos1rate'][iA].mean() )
-        y = (cr.occurB.data['dos1rate'][iB] - 
-            cr.occurB.data['dos1rate'][iB].mean() )
+        x = (self.occurA.data['dos1rate'][iA] - 
+            self.occurA.data['dos1rate'][iA].mean() )
+        y = (self.occurB.data['dos1rate'][iB] - 
+            self.occurB.data['dos1rate'][iB].mean() )
         # Cross-correlate
         ccArr = np.correlate(x, y, mode='valid')
         # Normalization
         ccArr /= np.sqrt(len(x)*len(y)*np.var(x)*np.var(y)) 
         return max(ccArr)
 
+    def save_training_data(self, sc_id, idx):
+        """
+        This method saves the microburst detection to a csv file.
+        First coolumn is the time, and the other columns are 
+        dos1rate counts for values in width. 
+        """
+        savePath = './../data/train/ac6{}_training_data.csv'.format(
+                    sc_id.lower())
+        with open(savePath, 'a') as f:
+            w = csv.writer(f)
+            if sc_id.upper() == 'A':
+                w.writerow(np.concatenate((
+                            [self.occurA.data['dateTime'][idx[len(idx)//2]]], 
+                            self.occurA.data['dos1rate'][idx]
+                                        )))
+            else:
+                w.writerow(np.concatenate((
+                            [self.occurB.data['dateTime'][idx[len(idx)//2]]], 
+                            self.occurB.data['dos1rate'][idx]
+                                        )))
+        return
     #################################################################
     #################### TEST METHODS ###############################
     #################################################################
@@ -653,5 +679,5 @@ if __name__ == '__main__':
     #cr = CoincidenceRate(datetime(2017, 1, 11), 3)
     #cr = CoincidenceRate(datetime(2015, 8, 28), 3)
     cr.radBeltIntervals()
-    cr.sortBursts()
-    cr.test_plots()
+    cr.sortBursts(testData=True)
+    #cr.test_plots()

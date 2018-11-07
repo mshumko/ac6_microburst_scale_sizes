@@ -15,10 +15,11 @@ cc_bins = np.arange(0, 1.1, 0.1)
 
 error = 'full'
 
-width = 1
+width = 0.5
 idx = np.arange(
             len(data[0])//2-10*width//2,
-            len(data[0])//2+10*width//2-1
+            len(data[0])//2+10*width//2-1,
+            dtype=int
                 )
 
 for y in data[:, idx]:

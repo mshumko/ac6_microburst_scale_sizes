@@ -294,8 +294,9 @@ class CoincidenceRate:
                 self.passes = np.vstack((self.passes, newRow))
         return
 
-    def sortBursts(self, ccThresh=0.8, ccWindow=2, ccOverlap=2, 
-                    testPlots=False, testData=False):
+    def sortBursts(self, ccAbsThresh=0.8, ccSpatialThresh=0.1, 
+                    ccWindow=0.5, ccOverlap=2, testPlots=False, 
+                    testData=False):
         """
         NAME:   sortBursts
         USE:    This method loops through every pass for which there
@@ -303,24 +304,30 @@ class CoincidenceRate:
                 made by either AC6A or AC6B, checks if there is a 
                 correlated peak at the same time, and in the same
                 position. Uses cross-correlations (CC)
-        INPUT:  ccThresh = 0.8 - CC threshold for detection.
+        INPUT:  ccAbsThresh = 0.8 - absolute CC threshold for detection.
+                ccSpatialThresh = 0.1 - relative threshold of microburst
+                                 to curtain e.g. a microburst is only 
+                                 identified if its CC threshold is above
+                                 ccAbsThresh and is ccSpatialThresh above 
+                                 the spatial CC.
                 ccWindow = 2 -   CC window width.
                 ccOverLap = 2  - CC overlap, to account for statistical 
                                  variation for short-duration 
                                  microbursts and small timing offsets
                                  (little to none expected).
         AUTHOR: Mykhaylo Shumko
-        RETURNS: self.bursts - array(nBursts, 5) where the columns
+        RETURNS: self.bursts - array(nBursts, 6) where the columns
                                are: 
+                               iPass = rad. belt pass number
                                t0 =  center time for microburst 
-                               observation (time-aligned).
+                                      observation (time-aligned).
                                t_sA = center time for AC6A shifted
                                t_sB = center time for AC6B shifted 
                                tCC  = temporal CC 
                                sCC  = spatial CC 
         MOD:     2018-10-29
         """
-        self.bursts = np.zeros((0, 5), dtype=object) 
+        self.bursts = np.zeros((0, 6), dtype=object) 
         self.ccWindow = ccWindow 
         
         # Convert detection times to numbers for easy comparison.
@@ -353,7 +360,7 @@ class CoincidenceRate:
                 tCC = self.CC(idtA, idtB)
                 sCC = self.CC(idtA_shifted, idtB_shifted)
                 # Save data
-                line = [t0, t_sA, t_sB, tCC, sCC]
+                line = [i, t0, t_sA, t_sB, tCC, sCC]
                 self.bursts = np.vstack((self.bursts, line))
                 if testPlots:
                     args = (idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB)
@@ -370,7 +377,7 @@ class CoincidenceRate:
                 tCC = self.CC(idtA, idtB)
                 sCC = self.CC(idtA_shifted, idtB_shifted)
                 # Save data
-                line = [t0, t_sA, t_sB, tCC, sCC]
+                line = [i, t0, t_sA, t_sB, tCC, sCC]
                 self.bursts = np.vstack((self.bursts, line))
                 if testPlots:
                     args = (idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB)
@@ -451,8 +458,16 @@ class CoincidenceRate:
         This method sorts self.bursts
         """
         # Sort by time, and move around all of the columns with it.
-        self.bursts = sorted(self.bursts, key=lambda x:x[0])
+        self.bursts = sorted(self.bursts, key=lambda x:x[1])
         return 
+
+    def remove_duplicates(self):
+        """
+        This method goes through self.bursts and removes events that were
+        within a small threshold of each other.
+        """
+
+        return
 
     def CC(self, iA, iB):
         """ 
@@ -568,7 +583,7 @@ class CoincidenceRate:
         """ 
         This method handles the plotting of the time-aligned timeseries.
         """
-        t0, t_sA, t_sB, tCC, _ = burstInfo
+        _, t0, t_sA, t_sB, tCC, _ = burstInfo
         # Make time-aligned plots in ax[0]
         idtA = np.where(
             (self.occurA.data['dateTime'] > t0-timedelta(seconds=windowWidth/2)) &  
@@ -621,7 +636,7 @@ class CoincidenceRate:
         This method handles the plotting of the time and space
         aligned timeseries.
         """
-        t0, t_sA, t_sB, _, sCC = burstInfo
+        _, t0, t_sA, t_sB, _, sCC = burstInfo
         # time_lag = max([np.abs((t0-t_sA).total_seconds()), 
         #                 np.abs((t0-t_sB).total_seconds())])
         # Make time-aligned plots in ax[0]
@@ -651,9 +666,6 @@ class CoincidenceRate:
                         self.occurB.data['dos1rate'][idtB]-meanB, 
                         'b', label='AC6B')
             ax[1].set_ylabel('Mean subtracted')
-            # ax[1].hlines(0, t0-timedelta(seconds=self.ccWindow//2),
-            #              t0+timedelta(seconds=self.ccWindow//2), 
-            #               colors='r')
         else:
             ax = [ax]
                         
@@ -681,5 +693,5 @@ if __name__ == '__main__':
     #cr = CoincidenceRate(datetime(2017, 1, 11), 3)
     #cr = CoincidenceRate(datetime(2015, 8, 28), 3)
     cr.radBeltIntervals()
-    cr.sortBursts(testData=True)
-    #cr.test_plots()
+    cr.sortBursts(testData=False)
+    cr.test_plots()

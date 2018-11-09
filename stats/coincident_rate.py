@@ -294,7 +294,7 @@ class CoincidenceRate:
                 self.passes = np.vstack((self.passes, newRow))
         return
 
-    def sortBursts(self, ccAbsThresh=0.8, ccSpatialThresh=0.1, 
+    def sortBursts(self, ccAbsThresh=0.7, ccSpatialThresh=0.1, 
                     ccWindow=0.5, ccOverlap=2, testPlots=False, 
                     testData=False):
         """
@@ -384,8 +384,10 @@ class CoincidenceRate:
                     self._index_test_plot('B', args)
                 if testData:
                     self.save_training_data('b', idtB, ccWindow)
-            # Sort detections
-            self.sortArrays()
+
+        self.sortArrays() # Sort detections by time
+        self.findMicrobursts(ccAbsThresh, ccSpatialThresh) # Apply theshold CC test
+        self.removeDuplicates() # Remove duplicate events
         return
         
     def _get_index_bounds(self, sc_id, i, ccWindow, ccOverlap):
@@ -455,18 +457,42 @@ class CoincidenceRate:
         
     def sortArrays(self):
         """ 
-        This method sorts self.bursts
+        This method sorts self.bursts. The sort is done by time, 
+        and the key function moves around all of the columns to 
+        the appropriate place.
         """
-        # Sort by time, and move around all of the columns with it.
-        self.bursts = sorted(self.bursts, key=lambda x:x[1])
+        self.bursts = np.array(sorted(self.bursts, key=lambda x:x[1]))
         return 
 
-    def remove_duplicates(self):
+    def removeDuplicates(self, tThresh=0.3):
         """
         This method goes through self.bursts and removes events that were
         within a small threshold of each other.
         """
+        # Calculate time differences between microbursts
+        tz = zip(self.microbursts[1:, 1] - self.microbursts[:-1, 1])
+        dt = np.array([t[0].total_seconds() for t in tz])
+        # Identify indicies when time differces were less than tThresh
+        idt = np.where(dt < tThresh)[0]
+        # Remove those entries.
+        self.microbursts = np.delete(self.microbursts, idt, axis=0)
+        return
 
+    def findMicrobursts(self, absCC, spatialCCthresh):
+        """
+        This method goes through self.bursts and removes events that were
+        within a small threshold of each other.
+        """
+        self.microbursts = np.zeros((0, 6), dtype=object) 
+
+        # Loop over bursts and save the events into self.microbursts
+        # that satisfy the CC threshold criteria.
+        for line in self.bursts:
+            tCC = line[-2]
+            sCC = line[-1]
+            # line contains (i, t0, t_sA, t_sB, tCC, sCC)
+            if (tCC >= absCC) and (tCC - sCC >= spatialCCthresh):
+                self.microbursts = np.vstack((self.microbursts, line))
         return
 
     def CC(self, iA, iB):
@@ -494,7 +520,6 @@ class CoincidenceRate:
         savePath = './../data/train/ac6{}_training_data.csv'.format(
                     sc_id.lower())
         N = int(ccWindow*10-1)
-        print(N)
         with open(savePath, 'a') as f:
             w = csv.writer(f)
             if sc_id.upper() == 'A':
@@ -559,8 +584,14 @@ class CoincidenceRate:
         # Iterate over the microburst detections.
         savePath = os.path.join(saveDir, '{}_microburst_validation.pdf'.format(
                     datetime.now().date()))
+        # Plot microburst detections if they have been sorted already.
+        if hasattr(self, 'microbursts'):
+            arr = self.microbursts
+        else:
+            arr = self.bursts
+
         with PdfPages(savePath) as pdf:
-            for row in self.bursts:
+            for row in arr:
                 self._make_time_plots(ax[:2], plot_window, row)
                 self._make_space_plots(ax[2:], plot_window, row)
                 #self._test_plots_space(ax[1], tA, tB, lag, cc, window)

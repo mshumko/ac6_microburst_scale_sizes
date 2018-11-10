@@ -110,6 +110,8 @@ class OccuranceRate:
         nDetTime = date2num(self.cat['dateTime'])
         self.rates = np.zeros(self.intervals.shape[0], 
                                 dtype=float)
+        self.durations = np.zeros(self.intervals.shape[0], 
+                                dtype=float)
         if testPlot:
             _, self.ax = plt.subplots(2, sharex=True)
         # Loop over the passes.
@@ -126,11 +128,11 @@ class OccuranceRate:
             # current pass
             for t_i in idt:
                 self.rates[i] += width(self.cat['dateTime'][t_i])
-            pass_duration = (endTime - startTime).total_seconds()
+            self.durations[i] = (endTime - startTime).total_seconds()
             if verbose:
                 print('rates =', self.rates[i], 
-                    'duration=', pass_duration)
-            self.rates[i] /= pass_duration
+                    'duration=', self.durations[i])
+            self.rates[i] /= self.durations[i]
         return
         
     def static_width(self, width, t):
@@ -495,6 +497,29 @@ class CoincidenceRate:
                 self.microbursts = np.vstack((self.microbursts, line))
         return
 
+    def microburstRate(self, widthMode='prominence'):
+        """ 
+        This method calculates the microburst occurance rate 
+        from the self.microbursts array.
+        """
+        self.occurA.occurance_rate(mode=widthMode)
+        self.occurB.occurance_rate(mode=widthMode)
+
+        # Calculate the chance occurance rate.
+        self.chanceRate = self.occurA.rates*self.occurB.rates # There is already code that calculated the durations of every pass!
+        # Calculate the microburst occurance rates.
+        self.microburstOccurance = np.zeros_like(self.occurA.rates)
+
+        for i, cR in enumerate(self.chanceRate):
+            # Find all of the microbursts in ith pass.
+            idx = np.where(self.microbursts[:, 0] == i)[0]
+            print('pass', i, 'idx', idx, 'duration=', 
+                    self.occurA.durations[i], 
+                    '\nmicroburst occurance rate=', 
+                    len(idx)*0.5/self.occurA.durations[i])
+
+        return
+
     def CC(self, iA, iB):
         """ 
         This method calculates the normalized cross-correlation 
@@ -725,4 +750,5 @@ if __name__ == '__main__':
     #cr = CoincidenceRate(datetime(2015, 8, 28), 3)
     cr.radBeltIntervals()
     cr.sortBursts(testData=False)
-    cr.test_plots()
+    cr.microburstRate()
+    #cr.test_plots()

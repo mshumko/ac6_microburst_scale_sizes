@@ -506,17 +506,33 @@ class CoincidenceRate:
         self.occurB.occurance_rate(mode=widthMode)
 
         # Calculate the chance occurance rate.
-        self.chanceRate = self.occurA.rates*self.occurB.rates # There is already code that calculated the durations of every pass!
-        # Calculate the microburst occurance rates.
-        self.microburstOccurance = np.zeros_like(self.occurA.rates)
+        # Note that self.occurA/ objects calculate
+        # occurance rates for all passes on that day.
+        # Here we nee to match up the individual 
+        # occurance rates to self.passes (so we can
+        # caluclate chance rates for passes that 
+        # both sc took data for).
+        self.chanceRates = np.zeros(self.passes.shape[0])
+        self.durations = np.zeros(self.passes.shape[0])
 
-        for i, cR in enumerate(self.chanceRate):
+        for i, (passAi, _, passBi, _) in enumerate(self.passes):
+            idpA = np.where(self.occurA.intervals[:,0] == passAi)[0]
+            idpB = np.where(self.occurB.intervals[:,0] == passBi)[0]
+            print(idpA, idpB)
+            self.chanceRates[i] = self.occurA.rates[idpA]*self.occurB.rates[idpB]
+            self.durations[i] = np.mean([self.occurA.durations[idpA], 
+                                        self.occurB.durations[idpB]])
+
+        # Calculate the microburst occurance rates.
+        self.microburstOccurance = self.chanceRates
+
+        for i, (cR, dt) in enumerate(zip(self.chanceRates, self.durations)):
             # Find all of the microbursts in ith pass.
             idx = np.where(self.microbursts[:, 0] == i)[0]
-            print('pass', i, 'idx', idx, 'duration=', 
-                    self.occurA.durations[i], 
+            print('pass', i, 'idx', idx, 'duration=', dt, 
                     '\nmicroburst occurance rate=', 
-                    len(idx)*0.5/self.occurA.durations[i])
+                    len(idx)*0.5/dt)
+            print('microburst/chance rate=', len(idx)*0.5/dt/cR)
 
         return
 

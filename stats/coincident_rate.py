@@ -497,7 +497,7 @@ class CoincidenceRate:
                 self.microbursts = np.vstack((self.microbursts, line))
         return
 
-    def microburstRate(self, widthMode='static', save=True, width=0.5):
+    def microburstRate(self, widthMode='static', save_data=True, width=0.5):
         """ 
         This method calculates the microburst occurance rate 
         from the self.microbursts array.
@@ -542,14 +542,52 @@ class CoincidenceRate:
             #         '\nmicroburst occurance rate=', 
             #         len(idx)*0.5/dt)
             # print('microburst/chance rate=', len(idx)*0.5/dt/cR)
-        if save:
+        if save_data:
             self.save_occurance_data()
         return
 
-    def save_occurance_data(self):
+    def save_occurance_data(self, path=None):
         """ 
         This method saves the occurance data to a csv file.
+        The data that is saved are: pass start time (from AC6A), total 
+        separation, microburst occurance rate, chance 
+        occurance rate, occurance rate ratio
         """
+        if not path:
+            path = os.path.join('./../data', 
+                                'coincident_microbursts_catalogues',
+                                'microburst_catalog.csv' )
+        if not os.path.exists(path):
+            make_header = True
+        else:
+            make_header = False
+        #     raise OSError('Microburst catalog file already exists.')
+        # Make the save data array
+        #save_data = np.zeros((0, 5), dtype=object)
+        #np.hstack((self.microbursts, line))
+        pass_start_times = [t.isoformat() for t in 
+                    self.occurA.data['dateTime'][self.passes[:, 0].astype(int)]]
+        self.data = np.vstack(
+                        (pass_start_times,
+                         self.occurA.data['Dist_Total'][self.passes[:, 0].astype(int)],
+                         self.microburstOccurance,
+                         self.chanceRates,
+                         self.occuranceRatio
+                        ))
+
+        # self.chanceRates
+        # self.microburstOccurance
+        # self.occuranceRatio
+        # self.passes #passAi, passAf, passBi, passBf
+
+        # Save the data
+        with open(path, 'a') as f:
+            w = csv.writer(f)
+            if make_header: # Make the header if file is opened for first time.
+                w.writerow(['pass_start', 'total_sep', 'uburst_occur',
+                          'chance_occur', 'occur_ratio'])
+            w.writerows(self.data.T)
+        return
         
 
     def CC(self, iA, iB):

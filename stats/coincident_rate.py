@@ -70,6 +70,9 @@ class OccuranceRate:
                             (MLT > 0) & (MLT < 12))[0]
         else:
             idL = np.where((L > lbound) & (L < ubound))[0]
+            
+        if len(idL) == 0: # If it is empty.
+            raise ValueError('No valid radiation belt passes found')
         # Find breaks in the rad belt indicies to separate 
         # the passes.
         conv = np.convolve([1, -1], idL, mode = 'valid') - 1
@@ -838,6 +841,12 @@ if __name__ == '__main__':
                 continue
             else:
                 raise
-        cr.radBeltIntervals()
+        try:
+            cr.radBeltIntervals()
+        except ValueError as err:
+            if str(err) == 'No valid radiation belt passes found':
+                continue
+            else:
+                raise
         cr.sortBursts(testData=False)
         cr.microburstRate()

@@ -497,10 +497,13 @@ class CoincidenceRate:
                 self.microbursts = np.vstack((self.microbursts, line))
         return
 
-    def microburstRate(self, widthMode='prominence'):
+    def microburstRate(self, widthMode='static', save=True, width=0.5):
         """ 
         This method calculates the microburst occurance rate 
         from the self.microbursts array.
+
+        if save==True, then the occurance rate ratios are saved
+        to a file.
         """
         self.occurA.occurance_rate(mode=widthMode)
         self.occurB.occurance_rate(mode=widthMode)
@@ -516,25 +519,38 @@ class CoincidenceRate:
         self.durations = np.zeros(self.passes.shape[0])
 
         for i, (passAi, _, passBi, _) in enumerate(self.passes):
+            # Assosiate individual passes from occurA/B.intervals to
+            # the shared passes saved in self.passes
             idpA = np.where(self.occurA.intervals[:,0] == passAi)[0]
             idpB = np.where(self.occurB.intervals[:,0] == passBi)[0]
-            print(idpA, idpB)
             self.chanceRates[i] = self.occurA.rates[idpA]*self.occurB.rates[idpB]
             self.durations[i] = np.mean([self.occurA.durations[idpA], 
                                         self.occurB.durations[idpB]])
 
         # Calculate the microburst occurance rates.
-        self.microburstOccurance = self.chanceRates
+        self.microburstOccurance = np.zeros_like(self.chanceRates)
+        self.occuranceRatio = np.zeros_like(self.chanceRates)
 
         for i, (cR, dt) in enumerate(zip(self.chanceRates, self.durations)):
             # Find all of the microbursts in ith pass.
             idx = np.where(self.microbursts[:, 0] == i)[0]
-            print('pass', i, 'idx', idx, 'duration=', dt, 
-                    '\nmicroburst occurance rate=', 
-                    len(idx)*0.5/dt)
-            print('microburst/chance rate=', len(idx)*0.5/dt/cR)
-
+            # Calculate microburst occurance rate.
+            self.microburstOccurance[i] = len(idx)*width/dt
+            self.occuranceRatio[i] = self.microburstOccurance[i]/cR
+            
+            # print('pass', i, 'idx', idx, 'duration=', dt, 
+            #         '\nmicroburst occurance rate=', 
+            #         len(idx)*0.5/dt)
+            # print('microburst/chance rate=', len(idx)*0.5/dt/cR)
+        if save:
+            self.save_occurance_data()
         return
+
+    def save_occurance_data(self):
+        """ 
+        This method saves the occurance data to a csv file.
+        """
+        
 
     def CC(self, iA, iB):
         """ 

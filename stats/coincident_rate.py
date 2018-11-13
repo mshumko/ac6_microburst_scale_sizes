@@ -299,7 +299,7 @@ class CoincidenceRate:
                 self.passes = np.vstack((self.passes, newRow))
         return
 
-    def sortBursts(self, ccAbsThresh=0.7, ccSpatialThresh=0.1, 
+    def sortBursts(self, ccAbsThresh=0.8, ccSpatialThresh=0.1, 
                     ccWindow=0.5, ccOverlap=2, testPlots=False, 
                     testData=False):
         """
@@ -500,7 +500,7 @@ class CoincidenceRate:
                 self.microbursts = np.vstack((self.microbursts, line))
         return
 
-    def microburstRate(self, widthMode='static', save_data=True, width=0.5):
+    def calcMicroburstRate(self, widthMode='static', save_data=True, width=0.5):
         """ 
         This method calculates the microburst occurance rate 
         from the self.microbursts array.
@@ -519,7 +519,10 @@ class CoincidenceRate:
         # caluclate chance rates for passes that 
         # both sc took data for).
         self.chanceRates = np.zeros(self.passes.shape[0])
-        self.durations = np.zeros(self.passes.shape[0])
+        self.microburstRate = np.zeros(self.passes.shape[0])
+        self.durations = np.zeros_like(self.chanceRates)
+        self.microburstOccurance = np.zeros_like(self.chanceRates)
+        self.rateRatio = np.zeros_like(self.chanceRates)
 
         for i, (passAi, _, passBi, _) in enumerate(self.passes):
             # Assosiate individual passes from occurA/B.intervals to
@@ -534,26 +537,19 @@ class CoincidenceRate:
                                        self.occurB.rates[idpB])
             else:
                 self.chanceRates[i] = np.max([self.occurA.rates[idpA],
-                                              self.occurB.rates[idpB])**2
+                                              self.occurB.rates[idpB]])**2
             
             self.durations[i] = np.mean([self.occurA.durations[idpA], 
                                         self.occurB.durations[idpB]])
 
         # Calculate the microburst occurance rates.
-        self.microburstOccurance = np.zeros_like(self.chanceRates)
-        self.occuranceRatio = np.zeros_like(self.chanceRates)
-
         for i, (cR, dt) in enumerate(zip(self.chanceRates, self.durations)):
             # Find all of the microbursts in ith pass.
             idx = np.where(self.microbursts[:, 0] == i)[0]
             # Calculate microburst occurance rate.
-            self.microburstOccurance[i] = len(idx)*width/dt
-            self.occuranceRatio[i] = self.microburstOccurance[i]/cR
-            
-            # print('pass', i, 'idx', idx, 'duration=', dt, 
-            #         '\nmicroburst occurance rate=', 
-            #         len(idx)*0.5/dt)
-            # print('microburst/chance rate=', len(idx)*0.5/dt/cR)
+            self.microburstRate[i] = len(idx)*width/dt
+            self.rateRatio[i] = self.microburstRate[i]/cR
+
         if save_data:
             self.save_occurance_data()
         return
@@ -582,22 +578,17 @@ class CoincidenceRate:
         self.data = np.vstack(
                         (pass_start_times,
                          self.occurA.data['Dist_Total'][self.passes[:, 0].astype(int)],
-                         self.microburstOccurance,
+                         self.microburstRate,
                          self.chanceRates,
-                         self.occuranceRatio
+                         self.rateRatio
                         ))
-
-        # self.chanceRates
-        # self.microburstOccurance
-        # self.occuranceRatio
-        # self.passes #passAi, passAf, passBi, passBf
 
         # Save the data
         with open(path, 'a') as f:
             w = csv.writer(f)
             if make_header: # Make the header if file is opened for first time.
-                w.writerow(['pass_start', 'total_sep', 'uburst_occur',
-                          'chance_occur', 'occur_ratio'])
+                w.writerow(['pass_start', 'total_sep', 'uburst_rate',
+                          'chance_rate', 'rate_ratio'])
             w.writerows(self.data.T)
         return
         
@@ -858,4 +849,4 @@ if __name__ == '__main__':
             else:
                 raise
         cr.sortBursts(testData=False)
-        cr.microburstRate()
+        cr.calcMicroburstRate()

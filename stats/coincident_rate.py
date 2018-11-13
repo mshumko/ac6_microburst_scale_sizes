@@ -526,7 +526,16 @@ class CoincidenceRate:
             # the shared passes saved in self.passes
             idpA = np.where(self.occurA.intervals[:,0] == passAi)[0]
             idpB = np.where(self.occurB.intervals[:,0] == passBi)[0]
-            self.chanceRates[i] = self.occurA.rates[idpA]*self.occurB.rates[idpB]
+            # If one of the occurance rates is 0, avoid infintiies by 
+            # squaring the non-zero value. Be definition, one of these values
+            # will be non-zero.
+            if self.occurA.rates[idpA]*self.occurB.rates[idpB] != 0:
+                self.chanceRates[i] = (self.occurA.rates[idpA]*
+                                       self.occurB.rates[idpB])
+            else:
+                self.chanceRates[i] = np.max([self.occurA.rates[idpA],
+                                              self.occurB.rates[idpB])**2
+            
             self.durations[i] = np.mean([self.occurA.durations[idpA], 
                                         self.occurB.durations[idpB]])
 

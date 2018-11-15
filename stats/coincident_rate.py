@@ -299,7 +299,7 @@ class CoincidenceRate:
                 self.passes = np.vstack((self.passes, newRow))
         return
 
-    def sortBursts(self, ccAbsThresh=0.8, ccSpatialThresh=0.1, 
+    def sortBursts(self, ccAbsThresh=0.9, ccSpatialThresh=0.1, 
                     ccWindow=0.5, ccOverlap=2, testPlots=False, 
                     testData=False):
         """

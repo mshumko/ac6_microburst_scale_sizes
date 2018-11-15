@@ -11,7 +11,9 @@ v1 = ('Second run with all of the AC6 data. Many NaNs'
      'random microbursts were detected (0/0 division).'
      ' Infinities have been replaced by square of the '
      'individual occurance rate.')   
-v2 = ('Same as v1, except that I changed the data '
+v2 = ('CC_threshold = 0.8 (I think), I also changed the data '
       'structure. Now it is "pass_start", "total_sep",'
       '"uburst_rate", "chance_rate", "rate_ratio"') 
+v3 = ('Same as v2, but with CC_threshold = 0.9.') 
+    
     

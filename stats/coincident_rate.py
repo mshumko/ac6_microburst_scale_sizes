@@ -818,35 +818,35 @@ def sec2day(s):
     return s/86400
 
 if __name__ == '__main__':
-    # cr = CoincidenceRate(datetime(2016, 10, 14), 3)
-    # #cr = CoincidenceRate(datetime(2017, 1, 11), 3)
-    # #cr = CoincidenceRate(datetime(2015, 8, 28), 3)
-    # cr.radBeltIntervals()
-    # cr.sortBursts(testData=False)
-    # cr.microburstRate()
-    # #cr.test_plots()
+    #cr = CoincidenceRate(datetime(2016, 10, 14), 3)
+    #cr = CoincidenceRate(datetime(2017, 1, 11), 3)
+    cr = CoincidenceRate(datetime(2015, 5, 6), 3)
+    cr.radBeltIntervals()
+    cr.sortBursts(testData=False)
+    cr.calcMicroburstRate()
+    cr.test_plots()
 
-    # This code section loops over all of the AC6 data to 
-    # generate the occurance data data.
-    dateRange = [datetime(2014, 6, 20), datetime(2017, 8, 1)]
-    dDays = (dateRange[1] - dateRange[0]).days
-    dates = [dateRange[0] + timedelta(days=i) for i in range(dDays)]
-    for date in dates:
-        try:   
-            print('Loading data from {}'.format(date))
-            cr = CoincidenceRate(date, 3)
-        except AssertionError as err:
-            if ( ('None or > 1 AC6 files found' in str(err)) or
-                ('File is empty!' in str(err)) ):
-                continue
-            else:
-                raise
-        try:
-            cr.radBeltIntervals()
-        except ValueError as err:
-            if str(err) == 'No valid radiation belt passes found':
-                continue
-            else:
-                raise
-        cr.sortBursts(testData=False)
-        cr.calcMicroburstRate()
+    # # This code section loops over all of the AC6 data to 
+    # # generate the occurance data data.
+    # dateRange = [datetime(2014, 6, 20), datetime(2017, 8, 1)]
+    # dDays = (dateRange[1] - dateRange[0]).days
+    # dates = [dateRange[0] + timedelta(days=i) for i in range(dDays)]
+    # for date in dates:
+    #     try:   
+    #         print('Loading data from {}'.format(date))
+    #         cr = CoincidenceRate(date, 3)
+    #     except AssertionError as err:
+    #         if ( ('None or > 1 AC6 files found' in str(err)) or
+    #             ('File is empty!' in str(err)) ):
+    #             continue
+    #         else:
+    #             raise
+    #     try:
+    #         cr.radBeltIntervals()
+    #     except ValueError as err:
+    #         if str(err) == 'No valid radiation belt passes found':
+    #             continue
+    #         else:
+    #             raise
+    #     cr.sortBursts(testData=False)
+    #     cr.calcMicroburstRate()

@@ -713,22 +713,35 @@ class CoincidenceRate:
         This method handles the plotting of the time-aligned timeseries.
         """
         _, t0, t_sA, t_sB, tCC, _ = burstInfo
-        # Make time-aligned plots in ax[0]
+        pltHalfWindow = timedelta(seconds=windowWidth/2)
+        ccHalfWindow = timedelta(seconds=self.ccWindow/2)
+        # Find indicies for time-aligned plots in ax[0]
         idtA = np.where(
-            (self.occurA.data['dateTime'] > t0-timedelta(seconds=windowWidth/2)) &  
-            (self.occurA.data['dateTime'] < t0+timedelta(seconds=windowWidth/2)) &
+            (self.occurA.data['dateTime'] > t0-pltHalfWindow) &  
+            (self.occurA.data['dateTime'] < t0+pltHalfWindow) &
             (self.occurA.data['dos1rate'] != -1E31)
             )[0]     
         idtB = np.where(
-            (self.occurB.data['dateTime'] > t0-timedelta(seconds=windowWidth/2)) &  
-            (self.occurB.data['dateTime'] < t0+timedelta(seconds=windowWidth/2)) &
+            (self.occurB.data['dateTime'] > t0-pltHalfWindow) &  
+            (self.occurB.data['dateTime'] < t0+pltHalfWindow) &
+            (self.occurB.data['dos1rate'] != -1E31)
+            )[0]
+        # Find indicies from cross-correlation
+        idCCA = np.where(
+            (self.occurA.data['dateTime'] > t0-ccHalfWindow) &  
+            (self.occurA.data['dateTime'] < t0+ccHalfWindow) &
+            (self.occurA.data['dos1rate'] != -1E31)
+            )[0]     
+        idCCB = np.where(
+            (self.occurB.data['dateTime'] > t0-ccHalfWindow) &  
+            (self.occurB.data['dateTime'] < t0+ccHalfWindow) &
             (self.occurB.data['dos1rate'] != -1E31)
             )[0]
 
         if hasattr(ax, '__len__'):
             # Plot the mean-subtracted values
-            meanA = self.occurA.data['dos1rate'][idtA].mean()
-            meanB = self.occurB.data['dos1rate'][idtB].mean()
+            meanA = self.occurA.data['dos1rate'][idCCA].mean()
+            meanB = self.occurB.data['dos1rate'][idCCB].mean()
 
             maxC = np.max([np.max(self.occurA.data['dos1rate'][idtA] - meanA), 
                            np.max(self.occurB.data['dos1rate'][idtB] - meanB)])
@@ -766,19 +779,31 @@ class CoincidenceRate:
         aligned timeseries.
         """
         _, t0, t_sA, t_sB, _, sCC = burstInfo
-        # time_lag = max([np.abs((t0-t_sA).total_seconds()), 
-        #                 np.abs((t0-t_sB).total_seconds())])
-        # Make time-aligned plots in ax[0]
+        pltHalfWindow = timedelta(seconds=windowWidth/2)
+        ccHalfWindow = timedelta(seconds=self.ccWindow/2)
+        
+        # Find indicies for time-aligned plots in ax[0]
         idtA = np.where(
-            (self.occurA.data['dateTime'] > t_sA-timedelta(seconds=windowWidth/2)) &  
-            (self.occurA.data['dateTime'] < t_sA+timedelta(seconds=windowWidth/2)) &
+            (self.occurA.data['dateTime'] > t_sA-pltHalfWindow) &  
+            (self.occurA.data['dateTime'] < t_sA+pltHalfWindow) &
             (self.occurA.data['dos1rate'] != -1E31)
             )[0]     
         idtB = np.where(
-            (self.occurB.data['dateTime'] > t_sB-timedelta(seconds=windowWidth/2)) &  
-            (self.occurB.data['dateTime'] < t_sB+timedelta(seconds=windowWidth/2)) &
+            (self.occurB.data['dateTime'] > t_sB-pltHalfWindow) &  
+            (self.occurB.data['dateTime'] < t_sB+pltHalfWindow) &
             (self.occurB.data['dos1rate'] != -1E31)
             )[0]
+        # Find cross-correlation indicies
+        idtCCA = np.where(
+            (self.occurA.data['dateTime'] > t_sA-ccHalfWindow) &  
+            (self.occurA.data['dateTime'] < t_sA+ccHalfWindow) &
+            (self.occurA.data['dos1rate'] != -1E31)
+            )[0]     
+        idtCCB = np.where(
+            (self.occurB.data['dateTime'] > t_sB-ccHalfWindow) &  
+            (self.occurB.data['dateTime'] < t_sB+ccHalfWindow) &
+            (self.occurB.data['dos1rate'] != -1E31)
+            )[0]            
 
         time_lag = self.occurA.data['Lag_In_Track'][idtA[0]]
         shifted_times = [t - timedelta(seconds=time_lag) 
@@ -786,11 +811,12 @@ class CoincidenceRate:
 
         if hasattr(ax, '__len__'):
             # Plot the mean-subtracted values
-            meanA = self.occurA.data['dos1rate'][idtA].mean()
+            meanA = self.occurA.data['dos1rate'][idtCCA].mean()
+            meanB = self.occurB.data['dos1rate'][idtCCB].mean()
+            
             ax[1].plot(self.occurA.data['dateTime'][idtA], 
                     self.occurA.data['dos1rate'][idtA]-meanA, 
                     'r', label='AC6A')
-            meanB = self.occurB.data['dos1rate'][idtB].mean()
             ax[1].plot(shifted_times, 
                         self.occurB.data['dos1rate'][idtB]-meanB, 
                         'b', label='AC6B')
@@ -812,7 +838,6 @@ class CoincidenceRate:
         return
 
     
-        
 def sec2day(s):
     """ Convert seconds to fraction of a day."""
     return s/86400

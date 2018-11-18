@@ -598,6 +598,10 @@ class CoincidenceRate:
         This method calculates the normalized cross-correlation 
         between two AC6 time series indexed by iA and iB.
         """
+        norm = np.sqrt(len(self.occurA.data['dos1rate'][iA])*\
+                       len(self.occurB.data['dos1rate'][iB])*\
+                       np.var(self.occurA.data['dos1rate'][iA])*\
+                       np.var(self.occurB.data['dos1rate'][iB])) 
         # Mean subtraction.
         x = (self.occurA.data['dos1rate'][iA] - 
             self.occurA.data['dos1rate'][iA].mean() )
@@ -606,7 +610,7 @@ class CoincidenceRate:
         # Cross-correlate
         ccArr = np.correlate(x, y, mode='valid')
         # Normalization
-        ccArr /= np.sqrt(len(x)*len(y)*np.var(x)*np.var(y)) 
+        ccArr /= norm
         return max(ccArr)
 
     def save_training_data(self, sc_id, idx, ccWindow):

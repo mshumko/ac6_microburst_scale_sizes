@@ -708,7 +708,7 @@ class CoincidenceRate:
         #             a.cla()
         return
 
-    def _make_time_plots(self, ax, windowWidth, burstInfo):
+    def _make_time_plots(self, ax, windowWidth, burstInfo, fill_between=True):
         """ 
         This method handles the plotting of the time-aligned timeseries.
         """
@@ -743,19 +743,17 @@ class CoincidenceRate:
             meanA = self.occurA.data['dos1rate'][idCCA].mean()
             meanB = self.occurB.data['dos1rate'][idCCB].mean()
 
-            maxC = np.max([np.max(self.occurA.data['dos1rate'][idtA] - meanA), 
-                           np.max(self.occurB.data['dos1rate'][idtB] - meanB)])
-
             ax[1].plot(self.occurA.data['dateTime'][idtA], 
                     self.occurA.data['dos1rate'][idtA]-meanA, 
                     'r', label='AC6A')
             ax[1].plot(self.occurB.data['dateTime'][idtB], 
                         self.occurB.data['dos1rate'][idtB]-meanB, 
                         'b', label='AC6B')
+            # My implementation of plt.fill_between but for this plot.
+            self.fill_between(self.occurA.data['dateTime'], 
+                              self.occurB.data['dateTime'], 
+                              idCCA, idCCB, ax[1])  
             ax[1].set_ylabel('Mean subtracted')
-            ax[1].hlines(maxC, t0-timedelta(seconds=self.ccWindow/2),
-                         t0+timedelta(seconds=self.ccWindow/2), 
-                          colors='grey')
         else:
             ax = [ax]
 
@@ -794,32 +792,38 @@ class CoincidenceRate:
             (self.occurB.data['dos1rate'] != -1E31)
             )[0]
         # Find cross-correlation indicies
-        idtCCA = np.where(
+        idCCA = np.where(
             (self.occurA.data['dateTime'] > t_sA-ccHalfWindow) &  
             (self.occurA.data['dateTime'] < t_sA+ccHalfWindow) &
             (self.occurA.data['dos1rate'] != -1E31)
             )[0]     
-        idtCCB = np.where(
+        idCCB = np.where(
             (self.occurB.data['dateTime'] > t_sB-ccHalfWindow) &  
             (self.occurB.data['dateTime'] < t_sB+ccHalfWindow) &
             (self.occurB.data['dos1rate'] != -1E31)
             )[0]            
 
         time_lag = self.occurA.data['Lag_In_Track'][idtA[0]]
-        shifted_times = [t - timedelta(seconds=time_lag) 
+        shifted_times = np.array([t - timedelta(seconds=time_lag) 
+                    for t in self.occurB.data['dateTime']])
+        shifted_times_flt = [t - timedelta(seconds=time_lag) 
                     for t in self.occurB.data['dateTime'][idtB]]
 
         if hasattr(ax, '__len__'):
             # Plot the mean-subtracted values
-            meanA = self.occurA.data['dos1rate'][idtCCA].mean()
-            meanB = self.occurB.data['dos1rate'][idtCCB].mean()
+            meanA = self.occurA.data['dos1rate'][idCCA].mean()
+            meanB = self.occurB.data['dos1rate'][idCCB].mean()
             
             ax[1].plot(self.occurA.data['dateTime'][idtA], 
                     self.occurA.data['dos1rate'][idtA]-meanA, 
                     'r', label='AC6A')
-            ax[1].plot(shifted_times, 
+            ax[1].plot(shifted_times_flt, 
                         self.occurB.data['dos1rate'][idtB]-meanB, 
                         'b', label='AC6B')
+            # My implementation of plt.fill_between but for this plot.
+            self.fill_between(self.occurA.data['dateTime'], 
+                              shifted_times, 
+                              idCCA, idCCB, ax[1])  
             ax[1].set_ylabel('Mean subtracted')
         else:
             ax = [ax]
@@ -827,7 +831,7 @@ class CoincidenceRate:
         ax[0].plot(self.occurA.data['dateTime'][idtA], 
                     self.occurA.data['dos1rate'][idtA], 
                     'r', label='AC6A')
-        ax[0].plot(shifted_times, 
+        ax[0].plot(shifted_times_flt, 
                     self.occurB.data['dos1rate'][idtB], 
                     'b', label='AC6B')
         ax[0].text(0, 1, 'space_CC={:.2f}\nAC6-B shift={:.2f}'.format(sCC, time_lag), 
@@ -835,6 +839,32 @@ class CoincidenceRate:
         #ax.axvline(t_sA, c='r')
         #ax.axvline(t_sB, c='b')
         #ax.legend(loc=1)
+        return
+
+    def fill_between(self, timeA, timeB, idCCA, idCCB, ax, alpha=0.25):
+        """
+        This method fills in the mean-subtracted dos1rate 
+        timeseries for CC indicies (given by idCCA and idCCB).
+        ax is the subplot to plot to.
+        """
+        meanA = self.occurA.data['dos1rate'][idCCA].mean()
+        meanB = self.occurB.data['dos1rate'][idCCB].mean()
+        ax.fill_between(timeA[idCCA], 0, 
+                                self.occurA.data['dos1rate'][idCCA]-meanA, 
+                                where=self.occurA.data['dos1rate'][idCCA]-meanA > 0, 
+                                facecolor='red', interpolate=True, alpha=alpha)
+        ax.fill_between(timeA[idCCA], 0, 
+                            self.occurA.data['dos1rate'][idCCA]-meanA, 
+                            where=self.occurA.data['dos1rate'][idCCA]-meanA < 0, 
+                            facecolor='blue', interpolate=True, alpha=alpha)
+        ax.fill_between(timeB[idCCB], 0, 
+                                self.occurB.data['dos1rate'][idCCB]-meanB, 
+                                where=self.occurB.data['dos1rate'][idCCB]-meanB > 0, 
+                                facecolor='red', interpolate=True, alpha=alpha)
+        ax.fill_between(timeB[idCCB], 0, 
+                                self.occurB.data['dos1rate'][idCCB]-meanB, 
+                                where=self.occurB.data['dos1rate'][idCCB]-meanB < 0, 
+                                facecolor='blue', interpolate=True, alpha=alpha)
         return
 
     
@@ -848,7 +878,7 @@ if __name__ == '__main__':
     cr = CoincidenceRate(datetime(2015, 5, 6), 3)
     cr.radBeltIntervals()
     cr.sortBursts(testData=False)
-    cr.calcMicroburstRate()
+    #cr.calcMicroburstRate()
     cr.test_plots()
 
     # # This code section loops over all of the AC6 data to 

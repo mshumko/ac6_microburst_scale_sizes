@@ -871,7 +871,7 @@ class CoincidenceRate:
                                 facecolor='blue', interpolate=True, alpha=alpha)
         return
 
-    
+
 def sec2day(s):
     """ Convert seconds to fraction of a day."""
     return s/86400

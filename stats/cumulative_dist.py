@@ -58,9 +58,10 @@ class CumulativeDist:
         4. Save the cross-correlation values to self.data array.
         """
         # self.data contains a copy of the catalog values as well as
-        # three values: time at the point the other sc is at the same
-        # position as the current sc, and time and space 
-        # cross-correlation. Lastly, the sc_id is saved. 
+        # four values: time cross-correlation, space cross-correlation
+        # center spatial time for unit A, center spatial time for unit B.
+        # To identify which spacecraft the microburst was detected, look
+        # for the spatial time which matches the 'dateTime' time.
         self.data = np.nan*np.zeros((0, len(c.catA.keys())+4))
         self.dates = self._find_loop_dates()
 
@@ -106,9 +107,10 @@ class CumulativeDist:
             space_cc = self.CC(out[2], out[3])
             if sc_id.upper() == 'A':
                 line = np.concatenate(([self.catA[key][i] for key in self.catA.keys()],
-                                       time_cc, space_cc))
+                                       [time_cc, space_cc, out[-2], out[-1]]))
             else:
-                line = np.concatenate(([]))
+                line = np.concatenate(([self.catB[key][i] for key in self.catB.keys()],
+                                       [time_cc, space_cc, out[-2], out[-1]]))
             self.data = np.vstack((self.data, line))
         return
 

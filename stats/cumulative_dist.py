@@ -95,10 +95,12 @@ class CumulativeDist:
 
     def _find_loop_dates(self):
         """ Get all of the unique AC6 data dates. """
-        self.catDatesA = date2num([ti.date() for ti in self.catA['dateTime']])
-        self.catDatesB = date2num([ti.date() for ti in self.catB['dateTime']])
-        unique_num_dates = sorted(list(set(self.catDatesA) & 
-                                        set(self.catDatesB)))
+        self.catDatesA = np.array([ti.date() for ti in self.catA['dateTime']])
+        self.catDatesB = np.array([ti.date() for ti in self.catB['dateTime']])
+        self.catNumDatesA = date2num(self.catDatesA)
+        self.catNumDatesB = date2num(self.catDatesB)
+        unique_num_dates = sorted(list(set(self.catNumDatesA) & 
+                                        set(self.catNumDatesB)))
         return num2date(unique_num_dates)
 
     def _daily_microburst_loop(self, sc_id, idx):

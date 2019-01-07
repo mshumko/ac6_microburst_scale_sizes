@@ -14,7 +14,7 @@ import functools
 import mission_tools.ac6.read_ac_data as read_ac_data
 
 class CumulativeDist:
-    def __init__(self, catV, catPath=None, cc_width=1, cc_overlap=2):
+    def __init__(self, catV, catPath=None, cc_width=1, cc_overlap=2, verbose=True):
         """
         NAME: CumulativeDist
         USE:  For each day, the loop method calculates the 
@@ -39,6 +39,7 @@ class CumulativeDist:
         self.catB = self._load_catalog('B', catPath, catV)
         self.cc_width = cc_width
         self.cc_overlap=cc_overlap
+        self.verbose = verbose
         return
 
     def loop(self):
@@ -66,6 +67,7 @@ class CumulativeDist:
         self.dates = self._find_loop_dates()
 
         for date in self.dates:
+            if self.verbose: print('Processing data on', date.date())
             # Load 10 Hz data from both spacecraft.
             self.tenHzA = read_ac_data.read_ac_data_wrapper(
                                 'A', date)
@@ -75,7 +77,9 @@ class CumulativeDist:
             idA = np.where(date.date() == self.catDatesA)[0]
             idB = np.where(date.date() == self.catDatesB)[0]
             # Loop over the daily detections and cross-correlate.
+            if self.verbose: print('Looping over AC6-A detections')
             self._daily_microburst_loop('A', idA)
+            if self.verbose: print('Looping over AC6-B detections')
             self._daily_microburst_loop('B', idB)            
         return
 
@@ -83,7 +87,7 @@ class CumulativeDist:
         """ Saves the catalog to a savePath file """
         with open(savePath, 'w') as f:
             w = csv.writer(f)
-            w.writerow(np.concatenate((self.catA.keys(), 
+            w.writerow(np.concatenate((list(self.catA.keys()), 
                     ['time_cc', 'space_cc', 
                     'time_spatial_A', 'time_spatial_B'])))
             w.writerows(self.data)
@@ -241,5 +245,7 @@ class CumulativeDist:
 
 if __name__ == '__main__':
     c = CumulativeDist(3)
-    c.loop()
-    c.save_catalog('coincident_microburst_test.csv')
+    try:
+        c.loop()
+    finally:
+        c.save_catalog('coincident_microburst_test.csv')

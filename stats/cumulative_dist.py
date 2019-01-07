@@ -79,6 +79,16 @@ class CumulativeDist:
             self._daily_microburst_loop('B', idB)            
         return
 
+    def save_catalog(self, savePath):
+        """ Saves the catalog to a savePath file """
+        with open(savePath, 'w') as f:
+            w = csv.writer(f)
+            w.writerow(np.concatenate((self.catA.keys(), 
+                    ['time_cc', 'space_cc', 
+                    'time_spatial_A', 'time_spatial_B'])))
+            w.writerows(self.data)
+        return
+
     def _find_loop_dates(self):
         """ Get all of the unique AC6 data dates. """
         self.catDatesA = date2num([ti.date() for ti in self.catA['dateTime']])
@@ -232,3 +242,4 @@ class CumulativeDist:
 if __name__ == '__main__':
     c = CumulativeDist(3)
     c.loop()
+    c.save_catalog('coincident_microburst_test.csv')

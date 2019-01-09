@@ -6,7 +6,7 @@ converters = {0:dateutil.parser.parse,
             -1:dateutil.parser.parse, 
             -2:dateutil.parser.parse}
 
-bins = np.arange(0, 200, 5)
+bins = np.arange(0, 70, 5)
 frac = np.nan*np.zeros(len(bins)-1)
 CC_thresh = 0.8
 

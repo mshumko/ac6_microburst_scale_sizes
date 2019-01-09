@@ -23,10 +23,10 @@ for i, (lower_edge, upper_edge) in enumerate(zip(bins[:-1], bins[1:])):
                         (data['Dist_Total'] > lower_edge) & 
                         (data['Dist_Total'] <= upper_edge) &
                         #np.logical_not((years == 2015) & (months == 4)) &
-                        (np.abs(data['Lm_OPQ']) < 8) & (data['dos1rate'] > 100)
+                        #(np.abs(data['Lm_OPQ']) < 8) & (data['dos1rate'] > 100)
+                        (data['time_cc'] > data['space_cc'])
                         )[0]
-        idCoincident = np.where((data['time_cc'][idsep] >= CC_thresh) & 
-                        (data['time_cc'][idsep] > data['space_cc'][idsep]))[0]
+        idCoincident = np.where((data['time_cc'][idsep] >= CC_thresh))[0]
         if len(idsep):
                 frac[i] = len(idCoincident)/len(idsep)
 
@@ -36,7 +36,7 @@ for i, (lower_edge, upper_edge) in enumerate(zip(bins[:-1], bins[1:])):
 pdf = np.convolve([-1, 1], frac, mode='valid')
 
 fig, ax = plt.subplots(1, sharex=True)
-ax.bar(bins[:-1], frac, width=(bins[1]-bins[0])*0.8)
+ax.bar(np.convolve([0.5, 0.5], bins, mode='valid'), frac, width=(bins[1]-bins[0])*0.8)
 ax.set_ylabel('CDF')
 
 # ax[1].bar(bins[1:-1], pdf, width=(bins[1]-bins[0])*0.8)

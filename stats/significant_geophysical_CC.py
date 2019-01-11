@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
@@ -7,7 +8,7 @@ from mission_tools.ac6 import read_ac_data
 Re=6371 # km
 
 class SignificantNoise:
-    def __init__(self, sc_id, date, microburst_time, CC_width=1):
+    def __init__(self, sc_id, date, CC_width=1, bins=np.arange(55, 70)):
         """
         This class calculates the fraction of random cross-correlations 
         above CC_threshold. This gives an indication of the fraction of
@@ -16,19 +17,41 @@ class SignificantNoise:
         self.sc_id = sc_id
         self.date = date
         self.CC_width = CC_width
-        self.microburst_time = microburst_time
+        self.bins = bins
         self._load_data() # Load 10 Hz data from date.
         return
 
-    def main(self, N=1E6, bins=np.arange(0, 70, 5)):
+    def main(self, N=100):
         """
-        This method loops N times and for each iteration picks a random
-        CC_width dos1 count rates and cross correlates it against the 
-        CC_width count rates centered on self.micrburst_time
+        This method loops over a meshgrid specified by self.bins and
+        for each bin calculates N CC's between random dos1 time series
+        of length self.CC_width
         """
-        #self._find_reference_microbirst_counts()
-        #self._calc_dist_relative_to_ref()
+        XX, YY = np.meshgrid((self.bins, self.bins))
+        self.CC_arr = np.nan*np.zeros((*XX.shape, N), dtype=float)
+        lx, ly = XX.shape
+        CC_data_width = 5/self.CC_width 
 
+        # Loop over the meshgrid.
+        for (i, j) in itertools.product(range(lx-1), range(ly-1)):
+            bin_i_edges = (XX[i], XX[i+i])
+            bin_j_edges = (YY[i], YY[i+i])
+
+            for k in range(N):
+                # Find all data indicies in that bin
+                idx = np.where((self.tenHzData['Inv_Lat_OPQ'] > bin_i_edges[0]) & 
+                                (self.tenHzData['Inv_Lat_OPQ'] <= bin_i_edges[1]))[0]
+                jdx = np.where((self.tenHzData['Inv_Lat_OPQ'] > bin_j_edges[0]) & 
+                                (self.tenHzData['Inv_Lat_OPQ'] <= bin_j_edges[1]))[0]
+                # Pick a random center CC indicie
+                cc_center_ind_i = np.random.choice(idx)
+                cc_center_ind_j = np.random.choice(jdx)
+
+                cc_ind_i = np.arange(cc_center_ind_i - CC_data_width, 
+                                    cc_center_ind_i + CC_data_width)
+                cc_ind_j = np.arange(cc_center_ind_j - CC_data_width, 
+                                    cc_center_ind_j + CC_data_width)
+                self.CC_arr[i, j, k] = self.CC(cc_ind_i, cc_ind_j)
         return
 
     def CC(self, iA, iB):

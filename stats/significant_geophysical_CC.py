@@ -21,37 +21,63 @@ class SignificantNoise:
         self._load_data() # Load 10 Hz data from date.
         return
 
-    def main(self, N=100):
+    def main(self, N=100, CC_width_thresh=1, verbose=True):
         """
         This method loops over a meshgrid specified by self.bins and
         for each bin calculates N CC's between random dos1 time series
-        of length self.CC_width
+        of length self.CC_width. CC_width_thresh is the wiggle room to 
+        calculate the max CC.
         """
-        XX, YY = np.meshgrid((self.bins, self.bins))
+        XX, YY = np.meshgrid(self.bins, self.bins)
         self.CC_arr = np.nan*np.zeros((*XX.shape, N), dtype=float)
         lx, ly = XX.shape
         CC_data_width = 5/self.CC_width 
+        InvLat_OPQ = np.abs(self.tenHzData['InvLat_OPQ'])
 
         # Loop over the meshgrid.
         for (i, j) in itertools.product(range(lx-1), range(ly-1)):
-            bin_i_edges = (XX[i], XX[i+i])
-            bin_j_edges = (YY[i], YY[i+i])
+            bin_i_edges = (XX[i, j], XX[i, j+1])
+            bin_j_edges = (YY[i, j], YY[i+1, j])
+
+            # Find all data indicies in  InvLat bin
+            idx = np.where((InvLat_OPQ > bin_i_edges[0]) & 
+                            (InvLat_OPQ <= bin_i_edges[1]))[0]
+            jdx = np.where((InvLat_OPQ > bin_j_edges[0]) & 
+                            (InvLat_OPQ <= bin_j_edges[1]))[0]
+            if verbose:
+                print('Invlat Edges = ', bin_i_edges, bin_j_edges)
+                print('Number of data points = ', len(idx), len(jdx))
+
+            # Pick N random center CC indicies
+            centers_i = np.random.choice(idx, size=N)
+            centers_j = np.random.choice(jdx, size=N)
 
             for k in range(N):
-                # Find all data indicies in that bin
-                idx = np.where((self.tenHzData['Inv_Lat_OPQ'] > bin_i_edges[0]) & 
-                                (self.tenHzData['Inv_Lat_OPQ'] <= bin_i_edges[1]))[0]
-                jdx = np.where((self.tenHzData['Inv_Lat_OPQ'] > bin_j_edges[0]) & 
-                                (self.tenHzData['Inv_Lat_OPQ'] <= bin_j_edges[1]))[0]
-                # Pick a random center CC indicie
-                cc_center_ind_i = np.random.choice(idx)
-                cc_center_ind_j = np.random.choice(jdx)
-
-                cc_ind_i = np.arange(cc_center_ind_i - CC_data_width, 
-                                    cc_center_ind_i + CC_data_width)
-                cc_ind_j = np.arange(cc_center_ind_j - CC_data_width, 
-                                    cc_center_ind_j + CC_data_width)
+                cc_ind_i = np.arange(centers_i[k] - CC_data_width, 
+                                     centers_i[k] + CC_data_width, 
+                                     dtype=int)
+                cc_ind_j = np.arange(centers_j[k] - CC_data_width - CC_width_thresh, 
+                                     centers_j[k] + CC_data_width + CC_width_thresh,
+                                     dtype=int)
+                if (max(cc_ind_i) > len(InvLat_OPQ) or max(cc_ind_j) > len(InvLat_OPQ)):
+                    continue
                 self.CC_arr[i, j, k] = self.CC(cc_ind_i, cc_ind_j)
+        return
+
+    def calc_CDF(self, CC_thresh=0.8):
+        """
+        For each bin on self.CC_arr, calculate the fraction of CC values greater
+        than CC_thresh
+        """
+        self.cdf_grid = np.nan*np.zeros((len(self.bins)-1, len(self.bins)-1), dtype=float)
+
+        lx, ly, _ = self.CC_arr.shape
+        #idx = np.where(signif.CC_arr > 0.8)
+        # Loop over the CC_arr meshgrid.
+        for (i, j) in itertools.product(range(lx-1), range(ly-1)):
+            ids = np.where(self.CC_arr[i, j, :] > CC_thresh)[0]
+            idtotal = np.where(~np.isnan(self.CC_arr[i, j, :]))[0]
+            self.cdf_grid[i, j] = len(ids)/len(idtotal)
         return
 
     def CC(self, iA, iB):
@@ -74,48 +100,6 @@ class SignificantNoise:
         ccArr /= norm
         return max(ccArr)
 
-    # def _calc_dist_relative_to_ref(self):
-    #     """ 
-    #     Calculate the distance from the position at self.microburst_time 
-    #     to all other data points.
-    #     """
-    #     idt = np.where(self.tenHzData['dateTime'] > self.microburst_time)[0][0]
-    #     ref_pos = np.array([self.tenHzData['lat'][idt],
-    #                         self.tenHzData['lon'][idt],
-    #                         self.tenHzData['alt'][idt]])
-    #     X1 = np.tile(ref_pos, (len(self.tenHzData['lat']), 1))
-    #     X2 = np.array([self.tenHzData['lat'], 
-    #                     self.tenHzData['lon'],
-    #                     self.tenHzData['alt']]).T
-    #     self.dist = self.haversine(X1, X2)
-    #     return
-
-    # def haversine(self, X1, X2):
-    #     """
-    #     Implementation of the haversine foruma to calculate total distance
-    #     at an average altitude. X1 and X2 must be N*3 array of 
-    #     lat, lon, alt.
-    #     """
-    #     X1 = np.asarray(X1)
-    #     X2 = np.asarray(X2)
-    #     R = (Re+(X1[:, 2]+X2[:, 2])/2)
-    #     s = 2*np.arcsin( np.sqrt( np.sin(np.deg2rad(X1[:, 0]-X2[:, 0])/2)**2 + \
-    #                     np.cos(np.deg2rad(X1[:, 0]))*np.cos(np.deg2rad(X2[:, 0]))*\
-    #                     np.sin(np.deg2rad(X1[:, 1]-X2[:, 1])/2)**2 ))
-    #     return R*s
-    
-    def _find_reference_microbirst_counts(self):
-        """ 
-        Find and return the dos1 count rates that are centered on 
-        self.microburst_time.
-        """
-        tRange = [self.microburst_time - timedelta(seconds=self.CC_width/2),
-                       self.microburst_time + timedelta(seconds=self.CC_width/2)]
-        idt = np.where((self.tenHzData['dateTime'] > tRange[0]) & 
-                       (self.tenHzData['dateTime'] <= tRange[1]))[0]
-        self.ref_counts = self.tenHzData['dos1rate'][idt]
-        return 
-
     def _load_data(self):
 
         self.tenHzData = read_ac_data.read_ac_data_wrapper(
@@ -126,5 +110,6 @@ if __name__ == '__main__':
     sc_id = 'A'
     date = datetime(2016, 10, 14)
     microburst_time = datetime(2016, 10, 14, 4, 27, 13)
-    signif = SignificantNoise(sc_id, date, microburst_time)
+    signif = SignificantNoise(sc_id, date)
     signif.main()
+    signif.calc_CDF()

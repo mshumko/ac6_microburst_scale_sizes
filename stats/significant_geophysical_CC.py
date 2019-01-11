@@ -8,7 +8,7 @@ from mission_tools.ac6 import read_ac_data
 Re=6371 # km
 
 class SignificantNoise:
-    def __init__(self, sc_id, date, CC_width=1, bins=np.arange(55, 70)):
+    def __init__(self, sc_id, date, CC_width=1, bins=np.arange(60, 70, 0.5)):
         """
         This class calculates the fraction of random cross-correlations 
         above CC_threshold. This gives an indication of the fraction of
@@ -21,23 +21,23 @@ class SignificantNoise:
         self._load_data() # Load 10 Hz data from date.
         return
 
-    def main(self, N=100, CC_width_thresh=1, verbose=True):
+    def main(self, N=50000, CC_width_thresh=1, verbose=True):
         """
         This method loops over a meshgrid specified by self.bins and
         for each bin calculates N CC's between random dos1 time series
         of length self.CC_width. CC_width_thresh is the wiggle room to 
         calculate the max CC.
         """
-        XX, YY = np.meshgrid(self.bins, self.bins)
-        self.CC_arr = np.nan*np.zeros((*XX.shape, N), dtype=float)
-        lx, ly = XX.shape
+        self.XX, self.YY = np.meshgrid(self.bins, self.bins)
+        self.CC_arr = np.nan*np.zeros((*self.XX.shape, N), dtype=float)
+        lx, ly = self.XX.shape
         CC_data_width = 5/self.CC_width 
         InvLat_OPQ = np.abs(self.tenHzData['InvLat_OPQ'])
 
         # Loop over the meshgrid.
         for (i, j) in itertools.product(range(lx-1), range(ly-1)):
-            bin_i_edges = (XX[i, j], XX[i, j+1])
-            bin_j_edges = (YY[i, j], YY[i+1, j])
+            bin_i_edges = (self.XX[i, j], self.XX[i, j+1])
+            bin_j_edges = (self.YY[i, j], self.YY[i+1, j])
 
             # Find all data indicies in  InvLat bin
             idx = np.where((InvLat_OPQ > bin_i_edges[0]) & 
@@ -59,7 +59,8 @@ class SignificantNoise:
                 cc_ind_j = np.arange(centers_j[k] - CC_data_width - CC_width_thresh, 
                                      centers_j[k] + CC_data_width + CC_width_thresh,
                                      dtype=int)
-                if (max(cc_ind_i) > len(InvLat_OPQ) or max(cc_ind_j) > len(InvLat_OPQ)):
+                if ((max(cc_ind_i) > len(InvLat_OPQ)-1 or max(cc_ind_j) > len(InvLat_OPQ)-1) or 
+                    (min(cc_ind_i) < 0 or min(cc_ind_j) < 0)):
                     continue
                 self.CC_arr[i, j, k] = self.CC(cc_ind_i, cc_ind_j)
         return
@@ -108,8 +109,16 @@ class SignificantNoise:
         
 if __name__ == '__main__':
     sc_id = 'A'
+    CC_thresh = 0.8
     date = datetime(2016, 10, 14)
-    microburst_time = datetime(2016, 10, 14, 4, 27, 13)
     signif = SignificantNoise(sc_id, date)
     signif.main()
-    signif.calc_CDF()
+    signif.calc_CDF(CC_thresh=CC_thresh)
+
+    plt.pcolormesh(signif.XX, signif.YY, signif.cdf_grid)
+    plt.title('AC6A random CC | {} | CC_thresh = {}'.format(date.date(), CC_thresh))
+    plt.xlabel(r'$\Lambda$')
+    plt.ylabel(r'$\Lambda$')
+    plt.colorbar()
+    plt.savefig('AC6_significant_random_CC.png', dpi=300)
+    #plt.show()

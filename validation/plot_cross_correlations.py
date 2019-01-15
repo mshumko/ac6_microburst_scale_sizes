@@ -11,12 +11,12 @@ import mission_tools.ac6.read_ac_data as read_ac_data
 
 class PlotCrossCorrelatedBursts:
     def __init__(self, catPath, saveDir='/home/mike/Desktop/validation_plots'):
+        self.saveDir = os.path.join(saveDir, datetime.now().date().isoformat())
+        if not os.path.exists(self.saveDir):
+            os.mkdir(self.saveDir)
+            print('Made directory:', self.saveDir)
+
         self.cat = self._load_catalog_(catPath)
-        
-        saveDir = sys.path.join( (saveDir, datetime.now().date()) )
-        if not os.path.exists(saveDir):
-            os.mkdir(saveDir)
-            print('Made directory:', saveDir)
         return
 
     def filter_catalog(self, flt):
@@ -40,12 +40,50 @@ class PlotCrossCorrelatedBursts:
             self.cat[key] = self.cat[key][idx]
         return
 
-    def loop(self):
+    def loop(self, pltWidth=5, ccWidth=1):
         """ 
         This method will loop over the catalog and make plots of 
         coincident microbursts at the same time and position. CC
         information will be annotated.
         """
+        prev_date = datetime.min
+        _, self.ax = plt.subplots(2, figsize=(8, 10))
+
+        for row, t0 in enumerate(self.cat['dateTime']):
+            # Load data on t0 if it has not been loaded already.
+            if t0.date() != prev_date.date():
+                print('Loading data from', t0.date())
+                self.dataA = read_ac_data.read_ac_data_wrapper('A', t0)
+                self.dataB = read_ac_data.read_ac_data_wrapper('B', t0)
+                prev_date = t0
+
+            # Plot count rates.
+            plotdt = timedelta(seconds=pltWidth/2)
+            ccdt = timedelta(seconds=ccWidth/2)
+
+            idA = np.where( (self.dataA['dateTime'] > t0-plotdt) & 
+                            (self.dataA['dateTime'] < t0+plotdt) &
+                            (self.dataA['dos1rate'] >= 0)
+                            )[0]
+            idB = np.where( (self.dataB['dateTime'] > t0-plotdt) & 
+                            (self.dataB['dateTime'] < t0+plotdt) &
+                            (self.dataB['dos1rate'] >= 0)
+                            )[0] 
+            self.ax[0].plot(self.dataA['dateTime'][idA], self.dataA['dos1rate'][idA], 'r', 
+                    label='AC6A dos1rate')
+            self.ax[0].plot(self.dataB['dateTime'][idB], self.dataB['dos1rate'][idB], 'b', 
+                    label='AC6B dos1rate')
+            self.ax[0].legend(loc=1)
+            self.ax[0].set_ylabel('Counts/s')
+            self.ax[1].set_xlabel('UTC')
+
+            # Save plot.
+            saveDate = t0.replace(microsecond=0).isoformat().replace(':', '')
+            saveName = '{}_microburst_validation.png'.format(saveDate)
+            plt.savefig(os.path.join(self.saveDir, saveName))
+
+            for a in self.ax:
+                a.clear() # Clear axis.
 
         return
 
@@ -69,3 +107,4 @@ if __name__ == '__main__':
     path = './../stats/coincident_microburst_test_v2.csv'
     p = PlotCrossCorrelatedBursts(path)
     p.filter_catalog(('Dist_Total', 60, 100))
+    p.loop()

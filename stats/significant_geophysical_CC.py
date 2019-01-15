@@ -110,7 +110,7 @@ class SignificantNoise:
 if __name__ == '__main__':
     sc_id = 'A'
     CC_thresh = 0.8
-    date = datetime(2016, 10, 14)
+    date = datetime(2015, 4, 25)
     signif = SignificantNoise(sc_id, date)
     signif.main()
     signif.calc_CDF(CC_thresh=CC_thresh)

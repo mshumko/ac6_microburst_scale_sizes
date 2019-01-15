@@ -6,13 +6,13 @@ converters = {0:dateutil.parser.parse,
             -1:dateutil.parser.parse, 
             -2:dateutil.parser.parse}
 
-bins = np.arange(0, 70, 5)
+bins = np.arange(0, 200, 5)
 frac = np.nan*np.zeros(len(bins)-1)
 CC_thresh = 0.8
 
 dtypes = (object, float, float, float, float, float, float, float, 
         float, float, float, float, float, float, float, object, object)
-data = np.genfromtxt('coincident_microburst_test.csv', delimiter=',',
+data = np.genfromtxt('coincident_microburst_test_v2.csv', delimiter=',',
         names=True, dtype=dtypes)#, converters=converters)
 # years = np.array([t.year for t in data['dateTime']])
 # months = np.array([t.month for t in data['dateTime']])

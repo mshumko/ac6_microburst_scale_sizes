@@ -85,6 +85,7 @@ class CumulativeDist:
 
     def save_catalog(self, savePath):
         """ Saves the catalog to a savePath file """
+        self._sort_catalog()
         with open(savePath, 'w') as f:
             w = csv.writer(f)
             w.writerow(np.concatenate((list(self.catA.keys()), 
@@ -102,6 +103,15 @@ class CumulativeDist:
         unique_num_dates = sorted(list(set(self.catNumDatesA) & 
                                         set(self.catNumDatesB)))
         return num2date(unique_num_dates)
+
+    def _sort_catalog(self, duplicate_thresh=0.1):
+        """ 
+        This method sorts the catalog file to be saved and removes
+        duplicate events that are defined as events occuring within a
+        duplicate_thresh (in seconds)
+        """
+        self.data = sorted(self.data, key=lambda t: t[0])
+        return
 
     def _daily_microburst_loop(self, sc_id, idx):
         """

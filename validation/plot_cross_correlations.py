@@ -47,7 +47,7 @@ class PlotCrossCorrelatedBursts:
         information will be annotated.
         """
         prev_date = datetime.min
-        _, self.ax = plt.subplots(2, figsize=(8, 10))
+        _, self.ax = plt.subplots(2, figsize=(8, 8))
 
         for row, t0 in enumerate(self.cat['dateTime']):
             # Load data on t0 if it has not been loaded already.
@@ -69,10 +69,16 @@ class PlotCrossCorrelatedBursts:
                             (self.dataB['dateTime'] < t0+plotdt) &
                             (self.dataB['dos1rate'] >= 0)
                             )[0] 
-            self.ax[0].plot(self.dataA['dateTime'][idA], self.dataA['dos1rate'][idA], 'r', 
+            cA = self.dataA['dos1rate'][idA] - self.dataA['dos1rate'][idA].mean()
+            cB = self.dataB['dos1rate'][idB] - self.dataB['dos1rate'][idB].mean()
+
+            self.ax[0].plot(self.dataA['dateTime'][idA], cA, 'r', 
                     label='AC6A dos1rate')
-            self.ax[0].plot(self.dataB['dateTime'][idB], self.dataB['dos1rate'][idB], 'b', 
+            self.ax[0].plot(self.dataB['dateTime'][idB], cB, 'b', 
                     label='AC6B dos1rate')
+            self.ax[0].axvline(t0, c='k')
+            self.ax[0].text(0.05, 0.9, 'time_CC = {}'.format(round(self.cat['time_cc'][row], 2)), 
+                            transform=self.ax[0].transAxes, ha='left')
             self.ax[0].legend(loc=1)
             self.ax[0].set_ylabel('Counts/s')
             self.ax[1].set_xlabel('UTC')
@@ -107,4 +113,5 @@ if __name__ == '__main__':
     path = './../stats/coincident_microburst_test_v2.csv'
     p = PlotCrossCorrelatedBursts(path)
     p.filter_catalog(('Dist_Total', 60, 100))
+    p.filter_catalog(('time_cc', 0.79, None))
     p.loop()

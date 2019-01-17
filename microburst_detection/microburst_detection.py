@@ -9,10 +9,10 @@ import sys
 import csv
 import os
 
-sys.path.insert(0, '/home/mike/research/mission-tools/ac6')
+sys.path.insert(0, '/home/mike/research/mission_tools/ac6')
 sys.path.insert(0, '/home/mike/research/microburst-detection/burst_parameter')
 sys.path.insert(0, '/home/mike/research/microburst-detection/wavelets')
-sys.path.insert(0, '/home/mike/research/mission-tools/misc')
+sys.path.insert(0, '/home/mike/research/mission_tools/misc')
 
 import read_ac_data
 import burst_parameter
@@ -221,7 +221,7 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
             'Dist_Cross_Track_Horiz', 'Dist_Cross_Track_Vert', 'Dist_Total'
         """
         self.d = read_ac_data.read_ac_data_wrapper(self.sc_id, self.date,
-            dType='10Hz', plot=False)
+            dType='10Hz')
         return
 
     def _getBurstParam(self, ch='dos1rate', n=0.1, a=0.5, thresh=5):
@@ -305,9 +305,11 @@ if __name__ == '__main__':
     # Good day for microbursts to test: 2016-10-14
     # Bad day to test: 2015-04-14
     for sc_id in ['A', 'B']:
-        date = datetime(2016, 10, 14) 
+        date = datetime(2017, 3, 19) 
         obj = TestFindMicrobursts(sc_id, date)
         obj.getMicroburstIdx(method='obrien')
+#        obj.getMicroburstIdx(maxWidth=0.5, thresh=0.05,
+#            SIGNIF_LEVEL=0.1)
         #obj.saveData()
         obj.plotTimeseries()
         plt.show()

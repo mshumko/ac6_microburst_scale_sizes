@@ -37,6 +37,7 @@ class CumulativeDist:
                       '/data/microburst_catalogues')
         self.catA = self._load_catalog('A', catPath, catV)
         self.catB = self._load_catalog('B', catPath, catV)
+        self.catV = catV
         self.cc_width = cc_width
         self.cc_overlap=cc_overlap
         self.verbose = verbose
@@ -83,9 +84,15 @@ class CumulativeDist:
             self._daily_microburst_loop('B', idB)            
         return
 
-    def save_catalog(self, savePath):
+    def save_catalog(self, savePath=None):
         """ Saves the catalog to a savePath file """
+
+        if savePath is None:
+            saveDir = './../data/coincident_microbursts_catalogues'
+            saveName = 'AC6_coincident_microbursts_v{}.txt'.format(self.catV)
+            savePath = os.path.join(saveDir, saveName)
         self._sort_catalog()
+
         with open(savePath, 'w') as f:
             w = csv.writer(f)
             w.writerow(np.concatenate((list(self.catA.keys()), 
@@ -96,8 +103,10 @@ class CumulativeDist:
 
     def _find_loop_dates(self):
         """ Get all of the unique AC6 data dates. """
-        self.catDatesA = np.array([ti.date() for ti in self.catA['dateTime']])
-        self.catDatesB = np.array([ti.date() for ti in self.catB['dateTime']])
+        self.catDatesA = np.array([ti.date() 
+                                for ti in self.catA['dateTime']])
+        self.catDatesB = np.array([ti.date() 
+                                for ti in self.catB['dateTime']])
         self.catNumDatesA = date2num(self.catDatesA)
         self.catNumDatesB = date2num(self.catDatesB)
         unique_num_dates = sorted(list(set(self.catNumDatesA) & 
@@ -110,7 +119,13 @@ class CumulativeDist:
         duplicate events that are defined as events occuring within a
         duplicate_thresh (in seconds)
         """
-        self.data = sorted(self.data, key=lambda t: t[0])
+        #self.data = sorted(self.data, key=lambda t: t[0])
+        data_sorted = sorted(self.data, key=lambda x:x[0])
+        t = np.array([row[0] for row in data_sorted])
+        dt = np.array([i.total_seconds() 
+                    for i in (t[1:] - t[:-1])])
+        idt = np.where(dt > 0.2)[0] # Non-duplicate values
+        self.data = self.data[idt]
         return
 
     def _daily_microburst_loop(self, sc_id, idx):
@@ -260,4 +275,4 @@ if __name__ == '__main__':
     try:
         c.loop()
     finally:
-        c.save_catalog('coincident_microburst_test.csv')
+        c.save_catalog()

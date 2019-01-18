@@ -15,18 +15,24 @@ def mergeDailyFiles(sc_id, inDir, outPath):
     # Get all files in directory, sort so files are in temporal order.
     fileNames = sorted(glob.glob(
         os.path.join(inDir, 'AC6{}*.txt'.format(sc_id.upper())) ))
+    header_written = False
     
     with open(outPath, 'w', newline='') as sF: # Open empty merged file
         writer = csv.writer(sF)
         
         for (i, iFname) in enumerate(fileNames): # Loop over files
+            if os.path.getsize(iFname) < 114:
+                continue # If file is empty, skip it.
             with open(iFname, 'r') as iF:
                 reader = csv.reader(iF)
-                next(reader)
-                if i == 0:
+                #next(reader)
+                # Write header on the first line.
+                if not header_written:
                     writer.writerow(next(reader))
+                    header_written = True
                 else:
                     next(reader)
+
                 for line in reader:
                     # Don't copy the header, except for first file.
                     # if ('#' in line[0]) and (i > 0): 

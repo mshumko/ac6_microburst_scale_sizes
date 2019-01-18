@@ -111,6 +111,10 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
             saveName = 'AC6{}_{}_microbursts.txt'.format(self.sc_id, self.date.date())
             fPath = os.path.join(saveDir, saveName)
 
+        if len(self.peakInd) == 0:
+            print('No microbursts detected. Not saving the file {}.'.format(saveName))
+            return
+
         with open(fPath, 'w', newline='') as f:
             writer = csv.writer(f)
             #writer.writerow(headerl1)

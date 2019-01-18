@@ -2,9 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import dateutil.parser
 
-converters = {0:dateutil.parser.parse, 
-            -1:dateutil.parser.parse, 
-            -2:dateutil.parser.parse}
+version = 4
+catPath = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
+        'coincident_microbursts_catalogues/'
+       'AC6_coincident_microbursts_v{}.txt'.format(version))
+
+converters = {0:lambda t: dateutil.parser.parse(t.decode()), 
+            -1:lambda t: dateutil.parser.parse(t.decode()), 
+            -2:lambda t: dateutil.parser.parse(t.decode())}
 
 bins = np.arange(0, 100, 5)
 frac = np.nan*np.zeros(len(bins)-1)
@@ -13,7 +18,7 @@ CC_thresh = 0.8
 
 dtypes = (object, float, float, float, float, float, float, float, 
         float, float, float, float, float, float, float, object, object)
-data = np.genfromtxt('coincident_microburst_test_v2.csv', delimiter=',',
+data = np.genfromtxt(catPath, delimiter=',',
         names=True, dtype=dtypes)#, converters=converters)
 # years = np.array([t.year for t in data['dateTime']])
 # months = np.array([t.month for t in data['dateTime']])

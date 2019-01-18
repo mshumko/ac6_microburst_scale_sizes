@@ -18,6 +18,7 @@ import read_ac_data
 import burst_parameter
 import waveletAnalysis
 import locate_consecutive_numbers
+import obrienBaseline
 
 class FindMicrobursts(waveletAnalysis.WaveletDetector):
     def __init__(self, sc_id, date, runPipeline=False):
@@ -41,6 +42,7 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
             self._getWavelet(**kwargs)
 
         self._checkMicroburstFlag()
+        self._getBaselineThresh()
         return
 
     def corrFlag(self, ACwidth=2, CCwidth=1):
@@ -268,8 +270,24 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
                 et += 1
             # Index nightmare, but works. There may be a better way
             offset = validDataIdt[self.burstIdt[st]]
-            self.peakInd[i] = np.argmax(self.d[ch][validDataIdt[self.burstIdt[st:et]]]) + offset
+            self.peakInd[i] = np.argmax(
+                    self.d[ch][validDataIdt[self.burstIdt[st:et]]]) + offset
         self.peakInd = self.peakInd.astype(int)
+        return
+            
+    def _getBaselineThresh(self):
+        """ 
+        This method calculates the number of sigmas the particular detection is
+        above the popular 10% baseline that Paul developed way back in the 
+        Mesozoic Era.
+        """
+        print('Calculating 10% baseline')
+        self.baseline = obrienBaseline.obrienBaseline(
+                        self.d['dos1rate'], timeWidth=5.0, 
+                        cadence=0.1)
+        self.peak_std = ( (self.d['dos1rate'][self.peakInd]/10 - 
+                           self.baseline[self.peakInd]/10)/ 
+                           np.sqrt(self.d['dos1rate'][self.peakInd]/10))
         return
 
 class TestFindMicrobursts(FindMicrobursts):
@@ -290,22 +308,32 @@ class TestFindMicrobursts(FindMicrobursts):
             self.d['dos1rate'][validIdt]-np.sqrt(self.d['dos1rate'][validIdt]),
             self.d['dos1rate'][validIdt]+np.sqrt(self.d['dos1rate'][validIdt]),
             color='r', alpha=0.5)
-        self.ax[0].scatter(self.d['dateTime'][validIdt[self.burstIdt]], self.d['dos1rate'][validIdt[self.burstIdt]], c='b', s=50)
-        self.ax[0].scatter(self.d['dateTime'][self.peakInd], self.d['dos1rate'][self.peakInd], c='r', s=25)
+        self.ax[0].scatter(self.d['dateTime'][validIdt[self.burstIdt]], 
+                           self.d['dos1rate'][validIdt[self.burstIdt]], 
+                           c='b', s=50)
+        self.ax[0].scatter(self.d['dateTime'][self.peakInd], 
+                           self.d['dos1rate'][self.peakInd], 
+                           c='r', s=25)
         if hasattr(self, 'time'):
             self.ax[1].plot(self.d['dateTime'][validIdt], self.dataFlt)
         else:
             self.ax[1].plot(self.d['dateTime'][validIdt], self.burstParam)
             self.ax[1].set_ylim(-10, 10)
+        if hasattr(self, 'baseline'):
+            self.ax[0].plot(self.d['dateTime'], self.baseline, 'k')
+            self.ax[1].scatter(self.d['dateTime'][self.peakInd], self.peak_std,
+                                 c='k')
         self.ax[0].set_ylim(bottom=0, top=np.max(self.d['dos1rate'][validIdt]))
-        self.ax[2].scatter(self.d['dateTime'][self.peakInd], self.d['flag'][self.peakInd], c='r', s=25)
+        self.ax[2].scatter(self.d['dateTime'][self.peakInd], 
+                           self.d['flag'][self.peakInd], 
+                           c='r', s=25)
         return
 
 if __name__ == '__main__':
     # Good day for microbursts to test: 2016-10-14
-    # Bad day to test: 2015-04-14
+    # Bad day to test: 2015-04-14, 2017-3-19, 2017-3-20
     for sc_id in ['A', 'B']:
-        date = datetime(2017, 3, 19) 
+        date = datetime(2016, 10, 14) 
         obj = TestFindMicrobursts(sc_id, date)
         obj.getMicroburstIdx(method='obrien')
 #        obj.getMicroburstIdx(maxWidth=0.5, thresh=0.05,

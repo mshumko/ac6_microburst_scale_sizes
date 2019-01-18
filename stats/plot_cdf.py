@@ -16,12 +16,10 @@ frac = np.nan*np.zeros(len(bins)-1)
 num = np.nan*np.zeros(len(bins)-1)
 CC_thresh = 0.8
 
-dtypes = (object, float, float, float, float, float, float, float, 
-        float, float, float, float, float, float, float, object, object)
+dtypes = [object] + [float]*15 + 2*[object]
 data = np.genfromtxt(catPath, delimiter=',',
         names=True, dtype=dtypes)#, converters=converters)
-# years = np.array([t.year for t in data['dateTime']])
-# months = np.array([t.month for t in data['dateTime']])
+
 
 curtain_thresh = 0.1
 

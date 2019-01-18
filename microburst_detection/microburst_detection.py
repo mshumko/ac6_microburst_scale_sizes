@@ -98,11 +98,11 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
         Columns are: dateTime, dos1 amplitude (not baseline subtracted),
         L, MLT, lat, lon, alt, Loss_Cone_Type, 
         """
-        keys = ['dateTime', 'dos1rate', 'Lm_OPQ', 'MLT_OPQ', 'lat',
+        keys = ['dateTime', 'dos1rate', 'peak_std', 'Lm_OPQ', 'MLT_OPQ', 'lat',
             'lon', 'alt', 'Dist_In_Track', 'Lag_In_Track',
             'Dist_Total','Loss_Cone_Type', 'flag']
-        headerl1 = ['Microburst catalogue created on {}'.format(
-            datetime.now())]
+#        headerl1 = ['Microburst catalogue created on {}'.format(
+#            datetime.now())]
         headerl2 = copy.copy(keys)
         #headerl2[0] = '# {}'.format(headerl2[0])
 
@@ -113,14 +113,19 @@ class FindMicrobursts(waveletAnalysis.WaveletDetector):
 
         with open(fPath, 'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(headerl1)
+            #writer.writerow(headerl1)
             writer.writerow(headerl2)
 
-            line = [None]*len(keys)
-            for peakInd in self.peakInd:
+            row_arr = [None]*len(keys)
+            for row, peakInd in enumerate(self.peakInd):
                 for ic, key in enumerate(keys):
-                    line[ic] = self.d[key][peakInd]
-                writer.writerow(line)
+                    # Save data to file. if statement checks to make sure we 
+                    # are saving data from the 10Hz data or derived data.
+                    if key != 'peak_std':
+                        row_arr[ic] = self.d[key][peakInd]
+                    else:
+                        row_arr[ic] = self.peak_std[row]
+                writer.writerow(row_arr)
         return
 
     def _checkMicroburstFlag(self, gTx=True, scTx=True):

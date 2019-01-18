@@ -9,7 +9,7 @@ import merge_daily_data
 import replace_error_sep_lags
 import append_goemag_indicies
 
-cVersion = 3 #Catalog version
+cVersion = 4 #Catalog version
 outPath = ('/home/mike/research/'
             'ac6-microburst-scale-sizes/data/'
             'microburst_catalogues/'

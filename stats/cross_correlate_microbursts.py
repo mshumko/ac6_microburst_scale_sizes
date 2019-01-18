@@ -85,8 +85,10 @@ class CumulativeDist:
         return
 
     def save_catalog(self, savePath=None):
-        """ Saves the catalog to a savePath file """
-
+        """ 
+        Saves the catalog to a savePath file which has a default 
+        name if not specified.
+        """
         if savePath is None:
             saveDir = './../data/coincident_microbursts_catalogues'
             saveName = 'AC6_coincident_microbursts_v{}.txt'.format(self.catV)
@@ -271,7 +273,7 @@ class CumulativeDist:
 
 
 if __name__ == '__main__':
-    c = CumulativeDist(3)
+    c = CumulativeDist(4)
     try:
         c.loop()
     finally:

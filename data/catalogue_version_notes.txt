@@ -6,3 +6,7 @@ Version 1:
 Version 2:
     Added a cross correlation coefficient calculated 1 s around each flash 
     detection in the catalogues.
+Version 4:
+    Added a baseline_std column to the data to remove detections that appear
+    to be noisy. Ran with the wavelet detector, but both seem to pick up the 
+    noise. Version 5 will be the same, but with the burst parameter.

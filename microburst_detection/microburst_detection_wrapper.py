@@ -33,10 +33,10 @@ dates = [startDate + timedelta(days=i) for i in range(dDays)]
 
 # Loop over spcecraft and dates using itertools.product()
 for (sc_id, date) in itertools.product(['A', 'B'], dates): 
-    print('Analyzing {} on {}.'.format(sc_id, date.date()))
     try:   
         # Set up detector and load AC-6 data.
         obj = microburst_detection.FindMicrobursts(sc_id, date)
+        print('Analyzing {} on {}.'.format(sc_id, date.date()))
     except AssertionError as err:
         if ( ('None or > 1 AC6 files found' in str(err)) or
             ('Error, the data is not 2D (Empty file?)' in str(err)) 
@@ -52,14 +52,19 @@ for (sc_id, date) in itertools.product(['A', 'B'], dates):
             SIGNIF_LEVEL=0.1) 
         # Remove noisy detections using correlations.
         obj.corrFlag()
-    except ValueError as err:
+    except (ValueError, AssertionError) as err:
         if 'v cannot be empty' in str(err):
             logging.info('AC6-{} no microbursts found on {}.'.format(
                 sc_id, date.date()))
             del(obj)
             continue
-        if 'attempt to get argmax of an empty sequence' in str(err):
+        elif 'attempt to get argmax of an empty sequence' in str(err):
             logging.info('AC6-{} no microbursts found on {}.'.format(
+                sc_id, date.date()))
+            del(obj)
+            continue
+        elif 'Data too short for timeWidth specified.' in str(err):
+            logging.info('AC6-{} too little data for baseline. {}.'.format(
                 sc_id, date.date()))
             del(obj)
             continue

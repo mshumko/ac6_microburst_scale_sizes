@@ -11,7 +11,7 @@ converters = {0:lambda t: dateutil.parser.parse(t.decode()),
             -1:lambda t: dateutil.parser.parse(t.decode()), 
             -2:lambda t: dateutil.parser.parse(t.decode())}
 
-bins = np.arange(0, 100, 5)
+bins = np.arange(0, 150, 5)
 frac = np.nan*np.zeros(len(bins)-1)
 num = np.nan*np.zeros(len(bins)-1)
 CC_thresh = 0.8
@@ -21,7 +21,7 @@ data = np.genfromtxt(catPath, delimiter=',',
         names=True, dtype=dtypes)#, converters=converters)
 
 
-curtain_thresh = 0.1
+curtain_thresh = 0.2
 
 fig, ax = plt.subplots(3, figsize=(6, 10))
 
@@ -31,6 +31,8 @@ for i, (lower_edge, upper_edge) in enumerate(zip(bins[:-1], bins[1:])):
                         (data['Dist_Total'] > lower_edge) 
                         & 
                         (data['Dist_Total'] <= upper_edge) 
+                        & # Filter by significance above the 10% baseline.
+                        (data['peak_std'] > 3)
                         &
                         # Filter by L shell
                         (np.abs(data['Lm_OPQ']) < 8) 

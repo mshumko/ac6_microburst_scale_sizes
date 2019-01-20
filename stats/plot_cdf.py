@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import dateutil.parser
 
 write_times_to_file = False
+write_cdf_to_file = True
+
 version = 4
 catPath = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
         'coincident_microbursts_catalogues/'
@@ -71,7 +73,12 @@ for i, (lower_edge, upper_edge) in enumerate(zip(bins[:-1], bins[1:])):
                     f.write(str(ti) + '\n')
             #print(lower_edge, upper_edge, data['dateTime'][idsep], '\n')
 
-pdf = np.convolve([-1, 1], frac, mode='valid')
+        if write_cdf_to_file:
+            saveArr = np.stack([bins[:-1], frac])
+            np.savetxt('cdf_vs_sep.csv', saveArr.T, fmt='%.3e', delimiter=', ', 
+                        header='sep_km, cdf')
+
+#pdf = np.convolve([-1, 1], frac, mode='valid')
 
 #fig, ax = plt.subplots(2)
 ax[0].bar(np.convolve([0.5, 0.5], bins, mode='valid'), frac, width=(bins[1]-bins[0])*0.8)

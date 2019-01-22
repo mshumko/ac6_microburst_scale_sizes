@@ -9,7 +9,7 @@ import merge_daily_data
 import replace_error_sep_lags
 import append_goemag_indicies
 
-cVersion = 4 #Catalog version
+cVersion = 5 #Catalog version
 outPath = ('/home/mike/research/'
             'ac6-microburst-scale-sizes/data/'
             'microburst_catalogues/'
@@ -48,8 +48,9 @@ for (sc_id, date) in itertools.product(['A', 'B'], dates):
            raise
    try:
        # Run the wavelet detector.
-       obj.getMicroburstIdx(maxWidth=0.5, thresh=0.05,
-           SIGNIF_LEVEL=0.1) 
+#       obj.getMicroburstIdx(maxWidth=0.5, thresh=0.05,
+#           SIGNIF_LEVEL=0.1) 
+       obj.getMicroburstIdx(method='obrien')
        # Remove noisy detections using correlations.
        obj.corrFlag()
    except (ValueError, AssertionError) as err:

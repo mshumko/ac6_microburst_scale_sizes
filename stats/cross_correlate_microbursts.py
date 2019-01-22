@@ -273,7 +273,8 @@ class CumulativeDist:
 
 
 if __name__ == '__main__':
-    c = CumulativeDist(4)
+    catalog_version = 5
+    c = CumulativeDist(catalog_version)
     try:
         c.loop()
     finally:

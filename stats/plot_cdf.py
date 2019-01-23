@@ -5,7 +5,7 @@ import dateutil.parser
 write_times_to_file = False
 write_cdf_to_file = True
 
-version = 4
+version = 5
 catPath = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
         'coincident_microbursts_catalogues/'
        'AC6_coincident_microbursts_v{}.txt'.format(version))

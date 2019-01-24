@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import dateutil.parser
 
 write_times_to_file = False
-write_cdf_to_file = True
+write_cdf_to_file = False
 
 version = 5
 catPath = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
@@ -32,8 +32,8 @@ for i, (lower_edge, upper_edge) in enumerate(zip(bins[:-1], bins[1:])):
         # Find microbursts in bin
         idsep = np.where(
                         (data['Dist_Total'] > lower_edge) 
-                        & 
-                        (data['Dist_Total'] <= upper_edge) 
+                        # & 
+                        # (data['Dist_Total'] <= upper_edge) 
                         & # Filter by significance above the 10% baseline.
                         (data['peak_std'] > 2)
                         &

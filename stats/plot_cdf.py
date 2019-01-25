@@ -5,7 +5,7 @@ import dateutil.parser
 write_times_to_file = False
 write_cdf_to_file = False
 
-version = 5
+version = 4
 catPath = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
         'coincident_microbursts_catalogues/'
        'AC6_coincident_microbursts_v{}.txt'.format(version))
@@ -31,9 +31,9 @@ fig, ax = plt.subplots(3, figsize=(6, 10))
 for i, (lower_edge, upper_edge) in enumerate(zip(bins[:-1], bins[1:])):
         # Find microbursts in bin
         idsep = np.where(
-                        (data['Dist_Total'] > lower_edge) 
+                        #(data['Dist_Total'] > lower_edge) 
                         # & 
-                        # (data['Dist_Total'] <= upper_edge) 
+                        (data['Dist_Total'] <= upper_edge) 
                         & # Filter by significance above the 10% baseline.
                         (data['peak_std'] > 2)
                         &
@@ -82,7 +82,7 @@ for i, (lower_edge, upper_edge) in enumerate(zip(bins[:-1], bins[1:])):
 
 #fig, ax = plt.subplots(2)
 ax[0].bar(np.convolve([0.5, 0.5], bins, mode='valid'), frac, width=(bins[1]-bins[0])*0.8)
-ax[0].set_ylabel('CDF')
+ax[0].set_ylabel('CDF'); ax[0].set_ylim(bottom=0.15)
 
 ax[1].bar(np.convolve([0.5, 0.5], bins, mode='valid'), num, width=(bins[1]-bins[0])*0.8)
 ax[1].set_ylabel('Number of detections')

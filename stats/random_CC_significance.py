@@ -264,6 +264,8 @@ class SignificantFraction:
 if __name__ == '__main__':
     sf = SignificantFraction('a', 5)
     sf.main()
+    np.savetxt('random_signif_frac.csv', sf.CCtFrac)
+
 
 # if __name__ == '__main__':
 #     sc_id = 'A'

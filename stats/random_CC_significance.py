@@ -159,7 +159,7 @@ class SignificantFraction:
                 for col, iCol in enumerate(jRandom):
                     iA, iB = self._get_CC_indicies(iRow, iCol, CC_window_thresh)
                     self.dayCC[row, col] = self.CC(iA, iB)
-            self.CCtFrac[i] = len(np.where(self.dayCC > CC_thresh)[0])/len(self.dayCC)
+            self.CCtFrac[i] = len(np.where(self.dayCC > CC_thresh)[0])/np.count_nonzero(~np.isnan(self.dayCC))
         return
 
     def CC(self, iA, iB):

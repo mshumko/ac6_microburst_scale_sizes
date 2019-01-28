@@ -82,7 +82,7 @@ for i, (lower_edge, upper_edge) in enumerate(zip(bins[:-1], bins[1:])):
 
 #fig, ax = plt.subplots(2)
 ax[0].bar(np.convolve([0.5, 0.5], bins, mode='valid'), frac, width=(bins[1]-bins[0])*0.8)
-ax[0].set_ylabel('CDF'); ax[0].set_ylim(bottom=0.15)
+ax[0].set_ylabel('CDF'); #ax[0].set_ylim(bottom=0.15)
 
 ax[1].bar(np.convolve([0.5, 0.5], bins, mode='valid'), num, width=(bins[1]-bins[0])*0.8)
 ax[1].set_ylabel('Number of detections')

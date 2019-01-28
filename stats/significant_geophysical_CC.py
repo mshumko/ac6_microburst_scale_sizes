@@ -1,7 +1,12 @@
 import itertools
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.dates import date2num, num2date
+import dateutil.parser
 from datetime import datetime, timedelta
+import os
+import csv
+import glob
 
 from mission_tools.ac6 import read_ac_data
 
@@ -106,19 +111,136 @@ class SignificantNoise:
         self.tenHzData = read_ac_data.read_ac_data_wrapper(
                             self.sc_id, self.date)
         return
-        
-if __name__ == '__main__':
-    sc_id = 'A'
-    CC_thresh = 0.8
-    date = datetime(2015, 4, 25)
-    signif = SignificantNoise(sc_id, date)
-    signif.main()
-    signif.calc_CDF(CC_thresh=CC_thresh)
 
-    plt.pcolormesh(signif.XX, signif.YY, signif.cdf_grid)
-    plt.title('AC6A random CC | {} | CC_thresh = {}'.format(date.date(), CC_thresh))
-    plt.xlabel(r'$\Lambda$')
-    plt.ylabel(r'$\Lambda$')
-    plt.colorbar()
-    plt.savefig('AC6_significant_random_CC.png', dpi=300)
-    #plt.show()
+class SignificantFraction:
+    def __init__(self, sc_id, catalog_version):
+        """
+
+        """
+        self.sc_id = sc_id
+        #self.catalog_version = catalog_version
+        catPath = ('/home/mike/research/ac6_microburst_scale_size'
+                    's/data/microburst_catalogues')
+        self._load_catalog(catPath, catalog_version)
+        return
+
+    def main(self, CC_window_thresh=1, CC_thresh=0.8, fPath=None, N_microburst=10, N_CC=1000):
+        """ 
+        Main method to loop over AC6 data and cross-correlate random
+        time series.
+        """
+        # if fPath is None: 
+        #     fPath = '/home/mike/research/ac6/ac6{}/ascii/level2'.format(self.sc_id)
+        # paths = glob.glob(os.path.join(fPath, '*10Hz*.csv'))
+        
+        self._unique_dates()
+        self.CCtFrac = np.nan*np.zeros(len(self.cat_dates))
+
+        for i, date in enumerate(self.cat_dates):
+            # Load AC6 10 Hz data
+            # self._load_10Hz_data(date)
+            # Pick N_microbursts number of microbursts (if there are that many.)
+            self._find_microburst_times(date, N_microburst)
+            print(self.microburst_idx)
+
+            # For each microburst, CC N_CC times.
+
+
+
+        return
+
+    def CC(self, iA, iB):
+        """ 
+        This method calculates the normalized cross-correlation 
+        between two AC6 time series indexed by iA and iB.
+        """
+        norm = np.sqrt(len(self.tenHzData['dos1rate'][iA])*\
+                       len(self.tenHzData['dos1rate'][iB])*\
+                       np.var(self.tenHzData['dos1rate'][iA])*\
+                       np.var(self.tenHzData['dos1rate'][iB])) 
+        # Mean subtraction.
+        x = (self.tenHzData['dos1rate'][iA] - 
+            self.tenHzData['dos1rate'][iA].mean() )
+        y = (self.tenHzData['dos1rate'][iB] - 
+            self.tenHzData['dos1rate'][iB].mean() )
+        # Cross-correlate
+        ccArr = np.correlate(x, y, mode='valid')
+        # Normalization
+        ccArr /= norm
+        return max(ccArr)
+
+    def _unique_dates(self):
+        allDates_num = date2num(self.cat['dateTime']).astype(int)
+        unique_dates_num = set(allDates_num)
+        sorted_dates_num = sorted(list(unique_dates_num))
+        self.cat_dates = num2date(sorted_dates_num)
+        return 
+
+    def _load_10Hz_data(self, date):
+        """ Wrapper to load AC6 10 Hz data """
+        print('Loading AC6-{} data from {}'.format(
+            self.sc_id.upper(), date.date()))
+        self.tenHzData = read_ac_data.read_ac_data_wrapper(
+                            self.sc_id, date)
+        return
+
+    def _find_microburst_times(self, date, N):
+        num_date = date2num(date)
+        num_cat_dates = date2num(self.cat['dateTime']).astype(int)
+
+        idM = np.where(num_date == num_cat_dates)[0]
+        #print('idM', idM)
+        # In case there are less than N total microbursts in the 
+        # catalog on that day.
+        if len(idM) < N: N = len(idM)
+        # Choose N microburst indicies without replacement.
+        self.microburst_idx = np.random.choice(idM, N, replace=False)
+        return
+
+    def _load_catalog(self, catPath, v):
+        """ 
+        Loads the microburst catalog of version v spacecraft given 
+        by self.sc_id. 
+        """
+        fPath = os.path.join(catPath, 
+            'AC6{}_microbursts_v{}.txt'.format(self.sc_id.upper(), v))
+        print('Loading catalog,', 'AC6{}_microbursts_v{}.txt'.format(
+            self.sc_id.upper(), v))
+        with open(fPath) as f:
+            r = csv.reader(f)
+            keys = next(r)
+            rawData = np.array(list(r))
+        self.cat = {}
+        for (i, key) in enumerate(keys):
+            self.cat[key] = rawData[:, i]
+
+        # Now convert the times array(s) to datetime, 
+        # and all others except 'burstType' to a float.
+        timeKeys = itertools.filterfalse(
+            lambda x:'dateTime' in x or 'burstType' in x, self.cat.keys())
+        for key in timeKeys:
+                self.cat[key] = self.cat[key].astype(float)
+        for key in filter(lambda x: 'dateTime' in x, self.cat.keys()):
+            self.cat[key] = np.array([dateutil.parser.parse(i) 
+                for i in self.cat[key]])
+        return
+
+if __name__ == '__main__':
+    sf = SignificantFraction('a', 5)
+    sf.main()
+
+# if __name__ == '__main__':
+#     sc_id = 'A'
+#     CC_thresh = 0.8
+#     date = datetime(2015, 4, 25)
+#     signif = SignificantNoise(sc_id, date)
+#     signif.main()
+#     signif.calc_CDF(CC_thresh=CC_thresh)
+
+#     plt.pcolormesh(signif.XX, signif.YY, signif.cdf_grid)
+#     plt.title('AC6A random CC | {} | CC_thresh = {}'.format(date.date(), CC_thresh))
+#     plt.xlabel(r'$\Lambda$')
+#     plt.ylabel(r'$\Lambda$')
+#     plt.colorbar()
+#     plt.savefig('AC6_significant_random_CC.png', dpi=300)
+#     #plt.show()

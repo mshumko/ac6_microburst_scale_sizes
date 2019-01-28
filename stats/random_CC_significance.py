@@ -113,18 +113,19 @@ class SignificantNoise:
         return
 
 class SignificantFraction:
-    def __init__(self, sc_id, catalog_version):
+    def __init__(self, sc_id, catalog_version, CC_window=10):
         """
 
         """
         self.sc_id = sc_id
-        #self.catalog_version = catalog_version
+        self.CC_window = CC_window
         catPath = ('/home/mike/research/ac6_microburst_scale_size'
                     's/data/microburst_catalogues')
         self._load_catalog(catPath, catalog_version)
         return
 
-    def main(self, CC_window_thresh=1, CC_thresh=0.8, fPath=None, N_microburst=10, N_CC=1000):
+    def main(self, CC_window_thresh=1, CC_thresh=0.8, fPath=None, 
+             N_microburst=10, N_CC=1000):
         """ 
         Main method to loop over AC6 data and cross-correlate random
         time series.
@@ -134,19 +135,31 @@ class SignificantFraction:
         # paths = glob.glob(os.path.join(fPath, '*10Hz*.csv'))
         
         self._unique_dates()
-        self.CCtFrac = np.nan*np.zeros(len(self.cat_dates))
+        self.CCtFrac = np.nan*np.zeros(len(self.cat_dates), dtype=float)
 
         for i, date in enumerate(self.cat_dates):
+            self.dayCC = np.nan*np.zeros((N_microburst, N_CC))
             # Load AC6 10 Hz data
-            # self._load_10Hz_data(date)
+            self._load_10Hz_data(date)
             # Pick N_microbursts number of microbursts (if there are that many.)
             self._find_microburst_times(date, N_microburst)
-            print(self.microburst_idx)
+            
+            # To prepare the CC, find dos1rate indicies that are in the 
+            # rad belts.
+            self.tenHzData['Lm_OPQ'] = np.abs(self.tenHzData['Lm_OPQ'])
+            iBelt = np.where( (self.tenHzData['Lm_OPQ'] > 4) & 
+                              (self.tenHzData['Lm_OPQ'] < 8) )[0]
+            if not len(iBelt):
+                continue
+            # Get N_CC rad belt indicies as centers for CC windows.
+            jRandom = np.random.choice(iBelt, size=N_CC)
 
             # For each microburst, CC N_CC times.
-
-
-
+            for row, iRow in enumerate(self.microburst_idx):
+                for col, iCol in enumerate(jRandom):
+                    iA, iB = self._get_CC_indicies(iRow, iCol, CC_window_thresh)
+                    self.dayCC[row, col] = self.CC(iA, iB)
+            self.CCtFrac[i] = len(np.where(self.dayCC > CC_thresh)[0])/len(self.dayCC)
         return
 
     def CC(self, iA, iB):
@@ -168,6 +181,29 @@ class SignificantFraction:
         # Normalization
         ccArr /= norm
         return max(ccArr)
+        
+    def _get_CC_indicies(self, icA, icB, CC_window_thresh):
+        """ 
+        For center indicies iA and iB, return the CC indicies with a 
+        CC_window_thresh threshold (in data points).
+        """
+        iAmin = icA-self.CC_window//2
+        iAmax = icA+self.CC_window//2
+        
+        iBmin = icB-self.CC_window//2-CC_window_thresh
+        iBmax = icB+self.CC_window//2+CC_window_thresh
+        
+        # Now check and fix cases where we are out of bounds.
+        if iAmin < 0: iAmin = 0
+        if iBmin < 0: iBmin = 0
+        if iAmax >= len(self.tenHzData['dos1rate']): 
+            iAmax = len(self.tenHzData['dos1rate'])-1
+        if iBmax >= len(self.tenHzData['dos1rate']): 
+            iBmax = len(self.tenHzData['dos1rate'])-1
+           
+        iA = np.arange(iAmin, iAmax)
+        iB = np.arange(iBmin, iBmax)
+        return iA, iB
 
     def _unique_dates(self):
         allDates_num = date2num(self.cat['dateTime']).astype(int)

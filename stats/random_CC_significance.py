@@ -148,7 +148,8 @@ class SignificantFraction:
             # rad belts.
             self.tenHzData['Lm_OPQ'] = np.abs(self.tenHzData['Lm_OPQ'])
             iBelt = np.where( (self.tenHzData['Lm_OPQ'] > 5) & 
-                              (self.tenHzData['Lm_OPQ'] < 6) )[0]
+                              (self.tenHzData['Lm_OPQ'] < 5.5) &
+                              (self.tenHzData['flag'] == 0) )[0]
             if not len(iBelt):
                 continue
             # Get N_CC rad belt indicies as centers for CC windows.

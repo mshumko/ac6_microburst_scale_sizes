@@ -125,7 +125,7 @@ class SignificantFraction:
         return
 
     def main(self, CC_window_thresh=1, CC_thresh=0.8, fPath=None, 
-             N_microburst=10, N_CC=1000):
+             N_microburst=10, N_CC=100):
         """ 
         Main method to loop over AC6 data and cross-correlate random
         time series.
@@ -147,8 +147,8 @@ class SignificantFraction:
             # To prepare the CC, find dos1rate indicies that are in the 
             # rad belts.
             self.tenHzData['Lm_OPQ'] = np.abs(self.tenHzData['Lm_OPQ'])
-            iBelt = np.where( (self.tenHzData['Lm_OPQ'] > 4) & 
-                              (self.tenHzData['Lm_OPQ'] < 8) )[0]
+            iBelt = np.where( (self.tenHzData['Lm_OPQ'] > 5) & 
+                              (self.tenHzData['Lm_OPQ'] < 6) )[0]
             if not len(iBelt):
                 continue
             # Get N_CC rad belt indicies as centers for CC windows.
@@ -159,7 +159,11 @@ class SignificantFraction:
                 for col, iCol in enumerate(jRandom):
                     iA, iB = self._get_CC_indicies(iRow, iCol, CC_window_thresh)
                     self.dayCC[row, col] = self.CC(iA, iB)
-            self.CCtFrac[i] = len(np.where(self.dayCC > CC_thresh)[0])/np.count_nonzero(~np.isnan(self.dayCC))
+            # If dayCC array has at least one non-nan value.
+            numerator = len(np.where(self.dayCC > CC_thresh)[0])
+            denominator = len(np.where(~np.isnan(self.dayCC))[0])
+            if denominator:
+                self.CCtFrac[i] = (numerator/denominator)
         return
 
     def CC(self, iA, iB):
@@ -264,7 +268,12 @@ class SignificantFraction:
 if __name__ == '__main__':
     sf = SignificantFraction('a', 5)
     sf.main()
-    np.savetxt('random_signif_frac.csv', sf.CCtFrac)
+    np.savetxt('random_CC_significance.csv', sf.CCtFrac)
+
+    # Visualize histogram of the cross-correlations.
+    frac = sf.CCtFrac[np.where(~np.isnan(sf.CCtFrac))[0]]
+    plt.hist(100*frac)
+    plt.show()
 
 
 # if __name__ == '__main__':

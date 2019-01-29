@@ -80,6 +80,22 @@
          y="29.484085"
          ry="0" />
     </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath948">
+      <path
+         style="fill:#ff0000;fill-opacity:0.52577317;stroke:#ff0000;stroke-width:1.05799997;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="path950"
+         sodipodi:type="arc"
+         sodipodi:cx="89.013802"
+         sodipodi:cy="-82.309097"
+         sodipodi:rx="34.81324"
+         sodipodi:ry="34.81324"
+         sodipodi:start="2.6770449"
+         sodipodi:end="2.6290591"
+         sodipodi:open="true"
+         d="m 57.88992,-66.712121 a 34.81324,34.81324 0 0 1 15.15466,-46.531519 34.81324,34.81324 0 0 1 46.70996,14.595375 34.81324,34.81324 0 0 1 -14.03398,46.881691 34.81324,34.81324 0 0 1 -47.046667,-13.470569" />
+    </clipPath>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -89,10 +105,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="277.6771"
-     inkscape:cy="719.59316"
+     inkscape:cx="187.34841"
+     inkscape:cy="694.17269"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer2"
      showgrid="false"
      inkscape:window-width="1366"
      inkscape:window-height="713"
@@ -250,7 +266,7 @@
        sodipodi:open="true"
        d="M 58.650618,99.241995 A 34.81324,34.81324 0 0 1 72.037952,51.88289 34.81324,34.81324 0 0 1 119.40708,65.234703 34.81324,34.81324 0 0 1 106.0908,112.61383 34.81324,34.81324 0 0 1 58.701694,99.333085" />
     <path
-       style="fill:#000000;fill-opacity:0;stroke:#ff0000;stroke-width:1.05833328;stroke-miterlimit:4;stroke-dasharray:4.23333313, 1.05833328;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:#ff0000;fill-opacity:0;stroke:#ff0000;stroke-width:1.05833328;stroke-miterlimit:4;stroke-dasharray:4.23333313, 1.05833328000000004;stroke-dashoffset:0;stroke-opacity:1"
        id="path4811-8"
        sodipodi:type="arc"
        sodipodi:cx="89.041603"
@@ -293,5 +309,47 @@
        id="path4811-9-2"
        style="fill:#000000;fill-opacity:0;stroke:#ff0000;stroke-width:1.05833328;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        clip-path="url(#clipPath6413-2)" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="shading">
+    <path
+       style="fill:#ff0000;fill-opacity:0.52577317;stroke:none;stroke-width:1.05799997;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path4811-8-5"
+       sodipodi:type="arc"
+       sodipodi:cx="89.041603"
+       sodipodi:cy="-114.59813"
+       sodipodi:rx="34.81324"
+       sodipodi:ry="34.81324"
+       sodipodi:start="2.6770449"
+       sodipodi:end="2.6290591"
+       sodipodi:open="true"
+       d="m 57.917722,-99.001153 a 34.81324,34.81324 0 0 1 15.15466,-46.531517 34.81324,34.81324 0 0 1 46.709968,14.59537 34.81324,34.81324 0 0 1 -14.03398,46.881694 34.81324,34.81324 0 0 1 -47.046676,-13.470569"
+       transform="matrix(1,0,0,-1,-0.32543637,0.24084242)"
+       clip-path="url(#clipPath948)" />
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot952"
+       style="fill:black;fill-opacity:1;stroke:none;font-family:sans-serif;font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;letter-spacing:0px;word-spacing:0px"><flowRegion
+         id="flowRegion954"><rect
+           id="rect956"
+           width="62.629459"
+           height="69.700523"
+           x="252.03307"
+           y="336.621" /></flowRegion><flowPara
+         id="flowPara958"></flowPara></flowRoot>    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="71.227333"
+       y="96.280579"
+       id="text962"><tspan
+         sodipodi:role="line"
+         id="tspan960"
+         x="71.227333"
+         y="96.280579"
+         style="stroke-width:0.26458332;font-size:7.05555556px">A<tspan
+   style="font-size:6.75569444px;baseline-shift:sub"
+   id="tspan964">1</tspan></tspan></text>
   </g>
 </svg>

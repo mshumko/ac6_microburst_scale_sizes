@@ -362,19 +362,20 @@ class CrossCorrelateMicrobursts(SignificantFraction):
                             MLT_bins=np.arange(0, 15, 0.5), 
                             AE_bins=np.arange(0, 3000, 100),
                             N_CC = 100):
+        self._load_count_data()
         # Create 3d meshgrid to loop over
         LL, MLTMLT, AEAE = np.meshgrid(L_bins, MLT_bins, AE_bins)
-        F = np.nan*np.zeros_like(LL)
+        self.F = np.nan*np.zeros_like(LL)
 
         lL, lMLT, lAE = LL.shape
 
         # A nested loop that is three for loops deep.
-        for i, j, k in itertools.product(range(lL), range(lMLT), range(lAE)):
+        for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
             # Search for all microbursts in that bin. The 3d array indicies
             # steps were found through trial and error.
             iBursts = np.where(
                 (self.d[:, 1] > LL[i, j, k]) & (self.d[:, 1] < LL[i, j+1, k]) &
-                (self.d[:, 2] > MLTMLT[i+1, j, k]) & (self.d[:, 2] < MLTMLT[i+1, j, k]) &
+                (self.d[:, 2] > MLTMLT[i, j, k]) & (self.d[:, 2] < MLTMLT[i+1, j, k]) &
                 (self.d[:, 3] > AEAE[i, j, k]) & (self.d[:, 3] < AEAE[i, j, k+1])
             )[0]
 
@@ -397,7 +398,7 @@ class CrossCorrelateMicrobursts(SignificantFraction):
             denominator = len(np.where(~np.isnan(CCarr))[0])
             # Avoid division by 0
             if denominator:
-                F[i, j, k] = numerator/denominator
+                self.F[i, j, k] = numerator/denominator
         return
 
 
@@ -442,7 +443,8 @@ if __name__ == '__main__':
     # plt.show()
 
     ccm = CrossCorrelateMicrobursts('a', 5)
-    ccm.saveTimeSeries()
+    # ccm.saveTimeSeries()
+    ccm.binMicrobursts()
 
 
 # if __name__ == '__main__':

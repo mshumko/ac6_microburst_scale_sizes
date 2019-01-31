@@ -358,9 +358,9 @@ class CrossCorrelateMicrobursts(SignificantFraction):
                     )
         return
 
-    def binMicrobursts(self, L_bins=np.arange(4, 8, 0.5), 
-                            MLT_bins=np.arange(0, 15, 0.5), 
-                            AE_bins=np.arange(0, 3000, 100),
+    def binMicrobursts(self, L_bins=np.arange(4, 8, 1), 
+                            MLT_bins=np.arange(0, 15, 1), 
+                            AE_bins=np.arange(0, 600, 100),
                             N_CC = 100):
         self._load_count_data()
         # Create 3d meshgrid to loop over
@@ -379,14 +379,23 @@ class CrossCorrelateMicrobursts(SignificantFraction):
                 (self.d[:, 3] > AEAE[i, j, k]) & (self.d[:, 3] < AEAE[i, j, k+1])
             )[0]
 
+            # print(
+            #     LL[i, j, k], '< L <', LL[i, j+1, k], '\n',
+            #     MLTMLT[i, j, k], '< MLT <', MLTMLT[i+1, j, k], '\n',
+            #     AEAE[i, j, k], '< AE <',  AEAE[i, j, k+1],
+            #     '\nNumber of bursts in bin ', len(iBursts)
+            # )
+
             # Skip bins with only a "few" microbursts in this bin.
-            if len(iBursts) < N_CC:
+            if len(iBursts) < 10:
                 continue
 
             # Pick N_CC random microbursts from the iBursts list to cross-correlate against.
             iBursts2 = np.random.choice(iBursts, size=N_CC)
             # Loop over the microbursts in that bin and cross-correlate them.
             CCarr = np.nan*np.zeros((len(iBursts), N_CC))
+
+            #print(iBursts, iBursts2)
 
             for a, iBurst in enumerate(iBursts):
                 # Now cross correlate iBurst agaianist the random microbursts in iCC
@@ -396,6 +405,7 @@ class CrossCorrelateMicrobursts(SignificantFraction):
             # Now calculate the ratio of CCs above the threshold against all other CCs.
             numerator = len(np.where(CCarr > self.CC_thresh)[0])
             denominator = len(np.where(~np.isnan(CCarr))[0])
+            print(numerator, '/', denominator)
             # Avoid division by 0
             if denominator:
                 self.F[i, j, k] = numerator/denominator
@@ -445,6 +455,22 @@ if __name__ == '__main__':
     ccm = CrossCorrelateMicrobursts('a', 5)
     # ccm.saveTimeSeries()
     ccm.binMicrobursts()
+    a = ccm.F.flatten()
+    a = a[np.where(~np.isnan(a))[0]]
+    print(a, a.mean())
+
+# L_bins=np.arange(4, 8, 1), 
+# MLT_bins=np.arange(0, 15, 1), 
+# AE_bins=np.arange(0, 600, 100)
+    _, ax = plt.subplots()
+    ax.hist(a)
+    ax.set_title('AC6 random microburst correlation > 0.8')
+    ax.set_ylabel('Counts')
+    ax.set_xlabel('Probability of a random microburst correlation')
+    s = 'Bin widths: L=1, MLT=1, AE=100\nN_CC=100, N_total={}'.format(len(ccm.d[:, 0]))
+    ax.text(0.9, 0.9, s, transform=ax.transAxes, ha='right')
+    plt.show()
+
 
 
 # if __name__ == '__main__':

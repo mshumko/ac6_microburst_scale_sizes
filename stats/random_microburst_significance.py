@@ -293,10 +293,23 @@ class CrossCorrelateMicrobursts(SignificantFraction):
             #    self.tenHzData['dos1rate'][validCounts], cadence=0.1) 
             # Find the microbursts on this day
             self._get_daily_microbursts(date)
+            with open(self.timeSeriesPath, 'a') as f:
+                w = csv.writer(f)
+                for j in self.daily_microbursts:
+                    # Write the count rates to file here.
 
-            for j in self.idM:
-                # Write the count rates to file here.
-                pass
+                    tenHzIdx = np.where(
+                        self.cat['dateTime'][j] == self.tenHzData['dateTime']
+                                        )[0]
+                    assert len(tenHzIdx) == 1, ('Zero or > 1 '
+                                                'microburst matches '
+                                                'found! tenHzIdx={}'.format(tenHzIdx))
+                    j_start = tenHzIdx - CC_window//2 - CC_window_thresh
+                    j_end   = tenHzIdx + CC_window//2 + CC_window_thresh
+                    w.writerow(date2num(self.cat['dateTime'][j])+
+                       [self.cat['Lm_OPQ'][j]] + [self.cat['MLT_OPQ'][j]] +
+                        [self.cat['AE'][j]+self.tenHzData['dos1rate'][j_start:j_end]
+                                )
         return
 
     def _get_daily_microbursts(self, date):
@@ -305,7 +318,7 @@ class CrossCorrelateMicrobursts(SignificantFraction):
         """
         num_date = date2num(date)
         num_cat_dates = date2num(self.cat['dateTime']).astype(int)
-        self.idM = np.where(num_date == num_cat_dates)[0]
+        self.daily_microbursts = np.where(num_date == num_cat_dates)[0]
         return
 
 if __name__ == '__main__':

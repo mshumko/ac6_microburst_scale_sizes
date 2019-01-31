@@ -14,6 +14,13 @@ from mission_tools.misc import obrienBaseline
 Re=6371 # km
 
 class SignificantNoise:
+    """
+    First iteration at solving this problem. Here I CCd random times and 
+    binned them up by Lambda (invariant latitude) for each day. This shows
+    an occurance rate of being too low as I would expect. This may be due 
+    to CC random times and not microburst detections and not accounting for
+    CCs at times with similar L-MLT-AE. 
+    """
     def __init__(self, sc_id, date, CC_width=1, bins=np.arange(60, 70, 0.5)):
         """
         This class calculates the fraction of random cross-correlations 
@@ -114,6 +121,14 @@ class SignificantNoise:
         return
 
 class SignificantFraction:
+    """
+    Second iteration at solving this problem. Here I CCd 10 random microbursts
+    picked from each day against random time series in 4 < L < 8 on that day.
+    No binning was attempted, and this class generates a CCtFrac array that
+    contains the fraction of random events above a significance threshold
+    as a function of day. This still shows a random chance rate that is
+    about 5 times lower than I'd expect.
+    """
     def __init__(self, sc_id, catalog_version, CC_window=10):
         """
 
@@ -268,11 +283,17 @@ class SignificantFraction:
         return
 
 class CrossCorrelateMicrobursts(SignificantFraction):
+    """
+    This is the third iteration of the significance chance
+    coincidence code. Here I loop over all of the detections
+    from the catalog and save a time series snippet containing
+    the microburst as well as time, L, MLT, and AE to a file. 
+    This file is then read back in and then each micrburst
+    is CCd against other microbursts observed in a similar
+    L-MLT-AE bin.
+    """
     def __init__(self, sc_id, catalog_version, CC_window=10, 
                 timeSeriesPath='microburst_counts.csv'):
-        """
-
-        """
         self.timeSeriesPath = timeSeriesPath
         super().__init__(sc_id, catalog_version, CC_window=10)
         return

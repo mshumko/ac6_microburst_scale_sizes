@@ -9,6 +9,7 @@ import csv
 import glob
 
 from mission_tools.ac6 import read_ac_data
+from mission_tools.misc import obrienBaseline
 
 Re=6371 # km
 
@@ -264,6 +265,47 @@ class SignificantFraction:
         for key in filter(lambda x: 'dateTime' in x, self.cat.keys()):
             self.cat[key] = np.array([dateutil.parser.parse(i) 
                 for i in self.cat[key]])
+        return
+
+class CrossCorrelateMicrobursts(SignificantFraction):
+    def __init__(self, sc_id, catalog_version, CC_window=10, 
+                timeSeriesPath='microburst_counts.csv'):
+        """
+
+        """
+        self.timeSeriesPath = timeSeriesPath
+        super().__init__(sc_id, catalog_version, CC_window=10)
+        return
+
+    def saveTimeSeries(self, CC_window_thresh=1, CC_thresh=0.8):
+        """ 
+        Main method to loop over AC6 data and save each microburst's
+        the timeseries to a csv file.
+        """
+        self._unique_dates()
+
+        for i, date in enumerate(self.cat_dates):
+            # Load AC6 10 Hz data
+            self._load_10Hz_data(date)
+            # Find the baseline count rates.
+            #validCounts = np.where(self.tenHzData['dos1rate'] > 0)[0]
+            #self.baseline = obrienBaseline.obrienBaseline(
+            #    self.tenHzData['dos1rate'][validCounts], cadence=0.1) 
+            # Find the microbursts on this day
+            self._get_daily_microbursts(date)
+
+            for j in self.idM:
+                # Write the count rates to file here.
+                pass
+        return
+
+    def _get_daily_microbursts(self, date):
+        """
+        Get microburst catalog indicies from date.
+        """
+        num_date = date2num(date)
+        num_cat_dates = date2num(self.cat['dateTime']).astype(int)
+        self.idM = np.where(num_date == num_cat_dates)[0]
         return
 
 if __name__ == '__main__':

@@ -361,7 +361,7 @@ class CrossCorrelateMicrobursts(SignificantFraction):
     def binMicrobursts(self, L_bins=np.arange(4, 8, 1), 
                             MLT_bins=np.arange(0, 15, 1), 
                             AE_bins=np.arange(0, 600, 100),
-                            N_CC = 100):
+                            N_CC=100):
         self._load_count_data()
         # Create 3d meshgrid to loop over
         LL, MLTMLT, AEAE = np.meshgrid(L_bins, MLT_bins, AE_bins)
@@ -405,7 +405,7 @@ class CrossCorrelateMicrobursts(SignificantFraction):
             # Now calculate the ratio of CCs above the threshold against all other CCs.
             numerator = len(np.where(CCarr > self.CC_thresh)[0])
             denominator = len(np.where(~np.isnan(CCarr))[0])
-            print(numerator, '/', denominator)
+            #print(numerator, '/', denominator)
             # Avoid division by 0
             if denominator:
                 self.F[i, j, k] = numerator/denominator
@@ -467,8 +467,9 @@ if __name__ == '__main__':
     ax.set_title('AC6 random microburst correlation > 0.8')
     ax.set_ylabel('Counts')
     ax.set_xlabel('Probability of a random microburst correlation')
-    s = 'Bin widths: L=1, MLT=1, AE=100\nN_CC=100, N_total={}'.format(len(ccm.d[:, 0]))
-    ax.text(0.9, 0.9, s, transform=ax.transAxes, ha='right')
+    s = 'Bin widths: L=1, MLT=1, AE=100\nN_CC=100, N_total={}\nmean={}, median={}'.format(
+        len(ccm.d[:, 0]), round(a.mean(), 2), round(a.std(), 2))
+    ax.text(0.95, 0.95, s, transform=ax.transAxes, ha='right', va='top')
     plt.show()
 
 

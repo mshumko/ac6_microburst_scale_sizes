@@ -293,17 +293,23 @@ class CrossCorrelateMicrobursts(SignificantFraction):
     L-MLT-AE bin.
     """
     def __init__(self, sc_id, catalog_version, CC_window=10, 
-                timeSeriesPath='microburst_counts.csv'):
+                timeSeriesPath='microburst_counts.csv', CC_thresh=0.8):
         self.timeSeriesPath = timeSeriesPath
         super().__init__(sc_id, catalog_version, CC_window=10)
         return
 
-    def saveTimeSeries(self, CC_window_thresh=1, CC_thresh=0.8):
+    def saveTimeSeries(self, CC_window_thresh=1):
         """ 
         Main method to loop over AC6 data and save each microburst's
         the timeseries to a csv file.
         """
         self._unique_dates()
+
+        if not os.path.isfile(self.timeSeriesPath):
+            with open(self.timeSeriesPath, 'w') as f:
+                w = csv.writer(f)
+                w.writerow(['dateTime', 'Lm_OPQ', 'MLT_OPQ', 'AE']+
+                        (self.CC_window + 2*CC_window_thresh)*['CountsArray'])
 
         for i, date in enumerate(self.cat_dates):
             # Load AC6 10 Hz data
@@ -324,13 +330,31 @@ class CrossCorrelateMicrobursts(SignificantFraction):
                                         )[0]
                     assert len(tenHzIdx) == 1, ('Zero or > 1 '
                                                 'microburst matches '
-                                                'found! tenHzIdx={}'.format(tenHzIdx))
-                    j_start = tenHzIdx - CC_window//2 - CC_window_thresh
-                    j_end   = tenHzIdx + CC_window//2 + CC_window_thresh
-                    w.writerow(date2num(self.cat['dateTime'][j])+
-                       [self.cat['Lm_OPQ'][j]] + [self.cat['MLT_OPQ'][j]] +
-                        [self.cat['AE'][j]+self.tenHzData['dos1rate'][j_start:j_end]
-                                )
+                                                'found! tenHzIdx={}'.format(
+                                                    tenHzIdx))
+                    # dos1 rate indicies to save
+                    idc_start = tenHzIdx[0] - self.CC_window//2 - CC_window_thresh
+                    idc_end   = tenHzIdx[0] + self.CC_window//2 + CC_window_thresh
+                    # Skip the microburst if the count data is at the dos1rate 
+                    # file boundary
+                    if idc_start < 0 or idc_end >= len(self.tenHzData['dateTime']):
+                        continue
+
+                    # Skip the microburst if there are error values in the 
+                    # count data.
+                    if np.min(self.tenHzData['dos1rate'][idc_start:idc_end]) < 0:
+                        continue
+                        
+                    # Write data to a file.
+                    w.writerow(
+                        np.concatenate((
+                            [date2num(self.cat['dateTime'][j])],
+                            [self.cat['Lm_OPQ'][j]], 
+                            [self.cat['MLT_OPQ'][j]],
+                            [self.cat['AE'][j]],
+                            self.tenHzData['dos1rate'][idc_start:idc_end]
+                        ))
+                    )
         return
 
     def _get_daily_microbursts(self, date):
@@ -343,14 +367,17 @@ class CrossCorrelateMicrobursts(SignificantFraction):
         return
 
 if __name__ == '__main__':
-    sf = SignificantFraction('a', 5)
-    sf.main()
-    np.savetxt('random_CC_significance.csv', sf.CCtFrac)
+    # sf = SignificantFraction('a', 5)
+    # sf.main()
+    # np.savetxt('random_CC_significance.csv', sf.CCtFrac)
 
-    # Visualize histogram of the cross-correlations.
-    frac = sf.CCtFrac[np.where(~np.isnan(sf.CCtFrac))[0]]
-    plt.hist(100*frac)
-    plt.show()
+    # # Visualize histogram of the cross-correlations.
+    # frac = sf.CCtFrac[np.where(~np.isnan(sf.CCtFrac))[0]]
+    # plt.hist(100*frac)
+    # plt.show()
+
+    ccm = CrossCorrelateMicrobursts('a', 5)
+    ccm.saveTimeSeries()
 
 
 # if __name__ == '__main__':

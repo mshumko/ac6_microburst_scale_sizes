@@ -295,6 +295,7 @@ class CrossCorrelateMicrobursts(SignificantFraction):
     def __init__(self, sc_id, catalog_version, CC_window=10, 
                 timeSeriesPath='microburst_counts.csv', CC_thresh=0.8):
         self.timeSeriesPath = timeSeriesPath
+        self.CC_thresh = CC_thresh
         super().__init__(sc_id, catalog_version, CC_window=10)
         return
 
@@ -344,7 +345,7 @@ class CrossCorrelateMicrobursts(SignificantFraction):
                     # count data.
                     if np.min(self.tenHzData['dos1rate'][idc_start:idc_end]) < 0:
                         continue
-                        
+
                     # Write data to a file.
                     w.writerow(
                         np.concatenate((
@@ -356,6 +357,70 @@ class CrossCorrelateMicrobursts(SignificantFraction):
                         ))
                     )
         return
+
+    def binMicrobursts(self, L_bins=np.arange(4, 8, 0.5), 
+                            MLT_bins=np.arange(0, 15, 0.5), 
+                            AE_bins=np.arange(0, 3000, 100),
+                            N_CC = 100):
+        # Create 3d meshgrid to loop over
+        LL, MLTMLT, AEAE = np.meshgrid(L_bins, MLT_bins, AE_bins)
+        F = np.nan*np.zeros_like(LL)
+
+        lL, lMLT, lAE = LL.shape
+
+        # A nested loop that is three for loops deep.
+        for i, j, k in itertools.product(range(lL), range(lMLT), range(lAE)):
+            # Search for all microbursts in that bin. The 3d array indicies
+            # steps were found through trial and error.
+            iBursts = np.where(
+                (self.d[:, 1] > LL[i, j, k]) & (self.d[:, 1] < LL[i, j+1, k]) &
+                (self.d[:, 2] > MLTMLT[i+1, j, k]) & (self.d[:, 2] < MLTMLT[i+1, j, k]) &
+                (self.d[:, 3] > AEAE[i, j, k]) & (self.d[:, 3] < AEAE[i, j, k+1])
+            )[0]
+
+            # Skip bins with only a "few" microbursts in this bin.
+            if len(iBursts) < N_CC:
+                continue
+
+            # Pick N_CC random microbursts from the iBursts list to cross-correlate against.
+            iBursts2 = np.random.choice(iBursts, size=N_CC)
+            # Loop over the microbursts in that bin and cross-correlate them.
+            CCarr = np.nan*np.zeros((len(iBursts), N_CC))
+
+            for a, iBurst in enumerate(iBursts):
+                # Now cross correlate iBurst agaianist the random microbursts in iCC
+                for b, iBurst2 in enumerate(iBursts2):
+                    CCarr[a, b] = self.CC(self.d[iBurst, 4:], self.d[iBurst2, 4:])
+            
+            # Now calculate the ratio of CCs above the threshold against all other CCs.
+            numerator = len(np.where(CCarr > self.CC_thresh)[0])
+            denominator = len(np.where(~np.isnan(CCarr))[0])
+            # Avoid division by 0
+            if denominator:
+                F[i, j, k] = numerator/denominator
+        return
+
+
+    def CC(self, cA, cB):
+        """ 
+        This method calculates the normalized cross-correlation 
+        between two AC6 time series indexed by iA and iB.
+        """
+        norm = np.sqrt(len(cA)*len(cB)*np.var(cA)*np.var(cB))
+        # Mean subtraction.
+        x = (cA - cA.mean())
+        y = (cB - cB.mean())
+        # Cross-correlate
+        ccArr = np.correlate(x, y, mode='valid')
+        # Normalization
+        ccArr /= norm
+        return max(ccArr)
+
+    def _load_count_data(self):
+        """ Load the microburst data saved to self.timeSeriesPath """
+        self.d = np.genfromtxt(self.timeSeriesPath, delimiter=',', skip_header=1)
+        return
+
 
     def _get_daily_microbursts(self, date):
         """

@@ -281,7 +281,7 @@ class SignificantFraction:
             self.cat[key] = np.array([dateutil.parser.parse(i) 
                 for i in self.cat[key]])
         return
-
+        
 class CrossCorrelateMicrobursts(SignificantFraction):
     """
     This is the third iteration of the significance chance
@@ -441,40 +441,259 @@ class CrossCorrelateMicrobursts(SignificantFraction):
         num_cat_dates = date2num(self.cat['dateTime']).astype(int)
         self.daily_microbursts = np.where(num_date == num_cat_dates)[0]
         return
+        
+class CrossCorrelateMicroburstsRandom(SignificantFraction):
+    """
+    This is the third iteration of the significance chance
+    coincidence code. Here I loop over all of the detections
+    from the catalog and save a time series snippet containing
+    the microburst as well as time, L, MLT, and AE to a file. 
+    This file is then read back in and then each micrburst
+    is CCd against other microbursts observed in a similar
+    L-MLT-AE bin.
+    """
+    def __init__(self, sc_id, catalog_version, CC_window=10, 
+                timeSeriesPath='microburst_counts.csv', CC_thresh=0.8):
+        self.timeSeriesPath = timeSeriesPath
+        self.CC_thresh = CC_thresh
+        super().__init__(sc_id, catalog_version, CC_window=10)
+        return
+        
+    def binAllCounts(self,  L_bins=np.arange(4, 9, 1), 
+                            MLT_bins=np.arange(0, 15, 1), 
+                            AE_bins=np.arange(0, 600, 100),
+                            saveDir='/home/mike/research/ac6_microburst_scale_sizes/data/binned_counts'):
+        """ Bins all of AC6 count data into binned files"""
+        LL, MLTMLT, AEAE = np.meshgrid(L_bins, MLT_bins, AE_bins)
+        lL, lMLT, lAE = LL.shape
+
+        START_DATE = datetime(2014, 6, 21)
+        END_DATE = datetime(2017, 12, 31)
+        dates = [START_DATE + timedelta(days=i) for i in range((END_DATE-START_DATE).days)]
+
+        # Loop over AC6 data.
+        for date in dates:
+            # Load data
+            try:
+                self._load_10Hz_data(date)
+            except:
+                continue
+            # Append AE to the 10Hz data
+            self._apend_AE()
+            # A nested loop that is three for loops deep.
+            for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
+                # Search for all microbursts in that bin. The 3d array indicies
+                # steps were found through trial and error.
+                iBins = np.where(
+                    (self.tenHzData['Lm_OPQ'] > LL[i, j, k]  ) &
+                    (self.tenHzData['Lm_OPQ'] < LL[i, j+1, k]) &
+                    (self.tenHzData['MLT_OPQ'] > MLTMLT[i, j, k]) &
+                    (self.tenHzData['MLT_OPQ'] < MLTMLT[i+1, j, k]) &
+                    (self.tenHzData['AE'] > AEAE[i, j, k]) &
+                    (self.tenHzData['AE'] < AEAE[i, j, k+1])
+                )[0]
+                # Skip if no counts found
+                if len(iBins) == 0:
+                    continue
+                    
+                fName = 'AC6_counts_{}_L_{}_{}_MLT_{}_{}_AE_{}.csv'.format(
+                    LL[i, j, k], LL[i, j+1, k], MLTMLT[i, j, k],
+                    MLTMLT[i+1, j, k], AEAE[i, j, k], AEAE[i, j, k+1]
+                )
+                fPath = os.path.join(saveDir, fName)
+
+                with open(fPath, 'a') as f:
+                    w = csv.writer(f)
+                    for iBin in iBins:
+                        if self.tenHzData['dos1rate'][iBin] > 0:
+                            w.writerow([self.tenHzData['dateTime'][iBin], self.tenHzData['dos1rate'][iBin]])
+        return
+
+    def _apend_AE(self):
+        """ Append the AE index to the 10Hz data. """
+        year = self.tenHzData['dateTime'][0].year
+        self._loadAE(year)
+
+        self.tenHzData['AE'] = np.nan*np.ones(len(self.tenHzData['dateTime']))
+        data_num_times = date2num(self.tenHzData['dateTime'])
+        index_num_times = date2num(self.AE_times)
+
+        for i, t in enumerate(data_num_times):
+            j = np.argmin(np.abs(index_num_times-t))
+            self.tenHzData['AE'][i] = self.AE[j]
+
+            if np.abs(index_num_times[j] - t) > 2/1440:
+                raise ValueError('No index found!')
+        return
+
+    def _loadAE(self, year, aeType='AE', headerSize=15):
+        """
+
+        """
+        indexTimes = np.array([], dtype=object)
+        self.AE = np.array([], dtype=int)
+        dTypes = ['AE', 'AU', 'AL', 'A0']
+        idx = 3 + dTypes.index(aeType)
+
+        indexDir = '/home/mike/research/geomag_indicies/ae'
+        fName = '{}_{}.txt'.format(year, aeType.lower())
+
+        with open(os.path.join(indexDir, fName), 'r') as f:
+            reader = csv.reader(f, skipinitialspace=True, delimiter=' ')
+            data = np.array(list(reader))
+
+            # Skip the header and convert times
+            self.AE_times = np.array([dateutil.parser.parse(' '.join(line[0:2])) 
+                                    for line in data[headerSize:] ])
+            # Save indicies.
+            self.AE = np.array(list(map(float, [line[idx] 
+                            for line in data[headerSize:]])) )
+        return
+
+#    def saveTimeSeries(self, CC_window_thresh=1):
+#        """ 
+#        Main method to loop over AC6 data and save each microburst's
+#        the timeseries to a csv file.
+#        """
+#        self._unique_dates()
+
+#        if not os.path.isfile(self.timeSeriesPath):
+#            with open(self.timeSeriesPath, 'w') as f:
+#                w = csv.writer(f)
+#                w.writerow(['dateTime', 'Lm_OPQ', 'MLT_OPQ', 'AE']+
+#                        (self.CC_window + 2*CC_window_thresh)*['CountsArray'])
+
+#        for i, date in enumerate(self.cat_dates):
+#            # Load AC6 10 Hz data
+#            self._load_10Hz_data(date)
+#            # Find the baseline count rates.
+#            #validCounts = np.where(self.tenHzData['dos1rate'] > 0)[0]
+#            #self.baseline = obrienBaseline.obrienBaseline(
+#            #    self.tenHzData['dos1rate'][validCounts], cadence=0.1) 
+#            # Find the microbursts on this day
+#            self._get_daily_microbursts(date)
+#            with open(self.timeSeriesPath, 'a') as f:
+#                w = csv.writer(f)
+#                for j in self.daily_microbursts:
+#                    # Write the count rates to file here.
+
+#                    tenHzIdx = np.where(
+#                        self.cat['dateTime'][j] == self.tenHzData['dateTime']
+#                                        )[0]
+#                    assert len(tenHzIdx) == 1, ('Zero or > 1 '
+#                                                'microburst matches '
+#                                                'found! tenHzIdx={}'.format(
+#                                                    tenHzIdx))
+#                    # dos1 rate indicies to save
+#                    idc_start = tenHzIdx[0] - self.CC_window//2 - CC_window_thresh
+#                    idc_end   = tenHzIdx[0] + self.CC_window//2 + CC_window_thresh
+#                    # Skip the microburst if the count data is at the dos1rate 
+#                    # file boundary
+#                    if idc_start < 0 or idc_end >= len(self.tenHzData['dateTime']):
+#                        continue
+
+#                    # Skip the microburst if there are error values in the 
+#                    # count data.
+#                    if np.min(self.tenHzData['dos1rate'][idc_start:idc_end]) < 0:
+#                        continue
+
+#                    # Write data to a file.
+#                    w.writerow(
+#                        np.concatenate((
+#                            [date2num(self.cat['dateTime'][j])],
+#                            [self.cat['Lm_OPQ'][j]], 
+#                            [self.cat['MLT_OPQ'][j]],
+#                            [self.cat['AE'][j]],
+#                            self.tenHzData['dos1rate'][idc_start:idc_end]
+#                        ))
+#                    )
+#        return
+
+#    def binMicrobursts(self, L_bins=np.arange(4, 8, 1), 
+#                            MLT_bins=np.arange(0, 15, 1), 
+#                            AE_bins=np.arange(0, 600, 100),
+#                            N_CC=100):
+#        self._load_count_data()
+#        # Create 3d meshgrid to loop over
+#        LL, MLTMLT, AEAE = np.meshgrid(L_bins, MLT_bins, AE_bins)
+#        self.F = np.nan*np.zeros_like(LL)
+
+#        lL, lMLT, lAE = LL.shape
+
+#        # A nested loop that is three for loops deep.
+#        for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
+#            # Search for all microbursts in that bin. The 3d array indicies
+#            # steps were found through trial and error.
+#            iBursts = np.where(
+#                (self.d[:, 1] > LL[i, j, k]) & (self.d[:, 1] < LL[i, j+1, k]) &
+#                (self.d[:, 2] > MLTMLT[i, j, k]) & (self.d[:, 2] < MLTMLT[i+1, j, k]) &
+#                (self.d[:, 3] > AEAE[i, j, k]) & (self.d[:, 3] < AEAE[i, j, k+1])
+#            )[0]
+
+#            # print(
+#            #     LL[i, j, k], '< L <', LL[i, j+1, k], '\n',
+#            #     MLTMLT[i, j, k], '< MLT <', MLTMLT[i+1, j, k], '\n',
+#            #     AEAE[i, j, k], '< AE <',  AEAE[i, j, k+1],
+#            #     '\nNumber of bursts in bin ', len(iBursts)
+#            # )
+
+#            # Skip bins with only a "few" microbursts in this bin.
+#            if len(iBursts) < 10:
+#                continue
+
+#            # Pick N_CC random microbursts from the iBursts list to cross-correlate against.
+#            iBursts2 = np.random.choice(iBursts, size=N_CC)
+#            # Loop over the microbursts in that bin and cross-correlate them.
+#            CCarr = np.nan*np.zeros((len(iBursts), N_CC))
+
+#            #print(iBursts, iBursts2)
+
+#            for a, iBurst in enumerate(iBursts):
+#                # Now cross correlate iBurst agaianist the random microbursts in iCC
+#                for b, iBurst2 in enumerate(iBursts2):
+#                    CCarr[a, b] = self.CC(self.d[iBurst, 4:], self.d[iBurst2, 4:])
+#            
+#            # Now calculate the ratio of CCs above the threshold against all other CCs.
+#            numerator = len(np.where(CCarr > self.CC_thresh)[0])
+#            denominator = len(np.where(~np.isnan(CCarr))[0])
+#            #print(numerator, '/', denominator)
+#            # Avoid division by 0
+#            if denominator:
+#                self.F[i, j, k] = numerator/denominator
+#        return
+
+#    def CC(self, cA, cB):
+#        """ 
+#        This method calculates the normalized cross-correlation 
+#        between two AC6 time series indexed by iA and iB.
+#        """
+#        norm = np.sqrt(len(cA)*len(cB)*np.var(cA)*np.var(cB))
+#        # Mean subtraction.
+#        x = (cA - cA.mean())
+#        y = (cB - cB.mean())
+#        # Cross-correlate
+#        ccArr = np.correlate(x, y, mode='valid')
+#        # Normalization
+#        ccArr /= norm
+#        return max(ccArr)
+
+#    def _load_count_data(self):
+#        """ Load the microburst data saved to self.timeSeriesPath """
+#        self.d = np.genfromtxt(self.timeSeriesPath, delimiter=',', skip_header=1)
+#        return
+
+
+#    def _get_daily_microbursts(self, date):
+#        """
+#        Get microburst catalog indicies from date.
+#        """
+#        num_date = date2num(date)
+#        num_cat_dates = date2num(self.cat['dateTime']).astype(int)
+#        self.daily_microbursts = np.where(num_date == num_cat_dates)[0]
+#        return
 
 if __name__ == '__main__':
-    # sf = SignificantFraction('a', 5)
-    # sf.main()
-    # np.savetxt('random_CC_significance.csv', sf.CCtFrac)
-
-    # # Visualize histogram of the cross-correlations.
-    # frac = sf.CCtFrac[np.where(~np.isnan(sf.CCtFrac))[0]]
-    # plt.hist(100*frac)
-    # plt.show()
-
-    ccm = CrossCorrelateMicrobursts('a', 5)
-    # ccm.saveTimeSeries()
-    ccm.binMicrobursts()
-    a = ccm.F.flatten()
-    a = a[np.where(~np.isnan(a))[0]]
-    print(a, a.mean())
-
-# L_bins=np.arange(4, 8, 1), 
-# MLT_bins=np.arange(0, 15, 1), 
-# AE_bins=np.arange(0, 600, 100)
-    _, ax = plt.subplots()
-    ax.hist(a)
-    ax.set_title('AC6 random microburst correlation > 0.8')
-    ax.set_ylabel('Counts')
-    ax.set_xlabel('Probability of a random microburst correlation')
-    s = 'Bin widths: L=1, MLT=1, AE=100\nN_CC=100, N_total={}\nmean={}, median={}'.format(
-        len(ccm.d[:, 0]), round(a.mean(), 2), round(a.std(), 2))
-    ax.text(0.95, 0.95, s, transform=ax.transAxes, ha='right', va='top')
-    plt.show()
-
-
-
-# if __name__ == '__main__':
+#     ### VERSION 1 ###
 #     sc_id = 'A'
 #     CC_thresh = 0.8
 #     date = datetime(2015, 4, 25)
@@ -489,3 +708,33 @@ if __name__ == '__main__':
 #     plt.colorbar()
 #     plt.savefig('AC6_significant_random_CC.png', dpi=300)
 #     #plt.show()
+
+#     ### VERSION 2 ###
+#     sf = SignificantFraction('a', 5)
+#     sf.main()
+#     np.savetxt('random_CC_significance.csv', sf.CCtFrac)
+
+#     # Visualize histogram of the cross-correlations.
+#     frac = sf.CCtFrac[np.where(~np.isnan(sf.CCtFrac))[0]]
+#     plt.hist(100*frac)
+#     plt.show()
+
+#    ### VERSION 3 ###
+#    ccm = CrossCorrelateMicrobursts('a', 5)
+#    # ccm.saveTimeSeries()
+#    ccm.binMicrobursts()
+#    a = ccm.F.flatten()
+#    a = a[np.where(~np.isnan(a))[0]]
+#    _, ax = plt.subplots()
+#    ax.hist(a)
+#    ax.set_title('AC6 random microburst correlation > 0.8')
+#    ax.set_ylabel('Counts')
+#    ax.set_xlabel('Probability of a random microburst correlation')
+#    s = 'Bin widths: L=1, MLT=1, AE=100\nN_CC=100, N_total={}\nmean={}, median={}'.format(
+#        len(ccm.d[:, 0]), round(a.mean(), 2), round(a.std(), 2))
+#    ax.text(0.95, 0.95, s, transform=ax.transAxes, ha='right', va='top')
+#    plt.show()
+
+#    ### VERSION 4 ###
+    ccmr = CrossCorrelateMicroburstsRandom('a', 5)
+    ccmr.binAllCounts()

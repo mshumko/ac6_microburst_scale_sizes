@@ -456,15 +456,16 @@ class CrossCorrelateMicroburstsRandom(SignificantFraction):
                 timeSeriesPath='microburst_counts.csv', CC_thresh=0.8):
         self.timeSeriesPath = timeSeriesPath
         self.CC_thresh = CC_thresh
+        self.L_bins=np.arange(4, 9, 1)
+        self.MLT_bins=np.arange(0, 15, 1)
+        self.AE_bins=np.arange(0, 600, 100)
+        self.saveDir = '/home/mike/research/ac6_microburst_scale_sizes/data/binned_counts'
         super().__init__(sc_id, catalog_version, CC_window=10)
         return
         
-    def binAllCounts(self,  L_bins=np.arange(4, 9, 1), 
-                            MLT_bins=np.arange(0, 15, 1), 
-                            AE_bins=np.arange(0, 600, 100),
-                            saveDir='/home/mike/research/ac6_microburst_scale_sizes/data/binned_counts'):
+    def binAllCounts(self):
         """ Bins all of AC6 count data into binned files"""
-        LL, MLTMLT, AEAE = np.meshgrid(L_bins, MLT_bins, AE_bins)
+        LL, MLTMLT, AEAE = np.meshgrid(self.L_bins, self.MLT_bins, self.AE_bins)
         lL, lMLT, lAE = LL.shape
 
         START_DATE = datetime(2014, 6, 21)
@@ -495,18 +496,56 @@ class CrossCorrelateMicroburstsRandom(SignificantFraction):
                 # Skip if no counts found
                 if len(iBins) == 0:
                     continue
-                    
+
                 fName = 'AC6_counts_{}_L_{}_{}_MLT_{}_{}_AE_{}.csv'.format(
                     LL[i, j, k], LL[i, j+1, k], MLTMLT[i, j, k],
                     MLTMLT[i+1, j, k], AEAE[i, j, k], AEAE[i, j, k+1]
                 )
-                fPath = os.path.join(saveDir, fName)
+                fPath = os.path.join(self.saveDir, fName)
 
                 with open(fPath, 'a') as f:
                     w = csv.writer(f)
                     for iBin in iBins:
                         if self.tenHzData['dos1rate'][iBin] > 0:
                             w.writerow([self.tenHzData['dateTime'][iBin], self.tenHzData['dos1rate'][iBin]])
+        return
+
+    def CC_microbursts(self, N_CC = 100, N_bursts=None):
+        """ 
+        Cross-correlate microbursts vs random times in each L-MLT-AE bin
+        """
+        LL, MLTMLT, AEAE = np.meshgrid(self.L_bins, self.MLT_bins, self.AE_bins)
+        lL, lMLT, lAE = LL.shape
+
+        # Loop over L-MLT-AE bins.
+        for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
+
+            # First load the file with the binned AC6 counts.
+            fname = 'AC6_counts_{}_L_{}_{}_MLT_{}_{}_AE_{}.csv'.format(
+                LL[i, j, k], LL[i, j+1, k], MLTMLT[i, j, k], MLTMLT[i+1, j, k],
+                AEAE[i, j, k], AEAE[i, j, k+1]
+            )
+            with open(os.path.join(self.saveDir, fName)) as f:
+                r = csv.reader(f)
+                raw_data = list(r)
+            self.countsArr = {}
+            self.countsArr['dateTime'] = np.array([dateutil.parser.parse(t) for t in raw_data[:, 0]])
+            self.countsArr['counts'] = np.array([float(c) for c in raw_data[:, 1]])
+
+            # Now find the all of detections that were made in that bin
+            iBursts = np.where(
+               (self.cat['Lm_OPQ'] > LL[i, j, k]) & (self.cat['Lm_OPQ'] < LL[i, j+1, k]) &
+               (self.cat['MLT_OPQ'] > MLTMLT[i, j, k]) & (self.cat['MLT_OPQ'] < MLTMLT[i+1, j, k]) &
+               (self.cat['AE'] > AEAE[i, j, k]) & (self.cat['AE'] < AEAE[i, j, k+1])
+               )[0]
+
+            if N_bursts not None:
+               iBursts = np.random.choice(iBursts, size=N_bursts)
+
+            for iBurst in iBursts:
+                pass
+                # Cross-correlate N_CC times here.
+
         return
 
     def _apend_AE(self):

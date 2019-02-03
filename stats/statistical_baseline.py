@@ -461,6 +461,8 @@ class BinnedStatisticalBaseline:
         self.AE_bins=np.arange(0, 600, 100)
         self.binDir = ('/home/mike/research/ac6_microburst_scale_sizes/'
                         'data/binned_counts')
+        self.sc_id = sc_id
+        self.catV = catalog_version
         #super().__init__(sc_id, catalog_version, CC_window=10)
         return
         
@@ -511,7 +513,7 @@ class BinnedStatisticalBaseline:
                             w.writerow([self.tenHzData['dateTime'][iBin], self.tenHzData['dos1rate'][iBin]])
         return
 
-    def CC_random_random(self, N_CC=1000, CC_width=10, CC_time_thresh=1):
+    def CC_random_random(self, N_CC=1000, CC_width=10, CC_time_thresh=1, N_max=int(1E5)):
         """ 
         This method cross-correlates random count data against random count
         data N_CC times for each L-MLT-AE bin. 
@@ -521,6 +523,8 @@ class BinnedStatisticalBaseline:
         self.frac = np.nan*np.zeros_like(LL)
         self.CC_width = CC_width
         self.CC_time_thresh = CC_time_thresh
+        p = 0
+        max_p = lL*lMLT*lAE
 
         # Loop over all the bins.
         for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
@@ -529,12 +533,18 @@ class BinnedStatisticalBaseline:
                 LL[i, j, k], LL[i, j+1, k], MLTMLT[i, j, k], MLTMLT[i+1, j, k],
                 AEAE[i, j, k], AEAE[i, j, k+1]
             )
-            self._load_bin_file(fName)
+            print('Loading', fName, '{} % complete'.format(round(100*p/max_p, 1)))
+            p += 1
+            try:
+                self._load_bin_file(fName)
+            except FileNotFoundError:
+                continue
 
             n = 0
+            nn = 0 # Counter to quit the while loop in case it is stuck.
             CC_arr = np.zeros(N_CC)
 
-            while n < N_CC:
+            while n < N_CC and nn < N_max:
                 # Cross-correlate here. If CC is valid, increment n.
                 # Pick random central indicies to CC (checks to make sure 
                 # CC-time series is continuous is done in self.CC)
@@ -544,26 +554,30 @@ class BinnedStatisticalBaseline:
                 # If the cross-correlation was sucessfull.
                 if CC_arr[n] != -9999: 
                     n += 1
+                nn += 1
             # Find the fraction of events that were significant.
             self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/N_CC
         # Save data to a binary numpy .npy file.
         np.save('random_random', self.frac)
         return
 
-    def CC_microburst_random(self, catV, N_CC=1000, CC_width=10, CC_time_thresh=1):
+    def CC_microburst_random(self, N_CC=1000, CC_width=10, CC_time_thresh=1, N_max=int(1E5)):
         """ 
         Cross-correlate microbursts vs random times in each L-MLT-AE bin
         """
         # Load microburst catalog
         catPath = ('/home/mike/research/ac6_microburst_scale_sizes/'
-                    'data/coincident_microbursts_catalogues')
-        self._load_catalog(catPath, catV)
+                    'data/microburst_catalogues')
+        self._load_catalog(catPath, self.catV)
         # Create L-MLT-AE bins
         LL, MLTMLT, AEAE = np.meshgrid(self.L_bins, self.MLT_bins, self.AE_bins)
         lL, lMLT, lAE = LL.shape
         self.frac = np.nan*np.zeros_like(LL)
         self.CC_width = CC_width
         self.CC_time_thresh = CC_time_thresh
+        p = 0
+        max_p = lL*lMLT*lAE
+
 
         # Loop over L-MLT-AE bins.
         for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
@@ -573,7 +587,12 @@ class BinnedStatisticalBaseline:
                 LL[i, j, k], LL[i, j+1, k], MLTMLT[i, j, k], MLTMLT[i+1, j, k],
                 AEAE[i, j, k], AEAE[i, j, k+1]
             )
-            self._load_bin_file(fName)
+            print('Loading', fName, '{} % complete'.format(round(100*p/max_p, 1)))
+            p += 1
+            try:
+                self._load_bin_file(fName)
+            except FileNotFoundError:
+                continue
 
             # Now find the all of detections that were made in that bin
             iBursts = np.where(
@@ -583,19 +602,21 @@ class BinnedStatisticalBaseline:
                )[0]
 
             n = 0
+            nn = 0
             CC_arr = np.zeros(N_CC)
 
-            while n < N_CC:
+            while n < N_CC and nn < N_max:
                 # Find index where the catalog microburst time matches the counts array time.
                 idtA = np.random.choice(iBursts)
                 idtA = np.where(self.cat['dateTime'][idtA] == self.countsArr['dateTime'])[0] 
                 assert len(idtA) == 1, 'Zero of > 1 count files found!\nitdA = {}'.format(
                     self.cat['dateTime'][idtA])
                 idtB = np.random.choice(np.arange(len(self.countsArr['dateTime'])))
-                CC_arr[n] = self.CC(idtA, idtB)
+                CC_arr[n] = self.CC(idtA[0], idtB)
                 # If the cross-correlation was sucessfull.
                 if CC_arr[n] != -9999: 
                     n += 1
+                nn += 1
             # Find the fraction of events that were significant.
             self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/N_CC
 
@@ -606,7 +627,7 @@ class BinnedStatisticalBaseline:
     def CC_microburst_microburst(self, catV, N_CC=1000, CC_width=10, CC_time_thresh=1):
         # Load microburst catalog
         catPath = ('/home/mike/research/ac6_microburst_scale_sizes/'
-                    'data/coincident_microbursts_catalogues')
+                    'data/microburst_catalogues')
         self._load_catalog(catPath, catV)
         # Create L-MLT-AE bins
         LL, MLTMLT, AEAE = np.meshgrid(self.L_bins, self.MLT_bins, self.AE_bins)
@@ -647,7 +668,7 @@ class BinnedStatisticalBaseline:
                 assert len(idtB) == 1, 'Zero of > 1 count files found!\nitdA = {}'.format(
                     self.cat['dateTime'][idtB])
 
-                CC_arr[n] = self.CC(idtA, idtB)
+                CC_arr[n] = self.CC(idtA[0], idtB[0])
                 # If the cross-correlation was sucessfull.
                 if CC_arr[n] != -9999: 
                     n += 1
@@ -778,6 +799,14 @@ class BinnedStatisticalBaseline:
             # Save indicies.
             self.AE = np.array(list(map(float, [line[idx] 
                             for line in data[headerSize:]])) )
+        return
+
+    def _load_10Hz_data(self, date):
+        """ Wrapper to load AC6 10 Hz data """
+        print('Loading AC6-{} data from {}'.format(
+            self.sc_id.upper(), date.date()))
+        self.tenHzData = read_ac_data.read_ac_data_wrapper(
+                            self.sc_id, date)
         return
 
 #    def saveTimeSeries(self, CC_window_thresh=1):
@@ -968,4 +997,5 @@ if __name__ == '__main__':
 #    ### VERSION 4 ###
     ccmr = BinnedStatisticalBaseline('a', 5)
     #ccmr.binAllCounts()
-    ccmr.CC_random_random()
+    #ccmr.CC_random_random()
+    ccmr.CC_microburst_random()

@@ -442,9 +442,9 @@ class CrossCorrelateMicrobursts(SignificantFraction):
         self.daily_microbursts = np.where(num_date == num_cat_dates)[0]
         return
         
-class CrossCorrelateMicroburstsRandom(SignificantFraction):
+class BinnedStatisticalBaseline:
     """
-    This is the third iteration of the significance chance
+    This is the fourth iteration of the significance chance
     coincidence code. Here I loop over all of the detections
     from the catalog and save a time series snippet containing
     the microburst as well as time, L, MLT, and AE to a file. 
@@ -459,11 +459,12 @@ class CrossCorrelateMicroburstsRandom(SignificantFraction):
         self.L_bins=np.arange(4, 9, 1)
         self.MLT_bins=np.arange(0, 15, 1)
         self.AE_bins=np.arange(0, 600, 100)
-        self.saveDir = '/home/mike/research/ac6_microburst_scale_sizes/data/binned_counts'
-        super().__init__(sc_id, catalog_version, CC_window=10)
+        self.binDir = ('/home/mike/research/ac6_microburst_scale_sizes/'
+                        'data/binned_counts')
+        #super().__init__(sc_id, catalog_version, CC_window=10)
         return
         
-    def binAllCounts(self):
+    def binCounts(self):
         """ Bins all of AC6 count data into binned files"""
         LL, MLTMLT, AEAE = np.meshgrid(self.L_bins, self.MLT_bins, self.AE_bins)
         lL, lMLT, lAE = LL.shape
@@ -501,7 +502,7 @@ class CrossCorrelateMicroburstsRandom(SignificantFraction):
                     LL[i, j, k], LL[i, j+1, k], MLTMLT[i, j, k],
                     MLTMLT[i+1, j, k], AEAE[i, j, k], AEAE[i, j, k+1]
                 )
-                fPath = os.path.join(self.saveDir, fName)
+                fPath = os.path.join(self.binDir, fName)
 
                 with open(fPath, 'a') as f:
                     w = csv.writer(f)
@@ -510,7 +511,35 @@ class CrossCorrelateMicroburstsRandom(SignificantFraction):
                             w.writerow([self.tenHzData['dateTime'][iBin], self.tenHzData['dos1rate'][iBin]])
         return
 
-    def CC_microbursts(self, N_CC = 100, N_bursts=None):
+    def CC_random_random(self, N_CC=1000, CC_width=10, CC_time_thresh=1):
+        """ 
+        This method cross-correlates random count data against random count
+        data N_CC times for each L-MLT-AE bin. 
+        """
+        LL, MLTMLT, AEAE = np.meshgrid(self.L_bins, self.MLT_bins, self.AE_bins)
+        lL, lMLT, lAE = LL.shape
+        self.frac = np.nan*np.zeros_like(LL)
+
+        # Loop over all the bins.
+        for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
+            # Load the counts bin
+            fname = 'AC6_counts_{}_L_{}_{}_MLT_{}_{}_AE_{}.csv'.format(
+                LL[i, j, k], LL[i, j+1, k], MLTMLT[i, j, k], MLTMLT[i+1, j, k],
+                AEAE[i, j, k], AEAE[i, j, k+1]
+            )
+            self._load_bin_file(fname)
+
+            n = 0
+            CC_arr = np.zeros(N_CC)
+
+            while n < N_CC:
+                # Cross-correlate here. If CC is valid, increment n.
+                n += 1
+            # Find the fraction of events that were significant.
+            self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/N_CC
+        return
+
+    def CC_microburst_random(self, N_CC = 100, N_bursts=None):
         """ 
         Cross-correlate microbursts vs random times in each L-MLT-AE bin
         """
@@ -546,6 +575,19 @@ class CrossCorrelateMicroburstsRandom(SignificantFraction):
                 pass
                 # Cross-correlate N_CC times here.
 
+        return
+
+    def CC_microburst_microburst(self, N_CC = 100, N_bursts=None):
+        pass
+        return
+
+    def _load_bin_file(self, fname):
+        with open(os.path.join(self.binDir, fName)) as f:
+            r = csv.reader(f)
+            raw_data = list(r)
+        self.countsArr = {}
+        self.countsArr['dateTime'] = np.array([dateutil.parser.parse(t) for t in raw_data[:, 0]])
+        self.countsArr['counts'] = np.array([float(c) for c in raw_data[:, 1]])
         return
 
     def _apend_AE(self):
@@ -775,5 +817,5 @@ if __name__ == '__main__':
 #    plt.show()
 
 #    ### VERSION 4 ###
-    ccmr = CrossCorrelateMicroburstsRandom('a', 5)
+    ccmr = BinnedStatisticalBaseline('a', 5)
     ccmr.binAllCounts()

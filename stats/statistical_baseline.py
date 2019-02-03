@@ -519,6 +519,8 @@ class BinnedStatisticalBaseline:
         LL, MLTMLT, AEAE = np.meshgrid(self.L_bins, self.MLT_bins, self.AE_bins)
         lL, lMLT, lAE = LL.shape
         self.frac = np.nan*np.zeros_like(LL)
+        self.CC_width = CC_width
+        self.CC_time_thresh = CC_time_thresh
 
         # Loop over all the bins.
         for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
@@ -534,15 +536,27 @@ class BinnedStatisticalBaseline:
 
             while n < N_CC:
                 # Cross-correlate here. If CC is valid, increment n.
-                n += 1
+                # Pick random central indicies to CC (checks to make sure 
+                # CC-time series is continuous is done in self.CC)
+                idtA = np.random.choice(np.arange(len(self.countsArr['dateTime'])))
+                idtB = np.random.choice(np.arange(len(self.countsArr['dateTime'])))
+                CC_arr[n] = self.CC(idtA, idtB)
+                # If the cross-correlation was sucessfull.
+                if CC_arr[n] != -9999: 
+                    n += 1
             # Find the fraction of events that were significant.
             self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/N_CC
+        # Save data to a binary numpy .npy file.
+        np.save('random_random', self.frac)
         return
 
     def CC_microburst_random(self, N_CC = 100, N_bursts=None):
         """ 
         Cross-correlate microbursts vs random times in each L-MLT-AE bin
         """
+        # Load microburst catalog
+        self._load_catalog(catPath, v)
+        # Create L-MLT-AE bins
         LL, MLTMLT, AEAE = np.meshgrid(self.L_bins, self.MLT_bins, self.AE_bins)
         lL, lMLT, lAE = LL.shape
 
@@ -568,8 +582,8 @@ class BinnedStatisticalBaseline:
                (self.cat['AE'] > AEAE[i, j, k]) & (self.cat['AE'] < AEAE[i, j, k+1])
                )[0]
 
-            if N_bursts not None:
-               iBursts = np.random.choice(iBursts, size=N_bursts)
+            # if N_bursts not None:
+            #    iBursts = np.random.choice(iBursts, size=N_bursts)
 
             for iBurst in iBursts:
                 pass
@@ -578,16 +592,90 @@ class BinnedStatisticalBaseline:
         return
 
     def CC_microburst_microburst(self, N_CC = 100, N_bursts=None):
-        pass
+        # Load microburst catalog
+        self._load_catalog(catPath, v)
+        # Create L-MLT-AE bins
         return
 
-    def _load_bin_file(self, fname):
+    def CC(self, iA, iB):
+        """ 
+        This method calculates the normalized cross-correlation 
+        between two AC6 time series indexed by iA and iB.
+        """
+        # Calculate the indicies to cross correlate over
+        aStart = iA - self.CC_width//2 - self.CC_time_thresh
+        aEnd = iA + self.CC_width//2 + self.CC_time_thresh
+        bStart = iB - self.CC_width//2 - self.CC_time_thresh
+        bEnd = iB + self.CC_width//2 + self.CC_time_thresh
+
+        # If start or end indicies are outisde of the 
+        # self.countsArr index range.
+        if aStart < 0 or bStart < 0: 
+            return -9999
+        if (aEnd >= len(self.countsArr['dateTime']) or 
+                bEnd >= len(self.countsArr['dateTime'])): 
+            return -9999
+
+        # If start and end indicies are not "close" to each
+        # other, return error code -9999.
+        dtA = round((self.countsArr['dateTime'][aEnd] - 
+            self.countsArr['dateTime'][aStart]).total_seconds(), 1)
+        dtB = round((self.countsArr['dateTime'][bEnd] - 
+            self.countsArr['dateTime'][bStart]).total_seconds(), 1)
+        if dtA > (self.CC_width+2*self.CC_time_thresh)/10: return -9999
+        if dtB > (self.CC_width+2*self.CC_time_thresh)/10: return -9999
+
+        # Cross-correlate starting here
+        norm = np.sqrt(len(self.countsArr['counts'][aStart:aEnd])*\
+                       len(self.countsArr['counts'][bStart:bEnd])*\
+                       np.var(self.countsArr['counts'][aStart:aEnd])*\
+                       np.var(self.countsArr['counts'][bStart:bEnd])) 
+        # Mean subtraction.
+        x = (self.countsArr['counts'][aStart:aEnd] - 
+            self.countsArr['counts'][aStart:aEnd].mean() )
+        y = (self.countsArr['counts'][bStart:bEnd] - 
+            self.countsArr['counts'][bStart:bEnd].mean() )
+        # Cross-correlate
+        ccArr = np.correlate(x, y, mode='valid')
+        # Normalization
+        ccArr /= norm
+        return max(ccArr)
+
+    def _load_bin_file(self, fName):
         with open(os.path.join(self.binDir, fName)) as f:
             r = csv.reader(f)
-            raw_data = list(r)
+            raw_data = np.array(list(r))
         self.countsArr = {}
         self.countsArr['dateTime'] = np.array([dateutil.parser.parse(t) for t in raw_data[:, 0]])
         self.countsArr['counts'] = np.array([float(c) for c in raw_data[:, 1]])
+        return
+
+    def _load_catalog(self, catPath, v):
+        """ 
+        Loads the microburst catalog of version v spacecraft given 
+        by self.sc_id. 
+        """
+        fPath = os.path.join(catPath, 
+            'AC6{}_microbursts_v{}.txt'.format(self.sc_id.upper(), v))
+        print('Loading catalog,', 'AC6{}_microbursts_v{}.txt'.format(
+            self.sc_id.upper(), v))
+        with open(fPath) as f:
+            r = csv.reader(f)
+            keys = next(r)
+            rawData = np.array(list(r))
+        self.cat = {}
+        for (i, key) in enumerate(keys):
+            self.cat[key] = rawData[:, i]
+
+        # Now convert the times array(s) to datetime, 
+        # and all others except 'burstType' to a float.
+        timeKeys = itertools.filterfalse(
+            lambda x:'dateTime' in x or 'burstType' in x, self.cat.keys())
+        for key in timeKeys:
+                self.cat[key] = self.cat[key].astype(float)
+        for key in filter(lambda x: 'dateTime' in x, self.cat.keys()):
+            self.cat[key] = np.array([dateutil.parser.parse(i) 
+                for i in self.cat[key]])
         return
 
     def _apend_AE(self):
@@ -818,4 +906,5 @@ if __name__ == '__main__':
 
 #    ### VERSION 4 ###
     ccmr = BinnedStatisticalBaseline('a', 5)
-    ccmr.binAllCounts()
+    #ccmr.binAllCounts()
+    ccmr.CC_random_random()

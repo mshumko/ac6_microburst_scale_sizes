@@ -524,7 +524,7 @@ class BinnedStatisticalBaseline:
         self.CC_width = CC_width
         self.CC_time_thresh = CC_time_thresh
         p = 0
-        max_p = lL*lMLT*lAE
+        max_p = (lL-1)*(lMLT-1)*(lAE-1)
 
         # Loop over all the bins.
         for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
@@ -548,15 +548,15 @@ class BinnedStatisticalBaseline:
                 # Cross-correlate here. If CC is valid, increment n.
                 # Pick random central indicies to CC (checks to make sure 
                 # CC-time series is continuous is done in self.CC)
-                idtA = np.random.choice(np.arange(len(self.countsArr['dateTime'])))
-                idtB = np.random.choice(np.arange(len(self.countsArr['dateTime'])))
-                CC_arr[n] = self.CC(idtA, idtB)
+                idt = np.random.choice(np.arange(len(self.countsArr['dateTime'])), size=2)
+                #idtB = np.random.choice(np.arange(len(self.countsArr['dateTime'])))
+                CC_arr[n] = self.CC(*idt)
                 # If the cross-correlation was sucessfull.
                 if CC_arr[n] != -9999: 
                     n += 1
                 nn += 1
             # Find the fraction of events that were significant.
-            self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/N_CC
+            self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/n
         # Save data to a binary numpy .npy file.
         np.save('random_random', self.frac)
         return
@@ -576,7 +576,7 @@ class BinnedStatisticalBaseline:
         self.CC_width = CC_width
         self.CC_time_thresh = CC_time_thresh
         p = 0
-        max_p = lL*lMLT*lAE
+        max_p = (lL-1)*(lMLT-1)*(lAE-1)
 
 
         # Loop over L-MLT-AE bins.
@@ -642,7 +642,7 @@ class BinnedStatisticalBaseline:
         self.CC_width = CC_width
         self.CC_time_thresh = CC_time_thresh
         p = 0
-        max_p = lL*lMLT*lAE
+        max_p = (lL-1)*(lMLT-1)*(lAE-1)
 
 
         # Loop over L-MLT-AE bins.
@@ -828,148 +828,6 @@ class BinnedStatisticalBaseline:
                             self.sc_id, date)
         return
 
-#    def saveTimeSeries(self, CC_window_thresh=1):
-#        """ 
-#        Main method to loop over AC6 data and save each microburst's
-#        the timeseries to a csv file.
-#        """
-#        self._unique_dates()
-
-#        if not os.path.isfile(self.timeSeriesPath):
-#            with open(self.timeSeriesPath, 'w') as f:
-#                w = csv.writer(f)
-#                w.writerow(['dateTime', 'Lm_OPQ', 'MLT_OPQ', 'AE']+
-#                        (self.CC_window + 2*CC_window_thresh)*['CountsArray'])
-
-#        for i, date in enumerate(self.cat_dates):
-#            # Load AC6 10 Hz data
-#            self._load_10Hz_data(date)
-#            # Find the baseline count rates.
-#            #validCounts = np.where(self.tenHzData['dos1rate'] > 0)[0]
-#            #self.baseline = obrienBaseline.obrienBaseline(
-#            #    self.tenHzData['dos1rate'][validCounts], cadence=0.1) 
-#            # Find the microbursts on this day
-#            self._get_daily_microbursts(date)
-#            with open(self.timeSeriesPath, 'a') as f:
-#                w = csv.writer(f)
-#                for j in self.daily_microbursts:
-#                    # Write the count rates to file here.
-
-#                    tenHzIdx = np.where(
-#                        self.cat['dateTime'][j] == self.tenHzData['dateTime']
-#                                        )[0]
-#                    assert len(tenHzIdx) == 1, ('Zero or > 1 '
-#                                                'microburst matches '
-#                                                'found! tenHzIdx={}'.format(
-#                                                    tenHzIdx))
-#                    # dos1 rate indicies to save
-#                    idc_start = tenHzIdx[0] - self.CC_window//2 - CC_window_thresh
-#                    idc_end   = tenHzIdx[0] + self.CC_window//2 + CC_window_thresh
-#                    # Skip the microburst if the count data is at the dos1rate 
-#                    # file boundary
-#                    if idc_start < 0 or idc_end >= len(self.tenHzData['dateTime']):
-#                        continue
-
-#                    # Skip the microburst if there are error values in the 
-#                    # count data.
-#                    if np.min(self.tenHzData['dos1rate'][idc_start:idc_end]) < 0:
-#                        continue
-
-#                    # Write data to a file.
-#                    w.writerow(
-#                        np.concatenate((
-#                            [date2num(self.cat['dateTime'][j])],
-#                            [self.cat['Lm_OPQ'][j]], 
-#                            [self.cat['MLT_OPQ'][j]],
-#                            [self.cat['AE'][j]],
-#                            self.tenHzData['dos1rate'][idc_start:idc_end]
-#                        ))
-#                    )
-#        return
-
-#    def binMicrobursts(self, L_bins=np.arange(4, 8, 1), 
-#                            MLT_bins=np.arange(0, 15, 1), 
-#                            AE_bins=np.arange(0, 600, 100),
-#                            N_CC=100):
-#        self._load_count_data()
-#        # Create 3d meshgrid to loop over
-#        LL, MLTMLT, AEAE = np.meshgrid(L_bins, MLT_bins, AE_bins)
-#        self.F = np.nan*np.zeros_like(LL)
-
-#        lL, lMLT, lAE = LL.shape
-
-#        # A nested loop that is three for loops deep.
-#        for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
-#            # Search for all microbursts in that bin. The 3d array indicies
-#            # steps were found through trial and error.
-#            iBursts = np.where(
-#                (self.d[:, 1] > LL[i, j, k]) & (self.d[:, 1] < LL[i, j+1, k]) &
-#                (self.d[:, 2] > MLTMLT[i, j, k]) & (self.d[:, 2] < MLTMLT[i+1, j, k]) &
-#                (self.d[:, 3] > AEAE[i, j, k]) & (self.d[:, 3] < AEAE[i, j, k+1])
-#            )[0]
-
-#            # print(
-#            #     LL[i, j, k], '< L <', LL[i, j+1, k], '\n',
-#            #     MLTMLT[i, j, k], '< MLT <', MLTMLT[i+1, j, k], '\n',
-#            #     AEAE[i, j, k], '< AE <',  AEAE[i, j, k+1],
-#            #     '\nNumber of bursts in bin ', len(iBursts)
-#            # )
-
-#            # Skip bins with only a "few" microbursts in this bin.
-#            if len(iBursts) < 10:
-#                continue
-
-#            # Pick N_CC random microbursts from the iBursts list to cross-correlate against.
-#            iBursts2 = np.random.choice(iBursts, size=N_CC)
-#            # Loop over the microbursts in that bin and cross-correlate them.
-#            CCarr = np.nan*np.zeros((len(iBursts), N_CC))
-
-#            #print(iBursts, iBursts2)
-
-#            for a, iBurst in enumerate(iBursts):
-#                # Now cross correlate iBurst agaianist the random microbursts in iCC
-#                for b, iBurst2 in enumerate(iBursts2):
-#                    CCarr[a, b] = self.CC(self.d[iBurst, 4:], self.d[iBurst2, 4:])
-#            
-#            # Now calculate the ratio of CCs above the threshold against all other CCs.
-#            numerator = len(np.where(CCarr > self.CC_thresh)[0])
-#            denominator = len(np.where(~np.isnan(CCarr))[0])
-#            #print(numerator, '/', denominator)
-#            # Avoid division by 0
-#            if denominator:
-#                self.F[i, j, k] = numerator/denominator
-#        return
-
-#    def CC(self, cA, cB):
-#        """ 
-#        This method calculates the normalized cross-correlation 
-#        between two AC6 time series indexed by iA and iB.
-#        """
-#        norm = np.sqrt(len(cA)*len(cB)*np.var(cA)*np.var(cB))
-#        # Mean subtraction.
-#        x = (cA - cA.mean())
-#        y = (cB - cB.mean())
-#        # Cross-correlate
-#        ccArr = np.correlate(x, y, mode='valid')
-#        # Normalization
-#        ccArr /= norm
-#        return max(ccArr)
-
-#    def _load_count_data(self):
-#        """ Load the microburst data saved to self.timeSeriesPath """
-#        self.d = np.genfromtxt(self.timeSeriesPath, delimiter=',', skip_header=1)
-#        return
-
-
-#    def _get_daily_microbursts(self, date):
-#        """
-#        Get microburst catalog indicies from date.
-#        """
-#        num_date = date2num(date)
-#        num_cat_dates = date2num(self.cat['dateTime']).astype(int)
-#        self.daily_microbursts = np.where(num_date == num_cat_dates)[0]
-#        return
-
 if __name__ == '__main__':
 #     ### VERSION 1 ###
 #     sc_id = 'A'
@@ -1014,11 +872,11 @@ if __name__ == '__main__':
 #    plt.show()
 
 #    ### VERSION 4 ###
-    # ccmr = BinnedStatisticalBaseline('a', 5)
+    ccmr = BinnedStatisticalBaseline('a', 5)
     # #ccmr.binAllCounts()
-    # #ccmr.CC_random_random()
-    # ccmr.CC_microburst_random()
-    # ccmr.CC_microburst_microburst()
+    ccmr.CC_random_random()
+    ccmr.CC_microburst_random()
+    ccmr.CC_microburst_microburst()
 
     ### Visualize the distribution of L-MLT-AE bins by the fraction of 
     # events with a CC > 0.8
@@ -1029,6 +887,12 @@ if __name__ == '__main__':
     rr_mean = np.nanmean(rr)
     mr_mean = np.nanmean(mr)
     mm_mean = np.nanmean(mm)
+
+    print('rr_N={}, mr_N={}, mm_N={}'.format(
+        len(np.where(~np.isnan(rr))[0]),
+        len(np.where(~np.isnan(mr))[0]),
+        len(np.where(~np.isnan(mm))[0])
+    ))
 
     hist_bins = np.arange(0, 0.6, 0.02)
     _, ax = plt.subplots()

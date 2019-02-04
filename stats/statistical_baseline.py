@@ -630,7 +630,7 @@ class BinnedStatisticalBaseline:
         np.save('microburst_random', self.frac)
         return
 
-    def CC_microburst_microburst(self, catV, N_CC=1000, CC_width=10, CC_time_thresh=1, N_max=int(1E4)):
+    def CC_microburst_microburst(self, N_CC=1000, CC_width=10, CC_time_thresh=1, N_max=int(1E4)):
         # Load microburst catalog
         catPath = ('/home/mike/research/ac6_microburst_scale_sizes/'
                     'data/microburst_catalogues')
@@ -666,7 +666,7 @@ class BinnedStatisticalBaseline:
                (self.cat['MLT_OPQ'] > MLTMLT[i, j, k]) & (self.cat['MLT_OPQ'] < MLTMLT[i+1, j, k]) &
                (self.cat['AE'] > AEAE[i, j, k]) & (self.cat['AE'] < AEAE[i, j, k+1])
                )[0]
-            if not len(iBursts):
+            if len(iBursts) < 10:
                 continue
 
             n = 0
@@ -695,7 +695,7 @@ class BinnedStatisticalBaseline:
             self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/N_CC
 
         # Save data to a binary numpy .npy file.
-        np.save('microburst_random', self.frac)
+        np.save('microburst_microburst', self.frac)
         return
 
     def CC(self, iA, iB):
@@ -1018,3 +1018,4 @@ if __name__ == '__main__':
     #ccmr.binAllCounts()
     #ccmr.CC_random_random()
     ccmr.CC_microburst_random()
+    ccmr.CC_microburst_microburst()

@@ -1014,8 +1014,37 @@ if __name__ == '__main__':
 #    plt.show()
 
 #    ### VERSION 4 ###
-    ccmr = BinnedStatisticalBaseline('a', 5)
-    #ccmr.binAllCounts()
-    #ccmr.CC_random_random()
-    ccmr.CC_microburst_random()
-    ccmr.CC_microburst_microburst()
+    # ccmr = BinnedStatisticalBaseline('a', 5)
+    # #ccmr.binAllCounts()
+    # #ccmr.CC_random_random()
+    # ccmr.CC_microburst_random()
+    # ccmr.CC_microburst_microburst()
+
+    ### Visualize the distribution of L-MLT-AE bins by the fraction of 
+    # events with a CC > 0.8
+    rr = np.load('random_random.npy').flatten()
+    mr = np.load('microburst_random.npy').flatten()
+    mm = np.load('microburst_microburst.npy').flatten()
+
+    rr_mean = np.nanmean(rr)
+    mr_mean = np.nanmean(mr)
+    mm_mean = np.nanmean(mm)
+
+    hist_bins = np.arange(0, 0.6, 0.02)
+    _, ax = plt.subplots()
+    ax.hist(rr, bins=hist_bins, color='r', label='random-random', alpha=0.5)
+    ax.hist(mr, bins=hist_bins, color='b', label='microburst-random', alpha=0.5)
+    ax.hist(mm, bins=hist_bins, color='g', label='microburst-microburst', alpha=0.5)
+    ax.legend(loc=1)
+    ax.set_yscale('log')
+    ax.set_xlabel('Fraction of CCs > 0.8 to all events')
+    ax.set_ylabel('Number of L-MLT-AE bins')
+    ax.set_title('AC6 Statistical Baseline')
+    s = ('Mean values:\nrandom-random={}\nmicroburst-random='
+        '{}\nmicroburst-microburst={}'.format(
+        round(rr_mean, 3), round(mr_mean, 3), round(mm_mean, 3)))
+    ax.text(0.57, 0.8, s, transform=ax.transAxes, ha='left', va='top')
+    plt.show()
+
+
+

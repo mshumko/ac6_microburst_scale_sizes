@@ -630,17 +630,20 @@ class BinnedStatisticalBaseline:
         np.save('microburst_random', self.frac)
         return
 
-    def CC_microburst_microburst(self, catV, N_CC=1000, CC_width=10, CC_time_thresh=1):
+    def CC_microburst_microburst(self, catV, N_CC=1000, CC_width=10, CC_time_thresh=1, N_max=int(1E4)):
         # Load microburst catalog
         catPath = ('/home/mike/research/ac6_microburst_scale_sizes/'
                     'data/microburst_catalogues')
-        self._load_catalog(catPath, catV)
+        self._load_catalog(catPath, self.catV)
         # Create L-MLT-AE bins
         LL, MLTMLT, AEAE = np.meshgrid(self.L_bins, self.MLT_bins, self.AE_bins)
         lL, lMLT, lAE = LL.shape
         self.frac = np.nan*np.zeros_like(LL)
         self.CC_width = CC_width
         self.CC_time_thresh = CC_time_thresh
+        p = 0
+        max_p = lL*lMLT*lAE
+
 
         # Loop over L-MLT-AE bins.
         for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
@@ -650,7 +653,12 @@ class BinnedStatisticalBaseline:
                 LL[i, j, k], LL[i, j+1, k], MLTMLT[i, j, k], MLTMLT[i+1, j, k],
                 AEAE[i, j, k], AEAE[i, j, k+1]
             )
-            self._load_bin_file(fName)
+            print('Loading', fName, '{} % complete'.format(round(100*p/max_p, 1)))
+            p += 1
+            try:
+                self._load_bin_file(fName)
+            except FileNotFoundError:
+                continue
 
             # Now find the all of detections that were made in that bin
             iBursts = np.where(
@@ -658,31 +666,36 @@ class BinnedStatisticalBaseline:
                (self.cat['MLT_OPQ'] > MLTMLT[i, j, k]) & (self.cat['MLT_OPQ'] < MLTMLT[i+1, j, k]) &
                (self.cat['AE'] > AEAE[i, j, k]) & (self.cat['AE'] < AEAE[i, j, k+1])
                )[0]
+            if not len(iBursts):
+                continue
 
             n = 0
+            nn = 0
             CC_arr = np.zeros(N_CC)
 
-            while n < N_CC:
+            while n < N_CC and nn < N_max:
                 # Find index where the catalog microburst time matches the counts array time.
                 idtA = np.random.choice(iBursts)
-                idtA = np.where(self.cat['dateTime'][idtA] == self.countsArr['dateTime'])[0] 
+                idtAA = np.where(self.cat['dateTime'][idtA] == self.countsArr['dateTime'])[0] 
                 idtB = np.random.choice(iBursts)
-                idtB = np.where(self.cat['dateTime'][idtB] == self.countsArr['dateTime'])[0] 
+                idtBB = np.where(self.cat['dateTime'][idtB] == self.countsArr['dateTime'])[0] 
+                # Sometimes this case happens if there are -1E31 values in the counts data.
+                if len(idtAA) == 0 or len(idtBB) == 0: 
+                    continue
+                elif len(idtAA) > 1 or len(idtBB) > 1:
+                    raise IndexError('> 1 count files found!\nitdA = {}\nitdB = {}'.format(
+                        self.cat['dateTime'][idtA], self.cat['dateTime'][idtB]))
 
-                assert len(idtA) == 1, 'Zero of > 1 count files found!\nitdA = {}'.format(
-                    self.cat['dateTime'][idtA])
-                assert len(idtB) == 1, 'Zero of > 1 count files found!\nitdA = {}'.format(
-                    self.cat['dateTime'][idtB])
-
-                CC_arr[n] = self.CC(idtA[0], idtB[0])
+                CC_arr[n] = self.CC(idtAA[0], idtBB[0])
                 # If the cross-correlation was sucessfull.
                 if CC_arr[n] != -9999: 
                     n += 1
+                nn += 1
             # Find the fraction of events that were significant.
             self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/N_CC
 
         # Save data to a binary numpy .npy file.
-        np.save('microburst_microburst', self.frac)
+        np.save('microburst_random', self.frac)
         return
 
     def CC(self, iA, iB):

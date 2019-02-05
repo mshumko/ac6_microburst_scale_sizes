@@ -457,8 +457,8 @@ class BinnedStatisticalBaseline:
         self.timeSeriesPath = timeSeriesPath
         self.CC_thresh = CC_thresh
         self.L_bins=np.arange(4, 9, 1)
-        self.MLT_bins=np.arange(0, 15, 1)
-        self.AE_bins=np.arange(0, 600, 100)
+        self.MLT_bins=np.arange(0, 25, 1)
+        self.AE_bins=np.arange(0, 800, 100)
         self.binDir = ('/home/mike/research/ac6_microburst_scale_sizes/'
                         'data/binned_counts')
         self.sc_id = sc_id
@@ -494,7 +494,9 @@ class BinnedStatisticalBaseline:
                     (self.tenHzData['MLT_OPQ'] > MLTMLT[i, j, k]) &
                     (self.tenHzData['MLT_OPQ'] < MLTMLT[i+1, j, k]) &
                     (self.tenHzData['AE'] > AEAE[i, j, k]) &
-                    (self.tenHzData['AE'] < AEAE[i, j, k+1])
+                    (self.tenHzData['AE'] < AEAE[i, j, k+1]) &
+                    (self.tenHzData['flag'] == 0) & 
+                    (self.tenHzData['dos1rate'] > 0)
                 )[0]
                 # Skip if no counts found
                 if len(iBins) == 0:
@@ -876,42 +878,44 @@ if __name__ == '__main__':
 
 #    ### VERSION 4 ###
     ccmr = BinnedStatisticalBaseline('a', 5)
-    # #ccmr.binAllCounts()
+    ccmr.binAllCounts()
     ccmr.CC_random_random()
     ccmr.CC_microburst_random()
     ccmr.CC_microburst_microburst()
 
-    ### Visualize the distribution of L-MLT-AE bins by the fraction of 
-    # events with a CC > 0.8
-    rr = np.load('random_random.npy').flatten()
-    mr = np.load('microburst_random.npy').flatten()
-    mm = np.load('microburst_microburst.npy').flatten()
+#    ### Visualize the distribution of L-MLT-AE bins by the fraction of 
+#    # events with a CC > 0.8
+#    rr = np.load('random_random.npy').flatten()
+#    mr = np.load('microburst_random.npy').flatten()
+#    mm = np.load('microburst_microburst.npy').flatten()
 
-    rr_mean = np.nanmean(rr)
-    mr_mean = np.nanmean(mr)
-    mm_mean = np.nanmean(mm)
+#    rr_mean = np.nanmean(rr)
+#    mr_mean = np.nanmean(mr)
+#    mm_mean = np.nanmean(mm)
 
-    print('rr_N={}, mr_N={}, mm_N={}'.format(
-        len(np.where(~np.isnan(rr))[0]),
-        len(np.where(~np.isnan(mr))[0]),
-        len(np.where(~np.isnan(mm))[0])
-    ))
+#    print('rr_N={}, mr_N={}, mm_N={}'.format(
+#        len(np.where(~np.isnan(rr))[0]),
+#        len(np.where(~np.isnan(mr))[0]),
+#        len(np.where(~np.isnan(mm))[0])
+#    ))
 
-    hist_bins = np.arange(0, 0.6, 0.02)
-    _, ax = plt.subplots()
-    ax.hist(rr, bins=hist_bins, color='r', label='random-random', alpha=0.5)
-    ax.hist(mr, bins=hist_bins, color='b', label='microburst-random', alpha=0.5)
-    ax.hist(mm, bins=hist_bins, color='g', label='microburst-microburst', alpha=0.5)
-    ax.legend(loc=1)
-    ax.set_yscale('log')
-    ax.set_xlabel('Fraction of CCs > 0.8 to all events')
-    ax.set_ylabel('Number of L-MLT-AE bins')
-    ax.set_title('AC6 Statistical Baseline')
-    s = ('Mean values:\nrandom-random={}\nmicroburst-random='
-        '{}\nmicroburst-microburst={}'.format(
-        round(rr_mean, 3), round(mr_mean, 3), round(mm_mean, 3)))
-    ax.text(0.57, 0.8, s, transform=ax.transAxes, ha='left', va='top')
-    plt.show()
+#    hist_bins = np.arange(0, 0.5, 0.02)
+#    _, ax = plt.subplots()
+##    ax.hist(rr, bins=hist_bins, color='r', label='random-random', alpha=0.5)
+##    ax.hist(mr, bins=hist_bins, color='b', label='microburst-random', alpha=0.5)
+##    ax.hist(mm, bins=hist_bins, color='g', label='microburst-microburst', alpha=0.5)
+#    labels = ['random-random', 'microburst-random', 'microburst-microburst']
+#    ax.hist([rr, mr, mm], bins=hist_bins, color=['r', 'g', 'b'], label=labels, alpha=1, histtype='bar')
+#    ax.legend(loc=1)
+#    ax.set_yscale('log')
+#    ax.set_xlabel('Fraction of CCs > 0.8 to all events')
+#    ax.set_ylabel('Number of L-MLT-AE bins')
+#    ax.set_title('AC6 Statistical Baseline')
+#    s = ('Mean values:\nrandom-random={}\nmicroburst-random='
+#        '{}\nmicroburst-microburst={}'.format(
+#        round(rr_mean, 3), round(mr_mean, 3), round(mm_mean, 3)))
+#    ax.text(0.57, 0.8, s, transform=ax.transAxes, ha='left', va='top')
+#    plt.show()
 
 
 

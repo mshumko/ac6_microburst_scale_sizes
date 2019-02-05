@@ -556,7 +556,8 @@ class BinnedStatisticalBaseline:
                     n += 1
                 nn += 1
             # Find the fraction of events that were significant.
-            self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/n
+            if n > 0:
+                self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/n
         # Save data to a binary numpy .npy file.
         np.save('random_random', self.frac)
         return
@@ -624,7 +625,8 @@ class BinnedStatisticalBaseline:
                     n += 1
                 nn += 1
             # Find the fraction of events that were significant.
-            self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/N_CC
+            if n > 0:
+                self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/n
 
         # Save data to a binary numpy .npy file.
         np.save('microburst_random', self.frac)
@@ -692,7 +694,8 @@ class BinnedStatisticalBaseline:
                     n += 1
                 nn += 1
             # Find the fraction of events that were significant.
-            self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/N_CC
+            if n > 0:
+                self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/n
 
         # Save data to a binary numpy .npy file.
         np.save('microburst_microburst', self.frac)

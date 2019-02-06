@@ -14,7 +14,7 @@ converters = {0:lambda t: dateutil.parser.parse(t.decode()),
             -1:lambda t: dateutil.parser.parse(t.decode()), 
             -2:lambda t: dateutil.parser.parse(t.decode())}
 
-bins = np.arange(0, 200, 5)
+bins = np.arange(2, 100, 3)
 frac = np.nan*np.zeros(len(bins)-1)
 num = np.nan*np.zeros(len(bins)-1)
 CC_thresh = 0.8
@@ -24,15 +24,15 @@ data = np.genfromtxt(catPath, delimiter=',',
         names=True, dtype=dtypes)#, converters=converters)
 
 
-curtain_thresh = 0.3
+curtain_thresh = 0
 
 fig, ax = plt.subplots(3, figsize=(6, 10))
 
 for i, (lower_edge, upper_edge) in enumerate(zip(bins[:-1], bins[1:])):
         # Find microbursts in bin
         idsep = np.where(
-                        (data['Dist_Total'] > lower_edge) 
-                         & 
+                        #(data['Dist_Total'] > lower_edge) 
+                        #  & 
                         (data['Dist_Total'] <= upper_edge) 
                         & # Filter by significance above the 10% baseline.
                         (data['peak_std'] > 2)
@@ -79,10 +79,12 @@ for i, (lower_edge, upper_edge) in enumerate(zip(bins[:-1], bins[1:])):
                         header='sep_km, cdf')
 
 #pdf = np.convolve([-1, 1], frac, mode='valid')
-
-#fig, ax = plt.subplots(2)
 ax[0].bar(np.convolve([0.5, 0.5], bins, mode='valid'), frac, width=(bins[1]-bins[0])*0.8)
 ax[0].set_ylabel('CDF'); #ax[0].set_ylim(bottom=0.15)
+
+# ax[0].bar(np.convolve([0.5, 0.5], bins[:-2], mode='valid'), 
+#         np.convolve([-1, 1], frac[1:], mode='valid'), width=(bins[1]-bins[0])*0.8)
+# ax[0].set_ylabel('PDF'); #ax[0].set_ylim(bottom=0.15)
 
 ax[1].bar(np.convolve([0.5, 0.5], bins, mode='valid'), num, width=(bins[1]-bins[0])*0.8)
 ax[1].set_ylabel('Number of detections')

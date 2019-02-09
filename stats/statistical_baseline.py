@@ -878,7 +878,7 @@ if __name__ == '__main__':
 
 #    ### VERSION 4 ###
     ccmr = BinnedStatisticalBaseline('a', 5)
-    ccmr.binAllCounts()
+    #ccmr.binCounts()
     ccmr.CC_random_random()
     ccmr.CC_microburst_random()
     ccmr.CC_microburst_microburst()

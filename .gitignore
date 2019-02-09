@@ -10,3 +10,4 @@ data/daily_microburst_catalogues/*
 /data/z_daily_microburst_catalogues/*
 *validation.pdf
 */binned_counts/
+data/binned_counts_old/

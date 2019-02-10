@@ -65,7 +65,7 @@ for i, (lower_edge, upper_edge) in enumerate(zip(bins[:-1], bins[1:])):
             print('lower_edge =', lower_edge, 'upper_edge =', upper_edge, 'len(idsep) =', len(idsep))
             frac[i] = len(idCoincident)/len(idsep)
             num[i] = len(idsep)
-        ax[2].scatter(data['lon'][idsep], data['lat'][idsep])
+        ax[2].scatter(data['lon'][idsep], data['lat'][idsep], color='k')
 
         if write_times_to_file and lower_edge == 80 and upper_edge == 85:
             with open('test_times.csv', 'w') as f:
@@ -79,15 +79,18 @@ for i, (lower_edge, upper_edge) in enumerate(zip(bins[:-1], bins[1:])):
                         header='sep_km, cdf')
 
 #pdf = np.convolve([-1, 1], frac, mode='valid')
-ax[0].bar(np.convolve([0.5, 0.5], bins, mode='valid'), frac, width=(bins[1]-bins[0])*0.8)
-ax[0].set_ylabel('CDF'); #ax[0].set_ylim(bottom=0.15)
+frac /= max(frac)
+ax[0].bar(np.convolve([0.5, 0.5], bins, mode='valid'), frac, width=(bins[1]-bins[0])*0.8, color='k')
+ax[0].set_ylabel('CDF (Normalized to 1)'); #ax[0].set_ylim(bottom=0.15)
+ax[0].set_xlabel('AC-6 total separation [km]')
 
 # ax[0].bar(np.convolve([0.5, 0.5], bins[:-2], mode='valid'), 
 #         np.convolve([-1, 1], frac[1:], mode='valid'), width=(bins[1]-bins[0])*0.8)
 # ax[0].set_ylabel('PDF'); #ax[0].set_ylim(bottom=0.15)
 
-ax[1].bar(np.convolve([0.5, 0.5], bins, mode='valid'), num, width=(bins[1]-bins[0])*0.8)
-ax[1].set_ylabel('Number of detections')
+ax[1].bar(np.convolve([0.5, 0.5], bins, mode='valid'), num, width=(bins[1]-bins[0])*0.8, color='k')
+ax[1].set_ylabel('cumulative number of detections\ni.e. number of detections in bin 0 to x km')
+ax[1].set_xlabel('AC-6 total separation [km]')
 
 ax[-1].set(xlabel='Lon', ylabel='Lat')
 plt.tight_layout()

@@ -564,7 +564,7 @@ class BinnedStatisticalBaseline:
         np.save('random_random', self.frac)
         return
 
-    def CC_microburst_random(self, N_CC=1000, CC_width=10, CC_time_thresh=1, N_max=int(1E4)):
+    def CC_microburst_random(self, N_CC=1000, CC_width=10, CC_time_thresh=1, N_max=int(5E3)):
         """ 
         Cross-correlate microbursts vs random times in each L-MLT-AE bin
         """
@@ -603,18 +603,23 @@ class BinnedStatisticalBaseline:
                (self.cat['MLT_OPQ'] > MLTMLT[i, j, k]) & (self.cat['MLT_OPQ'] < MLTMLT[i+1, j, k]) &
                (self.cat['AE'] > AEAE[i, j, k]) & (self.cat['AE'] < AEAE[i, j, k+1])
                )[0]
-            if not len(iBursts):
+            if not len(iBursts) or len(self.countsArr['dateTime']) < 100:
                 continue
 
             n = 0
             nn = 0
             CC_arr = np.zeros(N_CC)
+            if fName == 'AC6_counts_7_L_8_14_MLT_15_500_AE_600.csv':
+                print('len(iBursts)=', len(iBursts))
 
             while n < N_CC and nn < N_max:
                 # Find index where the catalog microburst time matches the counts array time.
+                if fName == 'AC6_counts_7_L_8_14_MLT_15_500_AE_600.csv':
+                    print('nn=', nn)
                 idtA = np.random.choice(iBursts)
                 idtAA = np.where(self.cat['dateTime'][idtA] == self.countsArr['dateTime'])[0] 
                 if len(idtAA) == 0: # Sometimes this case happens if there are -1E31 values in the counts data.
+                    nn += 1
                     continue
                 elif len(idtAA) > 1:
                     raise IndexError('> 1 count files found!\nitdA = {}'.format(
@@ -879,9 +884,9 @@ if __name__ == '__main__':
 #    ### VERSION 4 ###
     ccmr = BinnedStatisticalBaseline('a', 5)
     #ccmr.binCounts()
-    ccmr.CC_random_random()
+    #ccmr.CC_random_random()
     ccmr.CC_microburst_random()
-    ccmr.CC_microburst_microburst()
+    #ccmr.CC_microburst_microburst()
 
 #    ### Visualize the distribution of L-MLT-AE bins by the fraction of 
 #    # events with a CC > 0.8

@@ -581,6 +581,8 @@ class BinnedStatisticalBaseline:
         p = 0
         max_p = (lL-1)*(lMLT-1)*(lAE-1)
 
+        max_bursts = (0, '')
+
 
         # Loop over L-MLT-AE bins.
         for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
@@ -590,6 +592,8 @@ class BinnedStatisticalBaseline:
                 LL[i, j, k], LL[i, j+1, k], MLTMLT[i, j, k], MLTMLT[i+1, j, k],
                 AEAE[i, j, k], AEAE[i, j, k+1]
             )
+            if fName != 'AC6_counts_4_L_5_10_MLT_11_0_AE_100.csv':
+                continue
             print('Loading', fName, '{} % complete'.format(round(100*p/max_p, 1)))
             p += 1
             try:
@@ -605,6 +609,10 @@ class BinnedStatisticalBaseline:
                )[0]
             if not len(iBursts) or len(self.countsArr['dateTime']) < 100:
                 continue
+
+            print(fName, len(iBursts))
+            if len(iBursts) > max_bursts[0]:
+                max_bursts = (len(iBursts), fName)
 
             n = 0
             nn = 0
@@ -635,8 +643,17 @@ class BinnedStatisticalBaseline:
             if n > 0:
                 self.frac[i, j, k] = len(np.where(CC_arr > self.CC_thresh)[0])/n
 
+            plt.hist(CC_arr, np.linspace(0, 1, 25))
+            plt.yscale('log')
+            plt.xlabel('Max CC coefficient')
+            plt.ylabel('#')
+            plt.title('AC6 distribution of microburst-random CCs\nN_bursts = {} | N_CC = {}\n{}'.format(len(iBursts), N_CC, fName))
+            plt.tight_layout()
+            plt.show()
+
         # Save data to a binary numpy .npy file.
-        np.save('microburst_random', self.frac)
+        #np.save('microburst_random', self.frac)
+        print(max_bursts)
         return
 
     def CC_microburst_microburst(self, N_CC=1000, CC_width=10, CC_time_thresh=1, N_max=int(1E4)):
@@ -890,9 +907,9 @@ if __name__ == '__main__':
 
 #    ### Visualize the distribution of L-MLT-AE bins by the fraction of 
 #    # events with a CC > 0.8
-#    rr = np.load('random_random.npy').flatten()
-#    mr = np.load('microburst_random.npy').flatten()
-#    mm = np.load('microburst_microburst.npy').flatten()
+#    rr = np.load('random_random.npy')[:, :, 5].flatten()
+#    mr = np.load('microburst_random.npy')[:, :, 5].flatten()
+#    mm = np.load('microburst_microburst.npy')[:, :, 5].flatten()
 
 #    rr_mean = np.nanmean(rr)
 #    mr_mean = np.nanmean(mr)
@@ -906,9 +923,9 @@ if __name__ == '__main__':
 
 #    hist_bins = np.arange(0, 0.5, 0.02)
 #    _, ax = plt.subplots()
-##    ax.hist(rr, bins=hist_bins, color='r', label='random-random', alpha=0.5)
-##    ax.hist(mr, bins=hist_bins, color='b', label='microburst-random', alpha=0.5)
-##    ax.hist(mm, bins=hist_bins, color='g', label='microburst-microburst', alpha=0.5)
+# #    ax.hist(rr, bins=hist_bins, color='r', label='random-random', alpha=0.5)
+# #    ax.hist(mr, bins=hist_bins, color='b', label='microburst-random', alpha=0.5)
+# #    ax.hist(mm, bins=hist_bins, color='g', label='microburst-microburst', alpha=0.5)
 #    labels = ['random-random', 'microburst-random', 'microburst-microburst']
 #    ax.hist([rr, mr, mm], bins=hist_bins, color=['r', 'g', 'b'], label=labels, alpha=1, histtype='bar')
 #    ax.legend(loc=1)

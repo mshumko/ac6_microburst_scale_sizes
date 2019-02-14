@@ -10,7 +10,5 @@
     "args": [
         "${file}"
     ],
-    "problemMatchers": [
-        "$eslint-stylish"
-    ]
+    "problemMatchers": []
 }

@@ -581,7 +581,7 @@ class BinnedStatisticalBaseline:
         p = 0
         max_p = (lL-1)*(lMLT-1)*(lAE-1)
 
-        max_bursts = (0, '')
+        max_burst_rate = (0, 0, '')
 
 
         # Loop over L-MLT-AE bins.
@@ -592,7 +592,7 @@ class BinnedStatisticalBaseline:
                 LL[i, j, k], LL[i, j+1, k], MLTMLT[i, j, k], MLTMLT[i+1, j, k],
                 AEAE[i, j, k], AEAE[i, j, k+1]
             )
-            if fName != 'AC6_counts_4_L_5_10_MLT_11_0_AE_100.csv':
+            if fName != 'AC6_counts_6_L_7_0_MLT_1_500_AE_600.csv':
                 continue
             print('Loading', fName, '{} % complete'.format(round(100*p/max_p, 1)))
             p += 1
@@ -610,9 +610,13 @@ class BinnedStatisticalBaseline:
             if not len(iBursts) or len(self.countsArr['dateTime']) < 100:
                 continue
 
-            print(fName, len(iBursts))
-            if len(iBursts) > max_bursts[0]:
-                max_bursts = (len(iBursts), fName)
+            
+            # current_burst_rate = len(iBursts)/(len(self.countsArr['dateTime'])/10/60)
+            # print(len(iBursts), current_burst_rate, fName)
+            # with open('burst_rate.csv', 'a') as f:
+            #     f.write('{}, {}, {}\n'.format(len(iBursts), current_burst_rate, fName))
+            # if current_burst_rate > max_burst_rate[1]:
+            #     max_burst_rate = (len(iBursts), current_burst_rate, fName)
 
             n = 0
             nn = 0
@@ -653,7 +657,7 @@ class BinnedStatisticalBaseline:
 
         # Save data to a binary numpy .npy file.
         #np.save('microburst_random', self.frac)
-        print(max_bursts)
+        print(max_burst_rate)
         return
 
     def CC_microburst_microburst(self, N_CC=1000, CC_width=10, CC_time_thresh=1, N_max=int(1E4)):

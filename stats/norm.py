@@ -9,8 +9,8 @@ import sys
 import os
 
 # Import personal libraries
-sys.path.insert(0, '/home/mike/research/mission-tools/ac6')
-import read_ac_data
+#sys.path.insert(0, '/home/mike/research/mission-tools/ac6')
+import mission_tools.ac6.read_ac_data as read_ac_data
 
 class Hist1D:
     def __init__(self, d=None, startDate=datetime(2014, 1, 1),
@@ -52,22 +52,23 @@ class Hist1D:
         time, and return control to user.
         """
         try:   
-            print('Loading data from {}'.format(date))
             self.ac6dataA = read_ac_data.read_ac_data_wrapper(
-                'A', date, dType='10Hz', plot=False)
+                'A', date, dType='10Hz')
             self.ac6dataB = read_ac_data.read_ac_data_wrapper(
-                'B', date, dType='10Hz', plot=False)
+                'B', date, dType='10Hz')
+            print('Loaded data from {}'.format(date))
         except AssertionError as err:
             if ( ('None or > 1 AC6 files found' in str(err)) or
                 ('File is empty!' in str(err)) ):
                 self.ac6dataA = None
                 self.ac6dataB = None
+                return self.ac6dataA, self.ac6dataB
             else:
                 raise
-        finally:
-            return self.ac6dataA, self.ac6dataB
+#        finally:
+#            return self.ac6dataA, self.ac6dataB
 
-    def filterData(self, verbose=True):
+    def filterData(self, verbose=False):
         """
         This function filters the AC-6 data by common times, data flag value,
         and filterDict dictionary.
@@ -180,11 +181,11 @@ class Hist2D(Hist1D):
 
 if __name__ == '__main__':
     ### SCRIPT TO MAKE "Dst_Total" NORMALIZATION ###
-    # ss=Hist1D()
-    # st = datetime.now()
-    # ss.loop_data()
-    sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
-    # ss.save_data(os.path.join(sDir, 'ac6_norm_all_test.csv'))
+     ss=Hist1D(d=np.arange(0, 501, 5), filterDict={'dos1rate':[0, 1E6]})
+     st = datetime.now()
+     ss.loop_data()
+     sDir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm'
+     ss.save_data(os.path.join(sDir, 'ac6_norm_all.csv'))
     # print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
 
     ### SCRIPT TO MAKE L-dependent "Dst_Total" NORMALIZATION ###
@@ -210,8 +211,8 @@ if __name__ == '__main__':
     #               os.path.join(sDir, 'ac6_L_MLT_norm.csv'))
 
     ### SCRIPT TO MAKE MLT-LON NORMALIZATION ####
-    ss = Hist2D('MLT_OPQ', 'lon', bins=[np.arange(0, 24.5, 0.5), np.arange(-180, 181, 5)])
-    ss.loop_data()
-    sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
-    ss.save_data(os.path.join(sDir, 'ac6_MLT_lon_bins_2.csv'), 
-                 os.path.join(sDir, 'ac6_MLT_lon_norm_2.csv'))
+#    ss = Hist2D('MLT_OPQ', 'lon', bins=[np.arange(0, 24.5, 0.5), np.arange(-180, 181, 5)])
+#    ss.loop_data()
+#    sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
+#    ss.save_data(os.path.join(sDir, 'ac6_MLT_lon_bins_2.csv'), 
+#                 os.path.join(sDir, 'ac6_MLT_lon_norm_2.csv'))

@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import dateutil.parser
 import itertools
+import os
 
 import pandas as pd
 
@@ -60,34 +61,47 @@ LL, MLTMLT, AEAE = np.meshgrid(L_bins, MLT_bins, AE_bins)
 N = np.nan*np.zeros_like(LL)
 lL, lMLT, lAE = LL.shape
 
+binDir = ('/home/mike/research/ac6_microburst_scale_sizes/'
+            'data/binned_counts')
+
 N_most_common = 5
 # most_common_bins = np.array([[None]*(len(sep_bins)-1)]*N_most_common)
-most_common_bins = np.ones((len(sep_bins)-1, 2+N_most_common*2), dtype=object)
+most_common_bins = np.ones((len(sep_bins), 1+N_most_common*2), dtype=object)
 
 # Loop over the L, MLT, AE bins
-for s_i, (si, sf) in enumerate(zip(sep_bins[:-1], sep_bins[1:])):
-    N = np.nan*np.zeros(((lL-1)*(lMLT-1)*(lAE-1), 4))
+for s_i, d in enumerate(sep_bins):
+    N = np.nan*np.zeros(((lL-1)*(lMLT-1)*(lAE-1), 4), dtype=float)
     n = 0
 
     for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
-        data_copy = data[
+        data_filtered = data[
             (data['Lm_OPQ'] > LL[i, j, k]) & (data['Lm_OPQ'] < LL[i, j+1, k]) &
             (data['MLT_OPQ'] > MLTMLT[i, j, k]) & (data['MLT_OPQ'] < MLTMLT[i+1, j, k]) &
             (data['AE'] > AEAE[i, j, k]) & (data['AE'] < AEAE[i, j, k+1]) & 
-            (data['Dist_Total'] > si) & (data['Dist_Total'] < sf)
+            (data['Dist_Total'] > d)
             ]
-        N[n] = [i, j, k, data_copy.shape[0]]
+        N_microburst = data_filtered.shape[0]
+        if N_microburst:
+            # Load the current count bin to get microburst rate
+            s = index_to_name(LL, MLTMLT, AEAE, i, j, k)
+            binName = 'AC6_counts_' + s + '.csv'
+            binPath = os.path.join(binDir, binName)
+            binDf = pd.read_csv(binPath)
+            print('N_microburst/binDf.shape[0] =', 10*100*N_microburst/binDf.shape[0])
+            N[n] = [i, j, k, 10*100*N_microburst/binDf.shape[0]]
+            print(N[n])
         n += 1
+
     df = pd.DataFrame(data=N, dtype=int)
     #print(df.nlargest(N_most_common, 3))
     nlargest = df.nlargest(N_most_common, 3)
+    most_common_bins[s_i, 0] = d
     for row in range(nlargest.shape[0]):
         ii, jj, kk, nn = nlargest.iloc[row]
-        most_common_bins[s_i, 0:2] = [si, sf]
-        most_common_bins[s_i, 2+row] = index_to_name(LL, MLTMLT, AEAE, ii, jj, kk)
-        most_common_bins[s_i, 2+N_most_common+row] = nn
+        most_common_bins[s_i, 1+row] = index_to_name(LL, MLTMLT, AEAE, ii, jj, kk)
+        most_common_bins[s_i, 1+N_most_common+row] = nn
 
 # Save the data to file.
 df_most_common = pd.DataFrame(data=most_common_bins)
-header = ['lower_sep', 'upper_sep'] + ['{}th most common bin'.format(i+1) for i in range(N_most_common)] + ['# in {}th most common bin'.format(i+1) for i in range(N_most_common)]
-df_most_common.to_csv('most_common_bins.csv', header=header, index=False)
+header = ['lower_total_dist'] + ['{}_common'.format(i+1) for i in range(N_most_common)] + ['{}_rate_%'.format(i+1) for i in range(N_most_common)]
+df_most_common.to_csv('most_common_l_mlt_ae_bins.csv', header=header, index=False)

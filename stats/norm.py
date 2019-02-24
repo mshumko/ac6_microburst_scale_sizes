@@ -181,11 +181,12 @@ class Hist2D(Hist1D):
 
 if __name__ == '__main__':
     ### SCRIPT TO MAKE "Dst_Total" NORMALIZATION ###
-     ss=Hist1D(d=np.arange(0, 501, 5), filterDict={'dos1rate':[0, 1E6]})
+     ss=Hist1D(d=np.arange(0, 501, 5), 
+                filterDict={'dos1rate':[0, 1E6], 'Lm_OPQ':[4, 4]})
      st = datetime.now()
      ss.loop_data()
      sDir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm'
-     ss.save_data(os.path.join(sDir, 'ac6_norm_all.csv'))
+     ss.save_data(os.path.join(sDir, 'ac6_norm_all_cdf.csv'))
     # print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
 
     ### SCRIPT TO MAKE L-dependent "Dst_Total" NORMALIZATION ###

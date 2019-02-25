@@ -177,6 +177,23 @@ class CumulativeDist:
         ccArr /= norm
         return max(ccArr)
 
+    def _find_peaks(self, iA, iB, time_thresh=1, peak_kwargs={}):
+        """
+        This method calls scipy.signal.find_peaks to attempt to
+        find a peak within time_thresh of the center of the index
+        array, iA and iB for indices from sc A and B, respectively.
+        """
+        countsA = self.tenHzA['dos1rate'][iA]
+        countsB = self.tenHzB['dos1rate'][iB]
+        # Find the peaks
+        peaksA, propertiesA = scipy.signal.find_peaks(countsA, 
+                **peak_kwargs, width=[None, 10])
+        peaksB, propertiesB = scipy.signal.find_peaks(countsB, 
+                **peak_kwargs, width=[None, 10])
+        # Now find if there is a peak at or near the center.
+        
+        return
+
     def _get_time_space_indicies(self, sc_id, i):
         """ 
         This method calculates the time aligned and space-aligned

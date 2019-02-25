@@ -201,12 +201,21 @@ class CumulativeDist:
                             len(iB)//2-sample_thresh, len(iB)//2+sample_thresh+1
                             ))
         # Now find if there is a peak at or near the center.
-        valid_peaks_A = list(peak_template_A.intersection(peaksA))
-        valid_peaks_B = list(peak_template_B.intersection(peaksB))
-
-        if len(valid_peaks_A) and len(valid_peaks_B):
-            print('\npeaksA, propertiesA', peaksA, propertiesA, '\npeaksB, propertiesB', peaksB, propertiesB)
-        return
+        peak_df_A = pd.DataFrame({'ipeak':peaksA, 'width':propertiesA['widths']})
+        peak_df_B = pd.DataFrame({'ipeak':peaksB, 'width':propertiesB['widths']})
+        valid_peaks_A = peak_df_A[peak_df_A['ipeak'].isin(peak_template_A)]
+        valid_peaks_B = peak_df_B[peak_df_B['ipeak'].isin(peak_template_B)]
+        # If only one peak was found near the center, return the width_A/B. If 
+        # none or more than 1 peaks were found, then return np.nan.
+        if len(valid_peaks_A) == 1:
+            width_A = valid_peaks_A.iloc[0, 1]
+        else:
+            width_A = np.nan
+        if len(valid_peaks_B) == 1:
+            width_B = valid_peaks_B.iloc[0, 1]
+        else:
+            width_B = np.nan
+        return width_A, width_B
 
     def _get_time_space_indicies(self, sc_id, i):
         """ 

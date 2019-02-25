@@ -64,7 +64,7 @@ class CumulativeDist:
         # center spatial time for unit A, center spatial time for unit B.
         # To identify which spacecraft the microburst was detected, look
         # for the spatial time which matches the 'dateTime' time.
-        self.data = np.nan*np.zeros((0, len(c.catA.keys())+4))
+        self.data = np.nan*np.zeros((0, len(c.catA.keys())+6))
         self.dates = self._find_loop_dates()
 
         for date in self.dates:

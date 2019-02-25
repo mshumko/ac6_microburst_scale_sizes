@@ -142,6 +142,9 @@ class CumulativeDist:
         for i in idx:
             # Find time and space indicies.
             # out tuple consists of idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB
+            if self.catB['Lag_In_Track'][i] == np.nan:
+                continue
+
             out = self._get_time_space_indicies(sc_id, i)
             
             # Check if time and space indicies are not empty.
@@ -297,17 +300,20 @@ class CumulativeDist:
             'AC6{}_microbursts_v{}.txt'.format(sc_id.upper(), v))
         print('Loading AC6{}_microbursts_v{}.txt catalog'.format(
             sc_id.upper(), v))
-        catalog = pd.read_csv(fPath)
+        catalog = pd.read_csv(fPath, na_values=-1E31)
         # Convert the catalog times to datetime objects
         catalog['dateTime'] = pd.to_datetime(catalog['dateTime'])
         return catalog
 
 
 if __name__ == '__main__':
+    import time
+    start_time = time.time()
     catalog_version = 4
     c = CumulativeDist(catalog_version)
     try:
         c.loop()
     finally:
         c.save_catalog()
+        print("Ran in {} s".format(time.time() - start_time))
         #pass

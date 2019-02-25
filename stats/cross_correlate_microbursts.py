@@ -148,6 +148,8 @@ class CumulativeDist:
             # If there is enough indicies, now cross-correlate
             time_cc = self.CC(out[0], out[1])
             space_cc = self.CC(out[2], out[3])
+            self._find_peaks(out[0], out[1])
+            self._find_peaks(out[2], out[3])
             if sc_id.upper() == 'A':
                 line = np.concatenate(([self.catA[key][i] for key in self.catA.keys()],
                                        [time_cc, space_cc, out[-2], out[-1]]))
@@ -177,7 +179,7 @@ class CumulativeDist:
         ccArr /= norm
         return max(ccArr)
 
-    def _find_peaks(self, iA, iB, time_thresh=1, peak_kwargs={}):
+    def _find_peaks(self, iA, iB, sample_thresh=1, peak_kwargs={}):
         """
         This method calls scipy.signal.find_peaks to attempt to
         find a peak within time_thresh of the center of the index
@@ -187,11 +189,23 @@ class CumulativeDist:
         countsB = self.tenHzB['dos1rate'][iB]
         # Find the peaks
         peaksA, propertiesA = scipy.signal.find_peaks(countsA, 
-                **peak_kwargs, width=[None, 10])
+                **peak_kwargs, width=(None, None))
         peaksB, propertiesB = scipy.signal.find_peaks(countsB, 
-                **peak_kwargs, width=[None, 10])
+                **peak_kwargs, width=(None, None))
+        # The template sets just contain the indicies of iA and iB that 
+        # are at the center of iA and iB +/- sample_thresh
+        peak_template_A = set(np.arange(
+                            len(iA)//2-sample_thresh, len(iA)//2+sample_thresh+1
+                            ))
+        peak_template_B = set(np.arange(
+                            len(iB)//2-sample_thresh, len(iB)//2+sample_thresh+1
+                            ))
         # Now find if there is a peak at or near the center.
-        
+        valid_peaks_A = list(peak_template_A.intersection(peaksA))
+        valid_peaks_B = list(peak_template_B.intersection(peaksB))
+
+        if len(valid_peaks_A) and len(valid_peaks_B):
+            print('\npeaksA, propertiesA', peaksA, propertiesA, '\npeaksB, propertiesB', peaksB, propertiesB)
         return
 
     def _get_time_space_indicies(self, sc_id, i):
@@ -290,9 +304,10 @@ class CumulativeDist:
 
 
 if __name__ == '__main__':
-    catalog_version = 5
+    catalog_version = 4
     c = CumulativeDist(catalog_version)
     try:
         c.loop()
     finally:
-        c.save_catalog()
+        #c.save_catalog()
+        pass

@@ -118,15 +118,15 @@ class PlotMicrobursts:
         """
         df_time_a, df_time_b, df_space_a, df_space_b = self._get_filtered_plot_data(row)
         if mean_subtracted:
-            df_time_a['dos1rate'] -= df_time_a['dos1rate'].mean()
-            df_time_b['dos1rate'] -= df_time_b['dos1rate'].mean()
-            df_space_a['dos1rate'] -= df_space_a['dos1rate'].mean()
-            df_space_b['dos1rate'] -= df_space_b['dos1rate'].mean()
+            df_time_a.loc[:, 'dos1rate'] -= df_time_a.loc[:, 'dos1rate'].mean()
+            df_time_b.loc[:, 'dos1rate'] -= df_time_b.loc[:, 'dos1rate'].mean()
+            df_space_a.loc[:, 'dos1rate'] -= df_space_a.loc[:, 'dos1rate'].mean()
+            df_space_b.loc[:, 'dos1rate'] -= df_space_b.loc[:, 'dos1rate'].mean()
 
         _, ax = plt.subplots(2)
         ax[0].plot(df_time_a['dateTime'], df_time_a['dos1rate'], 'r', label='AC6-A')
         ax[0].plot(df_time_b['dateTime'], df_time_b['dos1rate'], 'b', label='AC6-B')
-        ax[0].axvline(row['dateTime'])
+        ax[0].axvline(row.at['dateTime'])
         ax[0].legend(loc=1)
         ax[1].plot(df_space_a['dateTime'], df_space_a['dos1rate'], 'r', label='AC6-A')
         ax[1].plot(df_space_b['dateTime'], df_space_b['dos1rate'], 'b', label='AC6-B')
@@ -145,19 +145,19 @@ class PlotMicrobursts:
                             (self.ac6b_data['dateTime'] > row['dateTime']-self.plot_width/2) & 
                             (self.ac6b_data['dateTime'] < row['dateTime']+self.plot_width/2)
                             ]
-        if row['dateTime'] == row['time_spatial_A']:
+        if row.at['dateTime'] == row.at['time_spatial_A']:
             df_space_a = df_time_a
             df_space_b = self.ac6b_data[
                             (self.ac6b_data['dateTime'] > row['time_spatial_B']-self.plot_width/2) & 
                             (self.ac6b_data['dateTime'] < row['time_spatial_B']+self.plot_width/2)
                             ]
-            df_space_b['dateTime'] -= timedelta(seconds=row['Lag_In_Track'])
-        elif row['dateTime'] == row['time_spatial_B']:
+            df_space_b.loc[:, 'dateTime'] -= timedelta(seconds=row.at['Lag_In_Track'])
+        elif row.at['dateTime'] == row.at['time_spatial_B']:
             df_space_a = self.ac6a_data[
                             (self.ac6a_data['dateTime'] > row['time_spatial_A']-self.plot_width/2) & 
                             (self.ac6a_data['dateTime'] < row['time_spatial_A']+self.plot_width/2)
                             ]
-            df_space_a['dateTime'] += timedelta(seconds=row['Lag_In_Track'])
+            df_space_a.loc[:, 'dateTime'] += timedelta(seconds=row.at['Lag_In_Track'])
             df_space_b = df_time_b
         else:
             raise(ValueError('No space matches found!'))
@@ -165,5 +165,5 @@ class PlotMicrobursts:
 
 if __name__ == '__main__':
     p = PlotMicrobursts(4)
-    p.filter_catalog(filterDict={'Dist_Total':[100, 200]})
+    p.filter_catalog(filterDict={'Dist_Total':[0, 50]})
     p.loop()

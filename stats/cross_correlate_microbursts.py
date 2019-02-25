@@ -99,7 +99,9 @@ class CumulativeDist:
             w = csv.writer(f)
             w.writerow(np.concatenate((list(self.catA.keys()), 
                     ['time_cc', 'space_cc', 
-                    'time_spatial_A', 'time_spatial_B'])))
+                    'time_spatial_A', 'time_spatial_B', 
+                    'peak_width_A', 'peak_width_B']
+                    )))
             w.writerows(self.data)
         return
 
@@ -148,14 +150,17 @@ class CumulativeDist:
             # If there is enough indicies, now cross-correlate
             time_cc = self.CC(out[0], out[1])
             space_cc = self.CC(out[2], out[3])
-            self._find_peaks(out[0], out[1])
-            self._find_peaks(out[2], out[3])
+            peak_width_A, peak_width_B = self._find_peaks(out[0], out[1])
+            # Need to think twice about the width in the spatial domain.
+            #width_A, width_B = self._find_peaks(out[2], out[3])
             if sc_id.upper() == 'A':
                 line = np.concatenate(([self.catA[key][i] for key in self.catA.keys()],
-                                       [time_cc, space_cc, out[-2], out[-1]]))
+                                       [time_cc, space_cc, out[-2], out[-1], 
+                                       peak_width_A, peak_width_B]))
             else:
                 line = np.concatenate(([self.catB[key][i] for key in self.catB.keys()],
-                                       [time_cc, space_cc, out[-2], out[-1]]))
+                                       [time_cc, space_cc, out[-2], out[-1], 
+                                       peak_width_A, peak_width_B]))
             self.data = np.vstack((self.data, line))
         return
 
@@ -208,11 +213,11 @@ class CumulativeDist:
         # If only one peak was found near the center, return the width_A/B. If 
         # none or more than 1 peaks were found, then return np.nan.
         if len(valid_peaks_A) == 1:
-            width_A = valid_peaks_A.iloc[0, 1]
+            width_A = valid_peaks_A.iloc[0, 1]/10
         else:
             width_A = np.nan
         if len(valid_peaks_B) == 1:
-            width_B = valid_peaks_B.iloc[0, 1]
+            width_B = valid_peaks_B.iloc[0, 1]/10
         else:
             width_B = np.nan
         return width_A, width_B
@@ -304,5 +309,5 @@ if __name__ == '__main__':
     try:
         c.loop()
     finally:
-        #c.save_catalog()
-        pass
+        c.save_catalog()
+        #pass

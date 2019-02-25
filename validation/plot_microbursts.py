@@ -3,22 +3,34 @@
 import os
 import numpy as np
 import pandas as pd
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import matplotlib.pyplot as plt
 
+# Paths that are used everywhere in the class
 CATALOG_DIR = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
                 'coincident_microbursts_catalogues/')
 AC6_DATA_PATH = lambda sc_id: ('/home/mike/research/ac6/ac6{}/'
                                 'ascii/level2'.format(sc_id))
+PLOT_SAVE_DIR = '/home/mike/Desktop/ac6_microburst_validation'
 
 class PlotMicrobursts:
-    def __init__(self, catalog_version, plot_width=5):
+    def __init__(self, catalog_version, plot_width=5, plot_save_dir=None):
         """
         This class plots the detections from the coincident
         microburst catalog with a set of default filters.
         The user can supply other filter values in the 
         filterDict.
         """
+        self.plot_width = timedelta(seconds=plot_width)
+        if plot_save_dir is None:
+            self.plot_save_dir = PLOT_SAVE_DIR
+        else:
+            self.plot_save_dir = plot_save_dir
+
+        if not os.path.exists(self.plot_save_dir):
+            os.mkdir(self.plot_save_dir)
+            print('Made directory:', self.plot_save_dir)
+
         self.load_catalog(catalog_version)
         return
 
@@ -44,6 +56,9 @@ class PlotMicrobursts:
                     ((self.catalog['lon'] > 30)  | (self.catalog['lon'] < -116)) |
                     ((self.catalog['lat'] < -90) | (self.catalog['lat'] > 0))
                                 ]
+            # Significane above baseline filter
+            self.catalog = self.catalog[self.catalog['peak_std'] > 3]
+
             for key, vals in filterDict.items():
                 self.catalog = self.catalog[
                     ((self.catalog[key] > min(vals)) & 
@@ -77,7 +92,7 @@ class PlotMicrobursts:
                 # Load current day AC-6 data if not loaded already
                 self.load_ten_hz_data(row.dateTime.date())
                 current_date = row.dateTime.date()
-        
+            self.make_plot(row)
         return
 
     def load_ten_hz_data(self, day):
@@ -90,12 +105,63 @@ class PlotMicrobursts:
                 'AC6-A_{}_L2_10Hz_V03.csv'.format(dayStr))
         pathB = os.path.join(AC6_DATA_PATH('b'), 
                 'AC6-B_{}_L2_10Hz_V03.csv'.format(dayStr))
-        print(pathA, pathB)
         self.ac6a_data = pd.read_csv(pathA, na_values='-1e+31')
         self.ac6a_data['dateTime'] = pd.to_datetime(self.ac6a_data[time_keys])
         self.ac6b_data = pd.read_csv(pathB, na_values='-1e+31')
         self.ac6b_data['dateTime'] = pd.to_datetime(self.ac6b_data[time_keys])
         return
+
+    def make_plot(self, row, mean_subtracted=True):
+        """
+        This method takes in a dataframe row from the catalog and makes a 
+        space/time plot.
+        """
+        df_time_a, df_time_b, df_space_a, df_space_b = self._get_filtered_plot_data(row)
+        if mean_subtracted:
+            df_time_a['dos1rate'] -= df_time_a['dos1rate'].mean()
+            df_time_b['dos1rate'] -= df_time_b['dos1rate'].mean()
+            df_space_a['dos1rate'] -= df_space_a['dos1rate'].mean()
+            df_space_b['dos1rate'] -= df_space_b['dos1rate'].mean()
+
+        _, ax = plt.subplots(2)
+        ax[0].plot(df_time_a['dateTime'], df_time_a['dos1rate'], 'r', label='AC6-A')
+        ax[0].plot(df_time_b['dateTime'], df_time_b['dos1rate'], 'b', label='AC6-B')
+        ax[0].axvline(row['dateTime'])
+        ax[0].legend(loc=1)
+        ax[1].plot(df_space_a['dateTime'], df_space_a['dos1rate'], 'r', label='AC6-A')
+        ax[1].plot(df_space_b['dateTime'], df_space_b['dos1rate'], 'b', label='AC6-B')
+
+        save_name = '{0:%Y%m%d_%H%M%S}_ac6_validation_dist_total_{1}.png'.format(
+                    row['dateTime'], round(row['Dist_Total']))
+        plt.savefig(os.path.join(self.plot_save_dir, save_name))
+        return
+
+    def _get_filtered_plot_data(self, row):
+        df_time_a = self.ac6a_data[
+                            (self.ac6a_data['dateTime'] > row['dateTime']-self.plot_width/2) & 
+                            (self.ac6a_data['dateTime'] < row['dateTime']+self.plot_width/2)
+                            ]
+        df_time_b = self.ac6b_data[
+                            (self.ac6b_data['dateTime'] > row['dateTime']-self.plot_width/2) & 
+                            (self.ac6b_data['dateTime'] < row['dateTime']+self.plot_width/2)
+                            ]
+        if row['dateTime'] == row['time_spatial_A']:
+            df_space_a = df_time_a
+            df_space_b = self.ac6b_data[
+                            (self.ac6b_data['dateTime'] > row['time_spatial_B']-self.plot_width/2) & 
+                            (self.ac6b_data['dateTime'] < row['time_spatial_B']+self.plot_width/2)
+                            ]
+            df_space_b['dateTime'] -= timedelta(seconds=row['Lag_In_Track'])
+        elif row['dateTime'] == row['time_spatial_B']:
+            df_space_a = self.ac6a_data[
+                            (self.ac6a_data['dateTime'] > row['time_spatial_A']-self.plot_width/2) & 
+                            (self.ac6a_data['dateTime'] < row['time_spatial_A']+self.plot_width/2)
+                            ]
+            df_space_a['dateTime'] += timedelta(seconds=row['Lag_In_Track'])
+            df_space_b = df_time_b
+        else:
+            raise(ValueError('No space matches found!'))
+        return df_time_a, df_time_b, df_space_a, df_space_b
 
 if __name__ == '__main__':
     p = PlotMicrobursts(4)

@@ -6,7 +6,7 @@ import dateutil.parser
 import csv
 import itertools
 import scipy.signal
-#import sys
+import pandas as pd
 import os 
 import functools
 
@@ -283,24 +283,10 @@ class CumulativeDist:
             'AC6{}_microbursts_v{}.txt'.format(sc_id.upper(), v))
         print('Loading AC6{}_microbursts_v{}.txt catalog'.format(
             sc_id.upper(), v))
-        with open(fPath) as f:
-            r = csv.reader(f)
-            keys = next(r)
-            rawData = np.array(list(r))
-        cat = {}
-        for (i, key) in enumerate(keys):
-            cat[key] = rawData[:, i]
-
-        # Now convert the times array(s) to datetime, 
-        # and all others except 'burstType' to a float.
-        timeKeys = itertools.filterfalse(
-            lambda x:'dateTime' in x or 'burstType' in x, cat.keys())
-        for key in timeKeys:
-                cat[key] = cat[key].astype(float)
-        for key in filter(lambda x: 'dateTime' in x, cat.keys()):
-            cat[key] = np.array([dateutil.parser.parse(i) 
-                for i in cat[key]])
-        return cat
+        catalog = pd.read_csv(fPath)
+        # Convert the catalog times to datetime objects
+        catalog['dateTime'] = pd.to_datetime(catalog['dateTime'])
+        return catalog
 
 
 if __name__ == '__main__':

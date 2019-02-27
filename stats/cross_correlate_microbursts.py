@@ -140,11 +140,18 @@ class CumulativeDist:
         cross-correlated in space and time.
         """
         for i in idx:
+            
+            # If the Lag_In_Track value is an error, 
+            # ignore that iteration.
+            if sc_id.upper() == 'A':
+                if np.isnan(self.catA['Lag_In_Track'][i]):
+                    continue
+            else:
+                if np.isnan(self.catB['Lag_In_Track'][i]):
+                    continue
             # Find time and space indicies.
-            # out tuple consists of idtA, idtB, idtA_shifted, idtB_shifted, t0, t_sA, t_sB
-            if self.catB['Lag_In_Track'][i] == np.nan:
-                continue
-
+            # out tuple consists of idtA, idtB, idtA_shifted, 
+            # idtB_shifted, t0, t_sA, t_sB
             out = self._get_time_space_indicies(sc_id, i)
             
             # Check if time and space indicies are not empty.

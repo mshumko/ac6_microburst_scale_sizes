@@ -131,6 +131,11 @@ class PlotMicrobursts:
         ax[1].plot(df_space_a['dateTime'], df_space_a['dos1rate'], 'r', label='AC6-A')
         ax[1].plot(df_space_b['dateTime'], df_space_b['dos1rate'], 'b', label='AC6-B')
 
+        # Print peak width.
+        s = 'peak_width_A = {} s\npeak_width_B = {} s'.format(
+                round(row['peak_width_A'], 2), round(row['peak_width_B'], 2))
+        ax[0].text(0, 1, s, transform=ax[0].transAxes, va='top')
+
         save_name = '{0:%Y%m%d_%H%M%S}_ac6_validation_dist_total_{1}.png'.format(
                     row['dateTime'], round(row['Dist_Total']))
         plt.savefig(os.path.join(self.plot_save_dir, save_name))
@@ -164,6 +169,8 @@ class PlotMicrobursts:
         return df_time_a, df_time_b, df_space_a, df_space_b
 
 if __name__ == '__main__':
-    p = PlotMicrobursts(4)
+    p = PlotMicrobursts(6)
     p.filter_catalog(filterDict={'Dist_Total':[0, 50]})
+    p.catalog = p.catalog[np.isclose(p.catalog['peak_width_A'], 
+                          p.catalog['peak_width_B'], rtol=0.1)]
     p.loop()

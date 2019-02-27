@@ -194,14 +194,17 @@ class CumulativeDist:
         ccArr /= norm
         return max(ccArr)
 
-    def _find_peaks(self, iA, iB, sample_thresh=1, peak_kwargs={}):
+    def _find_peaks(self, iA, iB, sample_thresh=1, peak_kwargs={}, smooth=3):
         """
         This method calls scipy.signal.find_peaks to attempt to
         find a peak within time_thresh of the center of the index
         array, iA and iB for indices from sc A and B, respectively.
         """
-        countsA = self.tenHzA['dos1rate'][iA]
-        countsB = self.tenHzB['dos1rate'][iB]
+        if smooth > 1:
+            countsA = np.convolve(np.ones(smooth)/smooth, self.tenHzA['dos1rate'][iA], 
+                mode='same')
+            countsB = np.convolve(np.ones(smooth)/smooth, self.tenHzB['dos1rate'][iB], 
+                mode='same')
         # Find the peaks
         peaksA, propertiesA = scipy.signal.find_peaks(countsA, 
                 **peak_kwargs, width=(None, None))
@@ -321,6 +324,8 @@ if __name__ == '__main__':
     try:
         c.loop()
     finally:
-        c.save_catalog()
+        saveDir = './../data/coincident_microbursts_catalogues'
+        saveName = 'AC6_coincident_microbursts_v7.txt'
+        c.save_catalog(savePath=os.path.join(saveDir, saveName))
         print("Ran in {} s".format(time.time() - start_time))
         #pass

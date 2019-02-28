@@ -133,7 +133,7 @@ class PlotMicrobursts:
         self.ac6b_data['dateTime'] = pd.to_datetime(self.ac6b_data[time_keys])
         return
 
-    def make_plot(self, row, mean_subtracted=True):
+    def make_plot(self, row, mean_subtracted=True, savefig=True):
         """
         This method takes in a dataframe row from the catalog and makes a 
         space/time plot.
@@ -164,10 +164,10 @@ class PlotMicrobursts:
             s = 'peak_width_A = {} s\npeak_width_B = {} s'.format(
                     round(row['peak_width_A'], 2), round(row['peak_width_B'], 2))
             self.ax[0].text(0, 1, s, transform=self.ax[0].transAxes, va='top')
-
-        save_name = '{0:%Y%m%d_%H%M%S}_ac6_validation_dist_total_{1}.png'.format(
-                    row['dateTime'], round(row['Dist_Total']))
-        plt.savefig(os.path.join(self.plot_save_dir, save_name))
+        if savefig:
+            save_name = '{0:%Y%m%d_%H%M%S}_ac6_validation_dist_total_{1}.png'.format(
+                        row['dateTime'], round(row['Dist_Total']))
+            plt.savefig(os.path.join(self.plot_save_dir, save_name))
         return
 
     def _get_filtered_plot_data(self, row):

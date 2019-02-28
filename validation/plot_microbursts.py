@@ -111,6 +111,8 @@ class PlotMicrobursts:
                 self.load_ten_hz_data(row.dateTime.date())
                 current_date = row.dateTime.date()
             self.make_plot(row)
+            self.ax[0].clear()
+            self.ax[1].clear()
         plt.close()
         return
 
@@ -165,8 +167,6 @@ class PlotMicrobursts:
         save_name = '{0:%Y%m%d_%H%M%S}_ac6_validation_dist_total_{1}.png'.format(
                     row['dateTime'], round(row['Dist_Total']))
         plt.savefig(os.path.join(self.plot_save_dir, save_name))
-        self.ax[0].clear()
-        self.ax[1].clear()
         return
 
     def _get_filtered_plot_data(self, row):

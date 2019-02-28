@@ -35,6 +35,22 @@ class PlotMicrobursts:
         return
 
     def filter_catalog(self, defaultFilter=True, filterDict={}):
+        """
+        Apply filters to the catalog file. The default filter
+        applies a filter that should always be used. The dafault
+        filter filters out the events with a temporal_CC < 0.8,
+        detections made outside of 4 < L < 8, filters out detections
+        that have a spatial_CC-0.3 > temporal_CC. Lastly, the default
+        filters removes detections made above the US and SAA to avoid
+        noise from ground transmitters and saturation in the SAA.
+
+        Whenever you want to filter other variables, supply them to
+        the filterDict dictionary. filterDict's keys are the
+        catalog keys and the values is a 2 element list with upper 
+        and lower bounds. If you want a one-sided filter e.g. 
+        Dist_Total greater than 50 km, pass in 
+        filterDict={'Dist_Total':[50, 9999]}.
+        """
         if defaultFilter:
             # High CC filter
             self.catalog = self.catalog[self.catalog['time_cc'] >= 0.8]
@@ -57,7 +73,7 @@ class PlotMicrobursts:
                     ((self.catalog['lat'] < -90) | (self.catalog['lat'] > 0))
                                 ]
             # Significane above baseline filter
-            self.catalog = self.catalog[self.catalog['peak_std'] > 3]
+            #self.catalog = self.catalog[self.catalog['peak_std'] > 3]
 
             for key, vals in filterDict.items():
                 self.catalog = self.catalog[
@@ -87,12 +103,15 @@ class PlotMicrobursts:
         """
         current_date = date.min
 
+        _, self.ax = plt.subplots(2)
+
         for _, row in self.catalog.iterrows():
             if row.dateTime.date() != current_date:
                 # Load current day AC-6 data if not loaded already
                 self.load_ten_hz_data(row.dateTime.date())
                 current_date = row.dateTime.date()
             self.make_plot(row)
+        plt.close()
         return
 
     def load_ten_hz_data(self, day):
@@ -123,22 +142,23 @@ class PlotMicrobursts:
             df_space_a.loc[:, 'dos1rate'] -= df_space_a.loc[:, 'dos1rate'].mean()
             df_space_b.loc[:, 'dos1rate'] -= df_space_b.loc[:, 'dos1rate'].mean()
 
-        _, ax = plt.subplots(2)
-        ax[0].plot(df_time_a['dateTime'], df_time_a['dos1rate'], 'r', label='AC6-A')
-        ax[0].plot(df_time_b['dateTime'], df_time_b['dos1rate'], 'b', label='AC6-B')
-        ax[0].axvline(row.at['dateTime'])
-        ax[0].legend(loc=1)
-        ax[1].plot(df_space_a['dateTime'], df_space_a['dos1rate'], 'r', label='AC6-A')
-        ax[1].plot(df_space_b['dateTime'], df_space_b['dos1rate'], 'b', label='AC6-B')
+        self.ax[0].plot(df_time_a['dateTime'], df_time_a['dos1rate'], 'r', label='AC6-A')
+        self.ax[0].plot(df_time_b['dateTime'], df_time_b['dos1rate'], 'b', label='AC6-B')
+        self.ax[0].axvline(row.at['dateTime'])
+        self.ax[0].legend(loc=1)
+        self.ax[1].plot(df_space_a['dateTime'], df_space_a['dos1rate'], 'r', label='AC6-A')
+        self.ax[1].plot(df_space_b['dateTime'], df_space_b['dos1rate'], 'b', label='AC6-B')
 
         # Print peak width.
         s = 'peak_width_A = {} s\npeak_width_B = {} s'.format(
                 round(row['peak_width_A'], 2), round(row['peak_width_B'], 2))
-        ax[0].text(0, 1, s, transform=ax[0].transAxes, va='top')
+        self.ax[0].text(0, 1, s, transform=self.ax[0].transAxes, va='top')
 
         save_name = '{0:%Y%m%d_%H%M%S}_ac6_validation_dist_total_{1}.png'.format(
                     row['dateTime'], round(row['Dist_Total']))
         plt.savefig(os.path.join(self.plot_save_dir, save_name))
+        self.ax[0].clear()
+        self.ax[1].clear()
         return
 
     def _get_filtered_plot_data(self, row):
@@ -170,7 +190,13 @@ class PlotMicrobursts:
 
 if __name__ == '__main__':
     p = PlotMicrobursts(6)
-    p.filter_catalog(filterDict={'Dist_Total':[0, 50]})
+    p.filter_catalog(filterDict={'Dist_Total':[0, 25]})
+    p.catalog = p.catalog[np.isclose(p.catalog['peak_width_A'], 
+                          p.catalog['peak_width_B'], rtol=0.1)]
+    p.loop()
+
+    p = PlotMicrobursts(6)
+    p.filter_catalog(filterDict={'Dist_Total':[60, 200]})
     p.catalog = p.catalog[np.isclose(p.catalog['peak_width_A'], 
                           p.catalog['peak_width_B'], rtol=0.1)]
     p.loop()

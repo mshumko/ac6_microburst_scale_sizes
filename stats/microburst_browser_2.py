@@ -14,8 +14,19 @@ from matplotlib.widgets import Button
 # l, = plt.plot(t, s, lw=2)
 
 class Browser(PlotMicrobursts):
-    def __init__(self, catalog_version, plot_width=5, catalog_save_name=None):
-        PlotMicrobursts.__init__(self, catalog_version, plot_width=plot_width)
+    def __init__(self, catalog_version, plot_width=5, catalog_save_name=None, width_tol=0.1):
+        """
+        This class plots the AC6 microbursts and allows the user to browse
+        detections in the future and past with buttons. Also there is a button
+        to mark the event as a microburst.
+        """
+        PlotMicrobursts.__init__(self, catalog_version, plot_width=plot_width, 
+                                plot_width_flag=False)
+        # Filter out events with widths whithin a width_tol.
+        if width_tol is not None:
+            self.catalog = self.catalog[np.isclose(
+                            self.catalog['peak_width_A'], 
+                            self.catalog['peak_width_B'], rtol=width_tol)]
 
         if catalog_save_name is None:
             catalog_save_name = ('AC6_coincident_microbursts_filtered_'
@@ -24,6 +35,8 @@ class Browser(PlotMicrobursts):
         # Subplot objects
         _, self.ax = plt.subplots(2, figsize=(8, 7))
         plt.subplots_adjust(bottom=0.2)
+        self.textbox = plt.axes([0.1, 0.05, 0.1, 0.075])
+        self.textbox.axis('off')
         self.lines = [self.ax[0].plot(), self.ax[1].plot()]
         self.index = 0 # Start at row 0 in the dataframe.
         #self.current_row = self.catalog.iloc[self.index] 
@@ -36,10 +49,7 @@ class Browser(PlotMicrobursts):
         if self.index >= self.catalog.shape[0]:
             return
         self.index += 1
-        #self.current_row = self.catalog.iloc[self.index]
-        #self._clear_ax()
         self.plot()
-        plt.draw()
         return
 
     def prev(self, event):
@@ -47,11 +57,11 @@ class Browser(PlotMicrobursts):
         # Just return if at the end of the dataframe.
         if self.index == 0:
             return
-        self.index -= 1
-        #self.current_row = self.catalog.iloc[self.index]
-        #self._clear_ax()
+        else:
+            self.index -= 1
         self.plot()
-        plt.draw()
+        return
+        
 
     def plot(self):
         """ 
@@ -60,6 +70,7 @@ class Browser(PlotMicrobursts):
         current_row = self.catalog.iloc[self.index]
         if current_row['dateTime'].date() != self.current_date:
             # Load current day AC-6 data if not loaded already
+            self._print_load_message(current_row)
             self.load_ten_hz_data(current_row.dateTime.date())
             self.current_date = current_row.dateTime.date()
         self._clear_ax() # Clear anything left over from prior plot.
@@ -70,11 +81,34 @@ class Browser(PlotMicrobursts):
         self.ax[0].set_ylabel('mean-subtracted dos1rate\n[counts/s]')
         self.ax[1].set_ylabel('mean-subtracted dos1rate\n[counts/s]')
         self.ax[1].set_xlabel('UTC')
-        # self.ax[1].text()
+        
+        self._print_aux_info(current_row)
+        plt.draw()
+        return
+
+    def _print_aux_info(self, current_row):
+        """ Print separation info as well as peak width info to the canvas. """
+        s = ('Lag_In_Track = {} s\nDist_In_Track = {}\n'
+                    'Dist_total = {}\npeak_width_A = {} s\n'
+                    'peak_width_B = {} s'.format(
+                    round(current_row['Lag_In_Track'], 1), 
+                    round(current_row['Dist_In_Track'], 1), 
+                    round(current_row['Dist_Total'], 1), 
+                    round(current_row['peak_width_A'], 2), 
+                    round(current_row['peak_width_B'], 2)))
+        self.textbox.text(0, 1, s, va='top')
+        return
+
+    def _print_load_message(self, current_row):
+        """ Print loading message to user """
+        self.textbox.text(0, 1, 'Loading data from {}'.format(
+            current_row['dateTime'].date()), va='top')
         return
 
     def _clear_ax(self):
         [a.clear() for a in self.ax]
+        self.textbox.clear()
+        self.textbox.axis('off')
         return 
 
 callback = Browser(6)

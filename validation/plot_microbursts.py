@@ -14,7 +14,8 @@ AC6_DATA_PATH = lambda sc_id: ('/home/mike/research/ac6/ac6{}/'
 PLOT_SAVE_DIR = '/home/mike/Desktop/ac6_microburst_validation'
 
 class PlotMicrobursts:
-    def __init__(self, catalog_version, plot_width=5, plot_save_dir=None):
+    def __init__(self, catalog_version, plot_width=5, 
+                plot_save_dir=None, plot_width_flag=True):
         """
         This class plots the detections from the coincident
         microburst catalog with a set of default filters.
@@ -30,7 +31,7 @@ class PlotMicrobursts:
         if not os.path.exists(self.plot_save_dir):
             os.mkdir(self.plot_save_dir)
             print('Made directory:', self.plot_save_dir)
-
+        self.plot_width_flag = plot_width_flag
         self.load_catalog(catalog_version)
         return
 
@@ -159,7 +160,7 @@ class PlotMicrobursts:
         self.ax[1].plot(df_space_b['dateTime'], df_space_b['dos1rate'], 'b', label='AC6-B')
 
         # Print peak width if it exists in the catalog.
-        if set(['peak_width_A', 'peak_width_B']).issubset(row.index):
+        if set(['peak_width_A', 'peak_width_B']).issubset(row.index) and self.plot_width_flag:
             s = 'peak_width_A = {} s\npeak_width_B = {} s'.format(
                     round(row['peak_width_A'], 2), round(row['peak_width_B'], 2))
             self.ax[0].text(0, 1, s, transform=self.ax[0].transAxes, va='top')

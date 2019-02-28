@@ -142,17 +142,25 @@ class PlotMicrobursts:
             df_space_a.loc[:, 'dos1rate'] -= df_space_a.loc[:, 'dos1rate'].mean()
             df_space_b.loc[:, 'dos1rate'] -= df_space_b.loc[:, 'dos1rate'].mean()
 
+        # to rescale the y-axis so the max value is near the peak value.
+        # peak_rate = max([
+        #             df_time_a['dos1rate'].iloc[df_time_a.shape[0]//2],
+        #             df_time_b['dos1rate'].iloc[df_time_b.shape[0]//2]
+        #                 ])
+
         self.ax[0].plot(df_time_a['dateTime'], df_time_a['dos1rate'], 'r', label='AC6-A')
         self.ax[0].plot(df_time_b['dateTime'], df_time_b['dos1rate'], 'b', label='AC6-B')
         self.ax[0].axvline(row.at['dateTime'])
+        #self.ax[0].set_ylim(top=1.2*peak_rate)
         self.ax[0].legend(loc=1)
         self.ax[1].plot(df_space_a['dateTime'], df_space_a['dos1rate'], 'r', label='AC6-A')
         self.ax[1].plot(df_space_b['dateTime'], df_space_b['dos1rate'], 'b', label='AC6-B')
 
-        # Print peak width.
-        s = 'peak_width_A = {} s\npeak_width_B = {} s'.format(
-                round(row['peak_width_A'], 2), round(row['peak_width_B'], 2))
-        self.ax[0].text(0, 1, s, transform=self.ax[0].transAxes, va='top')
+        # Print peak width if it exists in the catalog.
+        if set(['peak_width_A', 'peak_width_B']).issubset(row.index):
+            s = 'peak_width_A = {} s\npeak_width_B = {} s'.format(
+                    round(row['peak_width_A'], 2), round(row['peak_width_B'], 2))
+            self.ax[0].text(0, 1, s, transform=self.ax[0].transAxes, va='top')
 
         save_name = '{0:%Y%m%d_%H%M%S}_ac6_validation_dist_total_{1}.png'.format(
                     row['dateTime'], round(row['Dist_Total']))

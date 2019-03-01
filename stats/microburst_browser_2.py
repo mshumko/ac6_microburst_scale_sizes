@@ -2,7 +2,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from datetime import date
+from datetime import date, datetime
 from ac6_microburst_scale_sizes.validation.plot_microbursts import PlotMicrobursts
 from matplotlib.widgets import Button
 
@@ -34,7 +34,7 @@ class Browser(PlotMicrobursts):
         self.current_date = date.min
         self._init_plot()
         self.index = 0 # Start at row 0 in the dataframe.
-        self.plot()
+        #self.plot()
         return
 
     def next(self, event):
@@ -125,6 +125,14 @@ class Browser(PlotMicrobursts):
         return
 
     def save_filtered_catalog(self):
+        """
+        For every index that a user clicked microburst on, save
+        those rows from the catalog into a new catalog with the
+        name of self.catalog_save_name.
+        """
+        # Return if there are no micriobursts to save.
+        if not hasattr(self, 'microburst_idx'):
+            return
         # Remove duplicates
         self.microburst_idx = np.unique(self.microburst_idx)
         save_path = os.path.join(catalog_save_dir, self.catalog_save_name)
@@ -134,8 +142,10 @@ class Browser(PlotMicrobursts):
         return
 
 
-callback = Browser(6)
-callback.filter_catalog(filterDict={'Dist_Total':[100, 200]})
+callback = Browser(6, width_tol=None)
+#callback.filter_catalog(filterDict={'Dist_Total':[100, 200]})
+callback.filter_catalog()
+callback.filter_catalog()
 
 # Define button axes.
 axprev = plt.axes([0.59, 0.05, 0.1, 0.075])

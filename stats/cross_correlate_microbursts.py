@@ -117,19 +117,18 @@ class CumulativeDist:
                                         set(self.catNumDatesB)))
         return num2date(unique_num_dates)
 
-    def _sort_catalog(self, duplicate_thresh=0.1):
+    def _sort_catalog(self, duplicate_thresh=0.3):
         """ 
         This method sorts the catalog file to be saved and removes
         duplicate events that are defined as events occuring within a
         duplicate_thresh (in seconds)
         """
-        #self.data = sorted(self.data, key=lambda t: t[0])
         data_sorted = sorted(self.data, key=lambda x:x[0])
         t = np.array([row[0] for row in data_sorted])
         dt = np.array([i.total_seconds() 
                     for i in (t[1:] - t[:-1])])
-        idt = np.where(dt > 0.2)[0] # Non-duplicate values
-        self.data = self.data[idt]
+        idt = np.where(dt > duplicate_thresh)[0] # Non-duplicate values
+        self.data = self.data[idt, :]
         return
 
     def _daily_microburst_loop(self, sc_id, idx):
@@ -325,7 +324,7 @@ if __name__ == '__main__':
         c.loop()
     finally:
         saveDir = './../data/coincident_microbursts_catalogues'
-        saveName = 'AC6_coincident_microbursts_v7.txt'
+        saveName = 'AC6_coincident_microbursts_v8.txt'
         c.save_catalog(savePath=os.path.join(saveDir, saveName))
         print("Ran in {} s".format(time.time() - start_time))
         #pass

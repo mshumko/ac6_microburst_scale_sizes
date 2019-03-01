@@ -70,10 +70,10 @@ class PlotMicrobursts:
                     ((self.catalog['lat'] > 70) | (self.catalog['lat'] < 15))
                                         ]
             # SAA filter
-            self.catalog = self.catalog[
-                    ((self.catalog['lon'] > 30)  | (self.catalog['lon'] < -116)) |
-                    ((self.catalog['lat'] < -90) | (self.catalog['lat'] > 0))
-                                ]
+            # self.catalog = self.catalog[
+            #         ((self.catalog['lon'] > 30)  | (self.catalog['lon'] < -116)) |
+            #         ((self.catalog['lat'] < -90) | (self.catalog['lat'] > 0))
+            #                     ]
             # Significane above baseline filter
             #self.catalog = self.catalog[self.catalog['peak_std'] > 3]
 

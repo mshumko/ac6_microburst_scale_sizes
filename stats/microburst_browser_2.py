@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.dates import date2num
 import pandas as pd
 from datetime import date, datetime
 from ac6_microburst_scale_sizes.validation.plot_microbursts import PlotMicrobursts
@@ -11,7 +12,7 @@ catalog_save_dir = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
 
 class Browser(PlotMicrobursts):
     def __init__(self, catalog_version, plot_width=5, 
-                catalog_save_name=None, width_tol=0.1):
+                catalog_save_name=None, width_tol=0.1, filterDict={}):
         """
         This class plots the AC6 microbursts and allows the user to browse
         detections in the future and past with buttons. Also there is a button
@@ -19,6 +20,7 @@ class Browser(PlotMicrobursts):
         """
         PlotMicrobursts.__init__(self, catalog_version, plot_width=plot_width, 
                                 plot_width_flag=False, make_plt_dir_flag=False)
+        self.filter_catalog(filterDict=filterDict)
         # Filter out events with widths whithin a width_tol.
         if width_tol is not None:
             self.catalog = self.catalog[np.isclose(
@@ -30,6 +32,15 @@ class Browser(PlotMicrobursts):
                                 'v{}.txt'.format(catalog_version))
         else:
             self.catalog_save_name = catalog_save_name
+        self.catalog_save_path = os.path.join(catalog_save_dir, 
+                                            self.catalog_save_name)
+
+        # Load the filtered catalog if it already exists. This is
+        # userful if you can't sort all microbursts at once!
+        if os.path.exists(self.catalog_save_path):
+            self.load_filtered_catalog()
+        else:
+            self.microburst_idx = np.array([])
 
         self.current_date = date.min
         self._init_plot()
@@ -60,10 +71,8 @@ class Browser(PlotMicrobursts):
         Appends the current catalog row to self.filtered_catalog which will then
         be saved to a file for later processing.
         """
-        if not hasattr(self, 'microburst_idx'):
-            self.microburst_idx = np.array([self.index])
-        else:
-            self.microburst_idx = np.append(self.microburst_idx, self.index)
+        self.microburst_idx = np.append(self.microburst_idx, self.index)
+        self.bmicroburst.color = 'g'
         print('Micorburst saved at', self.catalog.iloc[self.index].dateTime)
         return
 
@@ -82,6 +91,12 @@ class Browser(PlotMicrobursts):
             self.load_ten_hz_data(current_row.dateTime.date())
             self.current_date = current_row.dateTime.date()
             print('done.')
+
+        # Turn microburst button green if this index has been marked as a microburst.
+        if self.index in self.microburst_idx:
+            self.bmicroburst.color = 'g'
+        else:
+            self.bmicroburst.color = '0.85'
            
         self.make_plot(current_row, savefig=False)
         self.ax[0].set_title('AC6 Microburst Browser\n {} {}'.format(
@@ -154,6 +169,24 @@ class Browser(PlotMicrobursts):
         print('Saving filtered catalog to {}'.format(save_path))
         df = self.catalog.iloc[self.microburst_idx]
         df.to_csv(save_path, index=False)
+        return
+
+    def load_filtered_catalog(self):
+        """
+        Load a filtered catalog and populate the self.microbirst_idx array
+        with existing detections. This method exists to help the user resume
+        the 
+        """
+        filtered_catalog = pd.read_csv(self.catalog_save_path)
+        # Convert the catalog times to datetime objects
+        for timeKey in ['dateTime', 'time_spatial_A', 'time_spatial_B']:
+            filtered_catalog[timeKey] = pd.to_datetime(filtered_catalog[timeKey])
+        # Convert times to numeric for easier comparison
+        flt_times_numeric = date2num(filtered_catalog.dateTime)
+        times_numeric = date2num(self.catalog.dateTime)
+        self.microburst_idx = np.where(np.in1d(times_numeric, flt_times_numeric, 
+                                    assume_unique=True))[0]
+        print(self.microburst_idx)  #2015-03-26 07:31:12.300000
         return
 
 

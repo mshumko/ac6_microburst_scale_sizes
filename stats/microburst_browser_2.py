@@ -168,11 +168,14 @@ class Browser(PlotMicrobursts):
         # Return if there are no micriobursts to save.
         if not hasattr(self, 'microburst_idx'):
             return
-        # Remove duplicates
+        # Remove duplicates indicies
         self.microburst_idx = np.unique(self.microburst_idx)
         save_path = os.path.join(catalog_save_dir, self.catalog_save_name)
         print('Saving filtered catalog to {}'.format(save_path))
         df = self.catalog.iloc[self.microburst_idx]
+        # Remove duplicate times (different than indicies since the same time
+        # from the other sc may be assigned to a different index. 
+        df.drop_duplicates(subset='dateTime')
         df.to_csv(save_path, index=False)
         return
 
@@ -191,7 +194,6 @@ class Browser(PlotMicrobursts):
         times_numeric = date2num(self.catalog.dateTime)
         self.microburst_idx = np.where(np.in1d(times_numeric, flt_times_numeric, 
                                     assume_unique=True))[0]
-        print(self.microburst_idx)  #2015-03-26 07:31:12.300000
         return
 
 

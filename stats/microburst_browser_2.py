@@ -5,7 +5,7 @@ from matplotlib.dates import date2num
 import pandas as pd
 from datetime import date, datetime
 from ac6_microburst_scale_sizes.validation.plot_microbursts import PlotMicrobursts
-from matplotlib.widgets import Button
+from matplotlib.widgets import Button, TextBox
 
 catalog_save_dir = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
                     'coincident_microbursts_catalogues')
@@ -80,13 +80,20 @@ class Browser(PlotMicrobursts):
         self.bmicroburst.color = 'g'
         print('Micorburst saved at', self.catalog.iloc[self.index].dateTime)
         return
+        
+    def change_index(self, index):
+        self.index = int(index)
+        self.plot()
+        return
 
     def plot(self):
         """ 
         Given a self.current_row in the dataframe, make a space-time plot 
         """
-        print('Index position = {}/{}'.format(self.index, self.catalog.shape[0]-1))
+        print('Index position = {}/{}'.format(
+                    self.index, self.catalog.shape[0]-1))
         current_row = self.catalog.iloc[self.index]
+        self.index_box.set_val(self.index)
         self._clear_ax()
 
         if current_row['dateTime'].date() != self.current_date:
@@ -147,9 +154,9 @@ class Browser(PlotMicrobursts):
         plt.subplots_adjust(bottom=0.2)
 
         # Define button axes.
-        self.axprev = plt.axes([0.59, 0.05, 0.1, 0.075])
-        self.axburst = plt.axes([0.7, 0.05, 0.1, 0.075])
-        self.axnext = plt.axes([0.81, 0.05, 0.1, 0.075])
+        self.axprev = plt.axes([0.59, 0.06, 0.1, 0.075])
+        self.axburst = plt.axes([0.7, 0.06, 0.1, 0.075])
+        self.axnext = plt.axes([0.81, 0.06, 0.1, 0.075])
 
         # Define buttons and their actions.
         self.bnext = Button(self.axnext, 'Next', hovercolor='g')
@@ -162,6 +169,10 @@ class Browser(PlotMicrobursts):
         # Define the textbox axes.
         self.textbox = plt.axes([0.1, 0.05, 0.2, 0.075])
         self.textbox.axis('off')
+        # Define index box.
+        self.axIdx = plt.axes([0.59, 0.01, 0.32, 0.04])
+        self.index_box = TextBox(self.axIdx, 'Index')
+        self.index_box.on_submit(self.change_index)
         return
 
     def save_filtered_catalog(self):

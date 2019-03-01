@@ -12,7 +12,8 @@ catalog_save_dir = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
 
 class Browser(PlotMicrobursts):
     def __init__(self, catalog_version, plot_width=5, 
-                catalog_save_name=None, width_tol=0.1, filterDict={}):
+                catalog_save_name=None, width_tol=0.1, filterDict={}, 
+                jump_to_latest=True):
         """
         This class plots the AC6 microbursts and allows the user to browse
         detections in the future and past with buttons. Also there is a button
@@ -44,8 +45,12 @@ class Browser(PlotMicrobursts):
 
         self.current_date = date.min
         self._init_plot()
-        self.index = 0 # Start at row 0 in the dataframe.
-        #self.plot()
+        if jump_to_latest and len(self.microburst_idx):
+            self.index = self.microburst_idx[-1]
+        else:
+            # Start at row 0 in the dataframe.
+            self.index = 0 
+        self.plot()
         return
 
     def next(self, event):
@@ -190,10 +195,7 @@ class Browser(PlotMicrobursts):
         return
 
 
-callback = Browser(6, width_tol=None)
-#callback.filter_catalog(filterDict={'Dist_Total':[100, 200]})
-callback.filter_catalog()
-
+callback = Browser(6, width_tol=None, filterDict={})
 # Initialize the GUI
 plt.show()
 # Save the catalog.

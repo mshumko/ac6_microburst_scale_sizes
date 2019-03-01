@@ -119,7 +119,7 @@ class Browser(PlotMicrobursts):
         """ Print separation info as well as peak width info to the canvas. """
         self.textbox.clear()
         self.textbox.axis('off')
-        s = ('Lag_In_Track = {} s\nDist_In_Track = {} km\n'
+        col1 = ('Lag_In_Track = {} s\nDist_In_Track = {} km\n'
                     'Dist_total = {} km\npeak_width_A = {} s\n'
                     'peak_width_B = {} s'.format(
                     round(current_row['Lag_In_Track'], 1), 
@@ -127,7 +127,12 @@ class Browser(PlotMicrobursts):
                     round(current_row['Dist_Total'], 1), 
                     round(current_row['peak_width_A'], 2), 
                     round(current_row['peak_width_B'], 2)))
-        self.textbox.text(0, 1, s, va='top')
+        col2 = ('time_cc = {}\nspace_cc = {} km\n'.format(
+                    round(current_row['time_cc'], 2), 
+                    round(current_row['space_cc'], 1)
+                    ))
+        self.textbox.text(0, 1, col1, va='top')
+        self.textbox.text(1.2, 1, col2, va='top')
         return
 
     def _clear_ax(self):
@@ -155,7 +160,7 @@ class Browser(PlotMicrobursts):
         self.bmicroburst.on_clicked(self.append_microburst)
 
         # Define the textbox axes.
-        self.textbox = plt.axes([0.1, 0.05, 0.1, 0.075])
+        self.textbox = plt.axes([0.1, 0.05, 0.2, 0.075])
         self.textbox.axis('off')
         return
 

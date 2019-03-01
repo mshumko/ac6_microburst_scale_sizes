@@ -127,12 +127,12 @@ class Browser(PlotMicrobursts):
                     round(current_row['Dist_Total'], 1), 
                     round(current_row['peak_width_A'], 2), 
                     round(current_row['peak_width_B'], 2)))
-        col2 = ('time_cc = {}\nspace_cc = {} km\n'.format(
+        col2 = ('time_cc = {}\nspace_cc = {}\n'.format(
                     round(current_row['time_cc'], 2), 
                     round(current_row['space_cc'], 1)
                     ))
         self.textbox.text(0, 1, col1, va='top')
-        self.textbox.text(1.2, 1, col2, va='top')
+        self.textbox.text(1.3, 1, col2, va='top')
         return
 
     def _clear_ax(self):

@@ -10,7 +10,8 @@ catalog_save_dir = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
                     'coincident_microbursts_catalogues')
 
 class Browser(PlotMicrobursts):
-    def __init__(self, catalog_version, plot_width=5, catalog_save_name=None,       width_tol=0.1):
+    def __init__(self, catalog_version, plot_width=5, 
+                catalog_save_name=None, width_tol=0.1):
         """
         This class plots the AC6 microbursts and allows the user to browse
         detections in the future and past with buttons. Also there is a button
@@ -63,18 +64,21 @@ class Browser(PlotMicrobursts):
             self.microburst_idx = np.array([self.index])
         else:
             self.microburst_idx = np.append(self.microburst_idx, self.index)
+        print('Micorburst saved at', self.catalog.iloc[self.index].dateTime)
         return
 
     def plot(self):
         """ 
         Given a self.current_row in the dataframe, make a space-time plot 
         """
+        print('Index position = {}/{}'.format(self.index, self.catalog.shape[0]-1))
         current_row = self.catalog.iloc[self.index]
         self._clear_ax()
+
         if current_row['dateTime'].date() != self.current_date:
+            # Load current day AC-6 data if not loaded already
             print('Loading data from {}...'.format(current_row['dateTime'].date()), 
                     end=' ', flush=True)
-            # Load current day AC-6 data if not loaded already
             self.load_ten_hz_data(current_row.dateTime.date())
             self.current_date = current_row.dateTime.date()
             print('done.')
@@ -120,7 +124,7 @@ class Browser(PlotMicrobursts):
         self.textbox.axis('off')
         return
 
-    def _save_filtered_catalog(self):
+    def save_filtered_catalog(self):
         # Remove duplicates
         self.microburst_idx = np.unique(self.microburst_idx)
         save_path = os.path.join(catalog_save_dir, self.catalog_save_name)
@@ -132,14 +136,21 @@ class Browser(PlotMicrobursts):
 
 callback = Browser(6)
 callback.filter_catalog(filterDict={'Dist_Total':[100, 200]})
+
+# Define button axes.
 axprev = plt.axes([0.59, 0.05, 0.1, 0.075])
 axburst = plt.axes([0.7, 0.05, 0.1, 0.075])
 axnext = plt.axes([0.81, 0.05, 0.1, 0.075])
-bnext = Button(axnext, 'Next')
+
+# Define buttons and their actions.
+bnext = Button(axnext, 'Next', hovercolor='g')
 bnext.on_clicked(callback.next)
-bprev = Button(axprev, 'Previous')
+bprev = Button(axprev, 'Previous', hovercolor='g')
 bprev.on_clicked(callback.prev)
-bmicroburst = Button(axburst, 'Microburst')
+bmicroburst = Button(axburst, 'Microburst', hovercolor='g')
 bmicroburst.on_clicked(callback.append_microburst)
+
+# Initialize the GUI
 plt.show()
-callback._save_filtered_catalog()
+# Save the catalog.
+callback.save_filtered_catalog()

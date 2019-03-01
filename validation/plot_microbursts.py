@@ -15,7 +15,8 @@ PLOT_SAVE_DIR = '/home/mike/Desktop/ac6_microburst_validation'
 
 class PlotMicrobursts:
     def __init__(self, catalog_version, plot_width=5, 
-                plot_save_dir=None, plot_width_flag=True):
+                plot_save_dir=None, plot_width_flag=True, 
+                make_plt_dir_flag=True):
         """
         This class plots the detections from the coincident
         microburst catalog with a set of default filters.
@@ -28,7 +29,7 @@ class PlotMicrobursts:
         else:
             self.plot_save_dir = plot_save_dir
 
-        if not os.path.exists(self.plot_save_dir):
+        if make_plt_dir_flag and (not os.path.exists(self.plot_save_dir)):
             os.mkdir(self.plot_save_dir)
             print('Made directory:', self.plot_save_dir)
         self.plot_width_flag = plot_width_flag

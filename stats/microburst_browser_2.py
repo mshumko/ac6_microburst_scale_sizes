@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -5,23 +6,18 @@ from datetime import date
 from ac6_microburst_scale_sizes.validation.plot_microbursts import PlotMicrobursts
 from matplotlib.widgets import Button
 
-# freqs = np.arange(2, 20, 3)
-
-# fig, ax = plt.subplots()
-# plt.subplots_adjust(bottom=0.2)
-# t = np.arange(0.0, 1.0, 0.001)
-# s = np.sin(2*np.pi*freqs[0]*t)
-# l, = plt.plot(t, s, lw=2)
+catalog_save_dir = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
+                    'coincident_microbursts_catalogues')
 
 class Browser(PlotMicrobursts):
-    def __init__(self, catalog_version, plot_width=5, catalog_save_name=None, width_tol=0.1):
+    def __init__(self, catalog_version, plot_width=5, catalog_save_name=None,       width_tol=0.1):
         """
         This class plots the AC6 microbursts and allows the user to browse
         detections in the future and past with buttons. Also there is a button
         to mark the event as a microburst.
         """
         PlotMicrobursts.__init__(self, catalog_version, plot_width=plot_width, 
-                                plot_width_flag=False)
+                                plot_width_flag=False, make_plt_dir_flag=False)
         # Filter out events with widths whithin a width_tol.
         if width_tol is not None:
             self.catalog = self.catalog[np.isclose(
@@ -29,15 +25,14 @@ class Browser(PlotMicrobursts):
                             self.catalog['peak_width_B'], rtol=width_tol)]
 
         if catalog_save_name is None:
-            catalog_save_name = ('AC6_coincident_microbursts_filtered_'
+            self.catalog_save_name = ('AC6_coincident_microbursts_sorted_'
                                 'v{}.txt'.format(catalog_version))
+        else:
+            self.catalog_save_name = catalog_save_name
+
         self.current_date = date.min
         self._init_plot()
-        #self.lines = [self.ax[0].plot(), self.ax[1].plot()]
         self.index = 0 # Start at row 0 in the dataframe.
-        self.filtered_catalog = pd.DataFrame(columns=self.catalog.columns)
-        #self.filtered_catalog = pd.DataFrame(data=None, columns=self.catalog.columns, index=self.catalog.index)
-        print(self.filtered_catalog)
         self.plot()
         return
 
@@ -64,12 +59,10 @@ class Browser(PlotMicrobursts):
         Appends the current catalog row to self.filtered_catalog which will then
         be saved to a file for later processing.
         """
-        #print(pd.DataFrame(self.catalog.iloc[self.index]))
-        if not hasattr(self, 'filtered_catalog'):
-            self.filtered_catalog = self.catalog.iloc[self.index].copy()
-        print(self.filter_catalog)
-        # self.filtered_catalog = self.filtered_catalog.append(self.catalog.iloc[self.index])
-        # print(self.filter_catalog)
+        if not hasattr(self, 'microburst_idx'):
+            self.microburst_idx = np.array([self.index])
+        else:
+            self.microburst_idx = np.append(self.microburst_idx, self.index)
         return
 
     def plot(self):
@@ -129,7 +122,11 @@ class Browser(PlotMicrobursts):
 
     def _save_filtered_catalog(self):
         # Remove duplicates
-
+        self.microburst_idx = np.unique(self.microburst_idx)
+        save_path = os.path.join(catalog_save_dir, self.catalog_save_name)
+        print('Saving filtered catalog to {}'.format(save_path))
+        df = self.catalog.iloc[self.microburst_idx]
+        df.to_csv(save_path, index=False)
         return
 
 
@@ -145,3 +142,4 @@ bprev.on_clicked(callback.prev)
 bmicroburst = Button(axburst, 'Microburst')
 bmicroburst.on_clicked(callback.append_microburst)
 plt.show()
+callback._save_filtered_catalog()

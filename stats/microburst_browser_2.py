@@ -120,6 +120,21 @@ class Browser(PlotMicrobursts):
         """
         _, self.ax = plt.subplots(2, figsize=(8, 7))
         plt.subplots_adjust(bottom=0.2)
+
+        # Define button axes.
+        self.axprev = plt.axes([0.59, 0.05, 0.1, 0.075])
+        self.axburst = plt.axes([0.7, 0.05, 0.1, 0.075])
+        self.axnext = plt.axes([0.81, 0.05, 0.1, 0.075])
+
+        # Define buttons and their actions.
+        self.bnext = Button(self.axnext, 'Next', hovercolor='g')
+        self.bnext.on_clicked(self.next)
+        self.bprev = Button(self.axprev, 'Previous', hovercolor='g')
+        self.bprev.on_clicked(self.prev)
+        self.bmicroburst = Button(self.axburst, 'Microburst', hovercolor='g')
+        self.bmicroburst.on_clicked(self.append_microburst)
+
+        # Define the textbox axes.
         self.textbox = plt.axes([0.1, 0.05, 0.1, 0.075])
         self.textbox.axis('off')
         return
@@ -145,20 +160,6 @@ class Browser(PlotMicrobursts):
 callback = Browser(6, width_tol=None)
 #callback.filter_catalog(filterDict={'Dist_Total':[100, 200]})
 callback.filter_catalog()
-callback.filter_catalog()
-
-# Define button axes.
-axprev = plt.axes([0.59, 0.05, 0.1, 0.075])
-axburst = plt.axes([0.7, 0.05, 0.1, 0.075])
-axnext = plt.axes([0.81, 0.05, 0.1, 0.075])
-
-# Define buttons and their actions.
-bnext = Button(axnext, 'Next', hovercolor='g')
-bnext.on_clicked(callback.next)
-bprev = Button(axprev, 'Previous', hovercolor='g')
-bprev.on_clicked(callback.prev)
-bmicroburst = Button(axburst, 'Microburst', hovercolor='g')
-bmicroburst.on_clicked(callback.append_microburst)
 
 # Initialize the GUI
 plt.show()

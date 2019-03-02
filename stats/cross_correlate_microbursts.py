@@ -93,16 +93,23 @@ class CumulativeDist:
             saveDir = './../data/coincident_microbursts_catalogues'
             saveName = 'AC6_coincident_microbursts_v{}.txt'.format(self.catV)
             savePath = os.path.join(saveDir, saveName)
-        self._sort_catalog()
-
-        with open(savePath, 'w') as f:
-            w = csv.writer(f)
-            w.writerow(np.concatenate((list(self.catA.keys()), 
+        columns = np.concatenate((list(self.catA.keys()), 
                     ['time_cc', 'space_cc', 
                     'time_spatial_A', 'time_spatial_B', 
                     'peak_width_A', 'peak_width_B']
-                    )))
-            w.writerows(self.data)
+                    ))
+        df = pd.DataFrame(data=self.data, columns=columns)    
+        # Add column with truncated seconds to help remove duplicates
+        df['dateTime_trunc'] = df['dateTime'].apply(
+                                lambda t: t.replace(microsecond=0))
+        # Sort the truncated dateTime values (needed since for each day
+        # AC6-A detections get added first and then AC6-B detections).
+        df = df.sort_values(by='dateTime_trunc')
+        # Now remove duplicate rows
+        df = df.drop_duplicates('dateTime_trunc')
+        df.drop('dateTime_trunc', axis=1, inplace=True)
+
+        df.to_csv(savePath, index=False, na_rep='nan')
         return
 
     def _find_loop_dates(self):

@@ -80,7 +80,22 @@ class Browser(PlotMicrobursts):
         self.bmicroburst.color = 'g'
         print('Micorburst saved at', self.catalog.iloc[self.index].dateTime)
         return
-        
+
+    def key_press(self, event):
+        """
+        Calls an appropriate method depending on what key was pressed.
+        """
+        if event.key == 'm':
+            # Mark as a microburst
+            self.append_microburst(event)
+        elif event.key == 'a':
+            # Move self.index back and replot.
+            self.prev(event)
+        elif event.key =='d':
+            # Move the self.index forward and replot.
+            self.next(event)
+        return
+       
     def change_index(self, index):
         self.index = int(index)
         self.plot()
@@ -150,20 +165,20 @@ class Browser(PlotMicrobursts):
         """
         Initialize subplot objects and text box.
         """
-        _, self.ax = plt.subplots(2, figsize=(8, 7))
+        fig, self.ax = plt.subplots(2, figsize=(8, 7))
         plt.subplots_adjust(bottom=0.2)
 
         # Define button axes.
-        self.axprev = plt.axes([0.59, 0.06, 0.1, 0.075])
-        self.axburst = plt.axes([0.7, 0.06, 0.1, 0.075])
-        self.axnext = plt.axes([0.81, 0.06, 0.1, 0.075])
+        self.axprev = plt.axes([0.54, 0.06, 0.12, 0.075])
+        self.axburst = plt.axes([0.67, 0.06, 0.13, 0.075])
+        self.axnext = plt.axes([0.81, 0.06, 0.12, 0.075])
 
         # Define buttons and their actions.
-        self.bnext = Button(self.axnext, 'Next', hovercolor='g')
+        self.bnext = Button(self.axnext, 'Next (d)', hovercolor='g')
         self.bnext.on_clicked(self.next)
-        self.bprev = Button(self.axprev, 'Previous', hovercolor='g')
+        self.bprev = Button(self.axprev, 'Previous (a)', hovercolor='g')
         self.bprev.on_clicked(self.prev)
-        self.bmicroburst = Button(self.axburst, 'Microburst', hovercolor='g')
+        self.bmicroburst = Button(self.axburst, 'Microburst (m)', hovercolor='g')
         self.bmicroburst.on_clicked(self.append_microburst)
 
         # Define the textbox axes.
@@ -173,6 +188,9 @@ class Browser(PlotMicrobursts):
         self.axIdx = plt.axes([0.59, 0.01, 0.32, 0.04])
         self.index_box = TextBox(self.axIdx, 'Index')
         self.index_box.on_submit(self.change_index)
+
+        # Initialise button press
+        fig.canvas.mpl_connect('key_press_event', self.key_press)
         return
 
     def save_filtered_catalog(self):

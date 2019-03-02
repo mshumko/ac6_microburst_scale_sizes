@@ -71,14 +71,21 @@ class Browser(PlotMicrobursts):
         self.plot()
         return
 
-    def append_microburst(self, event):
+    def append_remove_microburst(self, event):
         """ 
-        Appends the current catalog row to self.filtered_catalog which will then
+        Appends or removes the current catalog row to 
+        self.filtered_catalog which will then
         be saved to a file for later processing.
         """
-        self.microburst_idx = np.append(self.microburst_idx, self.index)
-        self.bmicroburst.color = 'g'
-        print('Micorburst saved at', self.catalog.iloc[self.index].dateTime)
+        if self.index not in self.microburst_idx:
+            self.microburst_idx = np.append(self.microburst_idx, self.index)
+            self.bmicroburst.color = 'g'
+            print('Micorburst saved at', self.catalog.iloc[self.index].dateTime)
+        else:
+            self.microburst_idx = np.delete(self.microburst_idx, 
+                np.where(self.microburst_idx == self.index)[0])
+            self.bmicroburst.color = '0.85'
+            print('Micorburst removed at', self.catalog.iloc[self.index].dateTime)
         return
 
     def key_press(self, event):
@@ -87,7 +94,7 @@ class Browser(PlotMicrobursts):
         """
         if event.key == 'm':
             # Mark as a microburst
-            self.append_microburst(event)
+            self.append_remove_microburst(event)
         elif event.key == 'a':
             # Move self.index back and replot.
             self.prev(event)
@@ -179,7 +186,7 @@ class Browser(PlotMicrobursts):
         self.bprev = Button(self.axprev, 'Previous (a)', hovercolor='g')
         self.bprev.on_clicked(self.prev)
         self.bmicroburst = Button(self.axburst, 'Microburst (m)', hovercolor='g')
-        self.bmicroburst.on_clicked(self.append_microburst)
+        self.bmicroburst.on_clicked(self.append_remove_microburst)
 
         # Define the textbox axes.
         self.textbox = plt.axes([0.1, 0.05, 0.2, 0.075])

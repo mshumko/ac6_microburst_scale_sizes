@@ -238,7 +238,7 @@ class Browser(PlotMicrobursts):
         return
 
 
-callback = Browser(6, width_tol=None, filterDict={})
+callback = Browser(8, width_tol=None, filterDict={})
 # Initialize the GUI
 plt.show()
 # Save the catalog.

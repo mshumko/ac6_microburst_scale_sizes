@@ -7,25 +7,25 @@ import os
 
 import pandas as pd
 
-# Load coincident microburst catalog
-version = 4
-catPath = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
-        'coincident_microbursts_catalogues/'
-       'AC6_coincident_microbursts_v{}.txt'.format(version))
-converters = {
-            0:dateutil.parser.parse, 
-            -1:dateutil.parser.parse, 
-            -2:dateutil.parser.parse
-            }
-data = pd.read_csv(catPath, converters=converters)
+# Load microburst catalog
+version = 5
+catalog_path = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
+        'microbursts_catalogues/'
+       'AC6A_microbursts_v{}.txt'.format(version))
+# converters = {
+#             0:dateutil.parser.parse, 
+#             -1:dateutil.parser.parse, 
+#             -2:dateutil.parser.parse
+#             }
+data = pd.read_csv(catalog_path)
+
+# Binned counts directory
+bin_counts_dir = ('/home/mike/research/ac6_microburst_scale_sizes/'
+            'data/binned_counts')
 
 ### FILTERS ###
 # Filter out detections outside of the outer radiation belt
-# and above the US and SAA. Also filter out detections
-# which had a higher spatial_CC by a curtain_thresh ammount. 
-# Lastly, filter out detections that are close to the noise
-# floor (peak_std)
-curtain_thresh = 0.3
+# and above the US.
 # L filter
 data = data[(data['Lm_OPQ'] > 4) & (data['Lm_OPQ'] < 8)]
 # USA filter
@@ -42,66 +42,63 @@ data = data[
 # above a 10% baseline.
 #data = data[data['peak_std'] > 2]
 # Filter out ambigious CCs with curtains
-data = data[data['time_cc'] > data['space_cc']+curtain_thresh]
+# data = data[data['time_cc'] > data['space_cc']+curtain_thresh]
 
-### BIN THE DETECTIONS ###
-# Now bin the data by L-MLT-AE and separation.
-L_bins=np.arange(4, 8, 1) 
-MLT_bins=np.arange(0, 15, 1)
-AE_bins=np.arange(0, 600, 100)
-sep_bins = np.arange(0, 100, 5)
+### Create all of the L-MLT-AE bins to iterate over. ###
+dL = 1
+dMLT = 1
+dAE = 100
+L_bins=np.arange(4, 8, dL) 
+MLT_bins=np.arange(0, 24, dMLT)
+AE_bins=np.arange(0, 600, dAE)
 
-def index_to_name(LL, MLTMLT, AEAE, i, j, k):
+# Create all possible combinations of L, MLT and AE
+LL, MLTMLT, AEAE = np.meshgrid(L_bins, MLT_bins, AE_bins)
+bin_vals_tuple = zip(LL.flatten(), MLTMLT.flatten(), AEAE.flatten())
+len_bins = len(LL.flatten())
+
+# Define arrays to save.
+N_most_common = 5
+N_bursts = np.nan*np.zeros(len_bins)
+N_bin_samples = np.nan*np.zeros(len_bins)
+N_burst_rate = np.nan*np.zeros(len_bins)
+most_common_bins = np.nan*np.ones((N_most_common, 4), dtype=object)
+
+def index_to_name(L, MLT, AE):
     s = '{}_L_{}_{}_MLT_{}_{}_AE_{}'.format(
-        LL[i, j, k], LL[i, j+1, k], MLTMLT[i, j, k], MLTMLT[i+1, j, k],
-        AEAE[i, j, k], AEAE[i, j, k+1])
+        L, L+dL, MLT, MLT+dMLT, AE, AE+dAE)
     return s
 
-LL, MLTMLT, AEAE = np.meshgrid(L_bins, MLT_bins, AE_bins)
-N = np.nan*np.zeros_like(LL)
-lL, lMLT, lAE = LL.shape
+### BIN LOOP ###
+for i, (Li, MLTi, AEi) in enumerate(bin_vals_tuple):
+    filtered_catalog = data[
+        (data['Lm_OPQ'] > Li) & (data['Lm_OPQ'] < Li+dL) &
+        (data['MLT_OPQ'] > MLTi) & (data['MLT_OPQ'] < MLTi+dMLT) &
+        (data['AE'] > AEi) & (data['AE'] < AEi+dAE)
+        ]
+    # Number of microbursts detected in that L-MLT-AE bin.
+    N_bursts[i] = filtered_catalog.shape[0] 
 
-binDir = ('/home/mike/research/ac6_microburst_scale_sizes/'
-            'data/binned_counts')
+    # If enough microbursts were detected in that bin.
+    if N_bursts[i] >= 100: 
+        # Load the current count bin
+        s = index_to_name(Li, MLTi, AEi)
+        binName = 'AC6_counts_' + s + '.csv'
+        binPath = os.path.join(bin_counts_dir, binName)
+        binDf = pd.read_csv(binPath)
+        N_bin_samples[i] = binDf.shape[0]
+        N_burst_rate[i] = N_bursts[i]/N_bin_samples[i]
 
-N_most_common = 5
-# most_common_bins = np.array([[None]*(len(sep_bins)-1)]*N_most_common)
-most_common_bins = np.ones((len(sep_bins), 1+N_most_common*2), dtype=object)
+# df = pd.DataFrame(data=N, dtype=int)
+# #print(df.nlargest(N_most_common, 3))
+# nlargest = df.nlargest(N_most_common, 3)
+# most_common_bins[s_i, 0] = d
+# for row in range(nlargest.shape[0]):
+#     ii, jj, kk, nn = nlargest.iloc[row]
+#     most_common_bins[s_i, 1+row] = index_to_name(LL, MLTMLT, AEAE, ii, jj, kk)
+#     most_common_bins[s_i, 1+N_most_common+row] = nn
 
-# Loop over the L, MLT, AE bins
-for s_i, d in enumerate(sep_bins):
-    N = np.nan*np.zeros(((lL-1)*(lMLT-1)*(lAE-1), 4), dtype=float)
-    n = 0
-
-    for i, j, k in itertools.product(range(lL-1), range(lMLT-1), range(lAE-1)):
-        data_filtered = data[
-            (data['Lm_OPQ'] > LL[i, j, k]) & (data['Lm_OPQ'] < LL[i, j+1, k]) &
-            (data['MLT_OPQ'] > MLTMLT[i, j, k]) & (data['MLT_OPQ'] < MLTMLT[i+1, j, k]) &
-            (data['AE'] > AEAE[i, j, k]) & (data['AE'] < AEAE[i, j, k+1]) & 
-            (data['Dist_Total'] > d)
-            ]
-        N_microburst = data_filtered.shape[0]
-        if N_microburst:
-            # Load the current count bin to get microburst rate
-            s = index_to_name(LL, MLTMLT, AEAE, i, j, k)
-            binName = 'AC6_counts_' + s + '.csv'
-            binPath = os.path.join(binDir, binName)
-            binDf = pd.read_csv(binPath)
-            print('N_microburst/binDf.shape[0] =', 10*100*N_microburst/binDf.shape[0])
-            N[n] = [i, j, k, 10*100*N_microburst/binDf.shape[0]]
-            print(N[n])
-        n += 1
-
-    df = pd.DataFrame(data=N, dtype=int)
-    #print(df.nlargest(N_most_common, 3))
-    nlargest = df.nlargest(N_most_common, 3)
-    most_common_bins[s_i, 0] = d
-    for row in range(nlargest.shape[0]):
-        ii, jj, kk, nn = nlargest.iloc[row]
-        most_common_bins[s_i, 1+row] = index_to_name(LL, MLTMLT, AEAE, ii, jj, kk)
-        most_common_bins[s_i, 1+N_most_common+row] = nn
-
-# Save the data to file.
-df_most_common = pd.DataFrame(data=most_common_bins)
-header = ['lower_total_dist'] + ['{}_common'.format(i+1) for i in range(N_most_common)] + ['{}_rate_%'.format(i+1) for i in range(N_most_common)]
-df_most_common.to_csv('most_common_l_mlt_ae_bins.csv', header=header, index=False)
+# # Save the data to file.
+# df_most_common = pd.DataFrame(data=most_common_bins)
+# header = ['lower_total_dist'] + ['{}_common'.format(i+1) for i in range(N_most_common)] + ['{}_rate_%'.format(i+1) for i in range(N_most_common)]
+# df_most_common.to_csv('most_common_l_mlt_ae_bins.csv', header=header, index=False)

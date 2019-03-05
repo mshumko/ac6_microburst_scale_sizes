@@ -34,13 +34,13 @@ data = data[
     ((data['lat'] > 70) | (data['lat'] < 15))
     ]
 # SAA filter
-data = data[
-    ((data['lon'] > 30)  | (data['lon'] < -116)) |
-    ((data['lat'] < -90) | (data['lat'] > 0))
-    ]
+#data = data[
+#    ((data['lon'] > 30)  | (data['lon'] < -116)) |
+#    ((data['lat'] < -90) | (data['lat'] > 0))
+#    ]
 # Filter by the number of standrad deviations a peak is 
 # above a 10% baseline.
-data = data[data['peak_std'] > 2]
+#data = data[data['peak_std'] > 2]
 # Filter out ambigious CCs with curtains
 data = data[data['time_cc'] > data['space_cc']+curtain_thresh]
 

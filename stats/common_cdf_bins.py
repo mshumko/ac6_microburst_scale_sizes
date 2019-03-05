@@ -9,9 +9,9 @@ import pandas as pd
 
 # Load microburst catalog
 version = 5
-catalog_path = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
-        'microbursts_catalogues/'
-       'AC6A_microbursts_v{}.txt'.format(version))
+catalog_path = ('/home/mike/research/ac6_microburst_scale_sizes/'
+                'data/microburst_catalogues'
+                '/AC6A_microbursts_v{}.txt'.format(version))
 # converters = {
 #             0:dateutil.parser.parse, 
 #             -1:dateutil.parser.parse, 
@@ -58,11 +58,9 @@ bin_vals_tuple = zip(LL.flatten(), MLTMLT.flatten(), AEAE.flatten())
 len_bins = len(LL.flatten())
 
 # Define arrays to save.
-N_most_common = 5
 N_bursts = np.nan*np.zeros(len_bins)
 N_bin_samples = np.nan*np.zeros(len_bins)
 N_burst_rate = np.nan*np.zeros(len_bins)
-most_common_bins = np.nan*np.ones((N_most_common, 4), dtype=object)
 
 def index_to_name(L, MLT, AE):
     s = '{}_L_{}_{}_MLT_{}_{}_AE_{}'.format(
@@ -87,18 +85,18 @@ for i, (Li, MLTi, AEi) in enumerate(bin_vals_tuple):
         binPath = os.path.join(bin_counts_dir, binName)
         binDf = pd.read_csv(binPath)
         N_bin_samples[i] = binDf.shape[0]
-        N_burst_rate[i] = N_bursts[i]/N_bin_samples[i]
+        N_burst_rate[i] = round(100*N_bursts[i]/N_bin_samples[i], 2)
 
-# df = pd.DataFrame(data=N, dtype=int)
-# #print(df.nlargest(N_most_common, 3))
-# nlargest = df.nlargest(N_most_common, 3)
-# most_common_bins[s_i, 0] = d
-# for row in range(nlargest.shape[0]):
-#     ii, jj, kk, nn = nlargest.iloc[row]
-#     most_common_bins[s_i, 1+row] = index_to_name(LL, MLTMLT, AEAE, ii, jj, kk)
-#     most_common_bins[s_i, 1+N_most_common+row] = nn
-
-# # Save the data to file.
-# df_most_common = pd.DataFrame(data=most_common_bins)
-# header = ['lower_total_dist'] + ['{}_common'.format(i+1) for i in range(N_most_common)] + ['{}_rate_%'.format(i+1) for i in range(N_most_common)]
-# df_most_common.to_csv('most_common_l_mlt_ae_bins.csv', header=header, index=False)
+# Put all of the data into one array.
+d = np.stack(
+    (LL.flatten(), MLTMLT.flatten(), AEAE.flatten(), 
+     N_bursts, N_bin_samples, N_burst_rate),
+     axis=1)
+# Utilize pandas
+df = pd.DataFrame(data=d, dtype=float, columns=['L', 'MLT', 'AE', 'bursts', 'samples', 'rate'])
+# Remove nan values
+df = df.dropna()
+# Sort by the microburst rate.
+df = df.sort_values(by='rate', ascending=False)
+# write to csv file.
+df.to_csv('most_common_l_mlt_ae_bins.csv', index=False)

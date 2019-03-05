@@ -92,8 +92,9 @@ d = np.stack(
     (LL.flatten(), MLTMLT.flatten(), AEAE.flatten(), 
      N_bursts, N_bin_samples, N_burst_rate),
      axis=1)
-# Utilize pandas
-df = pd.DataFrame(data=d, dtype=float, columns=['L', 'MLT', 'AE', 'bursts', 'samples', 'rate'])
+# Load data into a DataFrame.
+columns = ['L', 'MLT', 'AE', 'bursts', 'samples', 'rate']
+df = pd.DataFrame(data=d, dtype=float, columns=columns)
 # Remove nan values
 df = df.dropna()
 # Sort by the microburst rate.

@@ -148,7 +148,7 @@ class PlotMicrobursts:
         mean_subtracted = kwargs.get('mean_subtracted', True)
         savefig = kwargs.get('savefig', True)
         log_scale = kwargs.get('log_scale', False)
-        plot_dos3 = kwargs.get('plot_dos3', False)
+        plot_dos2_and_dos3 = kwargs.get('plot_dos2_and_dos3', True)
 
         df_time_a, df_time_b, df_space_a, df_space_b = self._get_filtered_plot_data(row)
         if mean_subtracted:
@@ -157,14 +157,21 @@ class PlotMicrobursts:
             df_space_a.loc[:, 'dos1rate'] -= df_space_a.loc[:, 'dos1rate'].mean()
             df_space_b.loc[:, 'dos1rate'] -= df_space_b.loc[:, 'dos1rate'].mean()
 
-            if plot_dos3:
+            if plot_dos2_and_dos3:
+                df_time_a.loc[:, 'dos2rate'] -= df_time_a.loc[:, 'dos2rate'].mean()
+                df_time_b.loc[:, 'dos2rate'] -= df_time_b.loc[:, 'dos2rate'].mean()
+                #df_space_a.loc[:, 'dos2rate'] -= df_space_a.loc[:, 'dos2rate'].mean()
                 df_time_a.loc[:, 'dos3rate'] -= df_time_a.loc[:, 'dos3rate'].mean()
-                df_space_a.loc[:, 'dos3rate'] -= df_space_a.loc[:, 'dos3rate'].mean()
-
+                #df_space_a.loc[:, 'dos3rate'] -= df_space_a.loc[:, 'dos3rate'].mean()
+                
         self.ax[0].plot(df_time_a['dateTime'], df_time_a['dos1rate'], 'r', label='AC6-A dos1')
-        if plot_dos3:
+        if plot_dos2_and_dos3:
+            self.ax[0].plot(df_time_a['dateTime'], df_time_a['dos2rate'], 'r:', label='AC6-A dos2')
             self.ax[0].plot(df_time_a['dateTime'], df_time_a['dos3rate'], 'r--', label='AC6-A dos3')
+            
         self.ax[0].plot(df_time_b['dateTime'], df_time_b['dos1rate'], 'b', label='AC6-B')
+        if plot_dos2_and_dos3:
+            self.ax[0].plot(df_time_b['dateTime'], df_time_b['dos2rate'], 'b:', label='AC6-B dos2')
         self.ax[0].axvline(row.at['dateTime'])
         self.ax[0].legend(loc=1)
         self.ax[1].plot(df_space_a['dateTime'], df_space_a['dos1rate'], 'r', label='AC6-A')

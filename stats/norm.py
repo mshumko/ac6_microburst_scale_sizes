@@ -183,12 +183,12 @@ if __name__ == '__main__':
     ### SCRIPT TO MAKE "Dst_Total" NORMALIZATION ###
     import time
     start_time = time.time()
-    ss=Hist1D(d=np.arange(0, 501, 5), 
+    ss=Hist1D(d=np.arange(0, 501, 2), 
                 filterDict={'dos1rate':[0, 1E6], 'Lm_OPQ':[4, 8]})
     st = datetime.now()
     ss.loop_data()
     sDir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm'
-    ss.save_data(os.path.join(sDir, 'ac6_norm_all_cdf.csv'))
+    ss.save_data(os.path.join(sDir, 'ac6_norm_all_2km_bins.csv'))
     print('Run time =', time.time()-start_time, 's')
     # print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
 

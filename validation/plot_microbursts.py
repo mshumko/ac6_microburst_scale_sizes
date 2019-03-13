@@ -16,7 +16,7 @@ PLOT_SAVE_DIR = '/home/mike/Desktop/ac6_microburst_validation'
 class PlotMicrobursts:
     def __init__(self, catalog_version, plot_width=5, 
                 plot_save_dir=None, plot_width_flag=True, 
-                make_plt_dir_flag=True):
+                make_plt_dir_flag=True, load_sorted_catalog=True):
         """
         This class plots the detections from the coincident
         microburst catalog with a set of default filters.
@@ -33,6 +33,7 @@ class PlotMicrobursts:
             os.mkdir(self.plot_save_dir)
             print('Made directory:', self.plot_save_dir)
         self.plot_width_flag = plot_width_flag
+        self.load_sorted_catalog = load_sorted_catalog
         self.load_catalog(catalog_version)
         return
 
@@ -90,15 +91,20 @@ class PlotMicrobursts:
         it is converted to am array of datetime objects. Time keys are:
         dateTime, time_spatial_A, and time_spatial_B.
         """
-        CATALOG_PATH = os.path.join(CATALOG_DIR,
-                'AC6_coincident_microbursts_v{}.txt'.format(catalog_version))
-        self.catalog = pd.read_csv(CATALOG_PATH)
+        # Load a catalog that has been sorted by a person or not.
+        if self.load_sorted_catalog: 
+            catalog_name = f'AC6_coincident_microbursts_sorted_v{catalog_version}.txt'
+        else:
+            catalog_name = f'AC6_coincident_microbursts_v{catalog_version}.txt'
+
+        catalog_path = os.path.join(CATALOG_DIR, catalog_name)
+        self.catalog = pd.read_csv(catalog_path)
         # Convert the catalog times to datetime objects
         for timeKey in ['dateTime', 'time_spatial_A', 'time_spatial_B']:
             self.catalog[timeKey] = pd.to_datetime(self.catalog[timeKey])
         return
 
-    def loop(self):
+    def loop(self, **kwargs):
         """
         Loops over the detections that made it through the filters and 
         make space-time plots.
@@ -112,7 +118,7 @@ class PlotMicrobursts:
                 # Load current day AC-6 data if not loaded already
                 self.load_ten_hz_data(row.dateTime.date())
                 current_date = row.dateTime.date()
-            self.make_plot(row)
+            self.make_plot(row, **kwargs)
             self.ax[0].clear()
             self.ax[1].clear()
         plt.close()
@@ -134,11 +140,16 @@ class PlotMicrobursts:
         self.ac6b_data['dateTime'] = pd.to_datetime(self.ac6b_data[time_keys])
         return
 
-    def make_plot(self, row, mean_subtracted=True, savefig=True):
+    def make_plot(self, row, **kwargs):
         """
         This method takes in a dataframe row from the catalog and makes a 
         space/time plot.
         """
+        mean_subtracted = kwargs.get('mean_subtracted', True)
+        savefig = kwargs.get('savefig', True)
+        log_scale = kwargs.get('log_scale', False)
+        plot_dos2_and_dos3 = kwargs.get('plot_dos2_and_dos3', True)
+
         df_time_a, df_time_b, df_space_a, df_space_b = self._get_filtered_plot_data(row)
         if mean_subtracted:
             df_time_a.loc[:, 'dos1rate'] -= df_time_a.loc[:, 'dos1rate'].mean()
@@ -146,19 +157,29 @@ class PlotMicrobursts:
             df_space_a.loc[:, 'dos1rate'] -= df_space_a.loc[:, 'dos1rate'].mean()
             df_space_b.loc[:, 'dos1rate'] -= df_space_b.loc[:, 'dos1rate'].mean()
 
-        # to rescale the y-axis so the max value is near the peak value.
-        # peak_rate = max([
-        #             df_time_a['dos1rate'].iloc[df_time_a.shape[0]//2],
-        #             df_time_b['dos1rate'].iloc[df_time_b.shape[0]//2]
-        #                 ])
-
-        self.ax[0].plot(df_time_a['dateTime'], df_time_a['dos1rate'], 'r', label='AC6-A')
+            if plot_dos2_and_dos3:
+                df_time_a.loc[:, 'dos2rate'] -= df_time_a.loc[:, 'dos2rate'].mean()
+                df_time_b.loc[:, 'dos2rate'] -= df_time_b.loc[:, 'dos2rate'].mean()
+                #df_space_a.loc[:, 'dos2rate'] -= df_space_a.loc[:, 'dos2rate'].mean()
+                df_time_a.loc[:, 'dos3rate'] -= df_time_a.loc[:, 'dos3rate'].mean()
+                #df_space_a.loc[:, 'dos3rate'] -= df_space_a.loc[:, 'dos3rate'].mean()
+                
+        self.ax[0].plot(df_time_a['dateTime'], df_time_a['dos1rate'], 'r', label='AC6-A dos1')
+        if plot_dos2_and_dos3:
+            self.ax[0].plot(df_time_a['dateTime'], df_time_a['dos2rate'], 'r:', label='AC6-A dos2')
+            self.ax[0].plot(df_time_a['dateTime'], df_time_a['dos3rate'], 'r--', label='AC6-A dos3')
+            
         self.ax[0].plot(df_time_b['dateTime'], df_time_b['dos1rate'], 'b', label='AC6-B')
+        if plot_dos2_and_dos3:
+            self.ax[0].plot(df_time_b['dateTime'], df_time_b['dos2rate'], 'b:', label='AC6-B dos2')
         self.ax[0].axvline(row.at['dateTime'])
-        #self.ax[0].set_ylim(top=1.2*peak_rate)
         self.ax[0].legend(loc=1)
         self.ax[1].plot(df_space_a['dateTime'], df_space_a['dos1rate'], 'r', label='AC6-A')
         self.ax[1].plot(df_space_b['dateTime'], df_space_b['dos1rate'], 'b', label='AC6-B')
+
+        if log_scale:
+            self.ax[0].set_yscale('log')
+            self.ax[1].set_yscale('log')
 
         # Print peak width if it exists in the catalog.
         if set(['peak_width_A', 'peak_width_B']).issubset(row.index) and self.plot_width_flag:
@@ -200,13 +221,13 @@ class PlotMicrobursts:
 
 if __name__ == '__main__':
     p = PlotMicrobursts(6)
-    p.filter_catalog(filterDict={'Dist_Total':[0, 25]})
-    p.catalog = p.catalog[np.isclose(p.catalog['peak_width_A'], 
-                          p.catalog['peak_width_B'], rtol=0.1)]
-    p.loop()
+    p.filter_catalog(filterDict={'Dist_Total':[0, 50]})
+    # p.catalog = p.catalog[np.isclose(p.catalog['peak_width_A'], 
+    #                       p.catalog['peak_width_B'], rtol=0.1)]
+    p.loop(mean_subtracted=False)
 
-    p = PlotMicrobursts(6)
-    p.filter_catalog(filterDict={'Dist_Total':[60, 200]})
-    p.catalog = p.catalog[np.isclose(p.catalog['peak_width_A'], 
-                          p.catalog['peak_width_B'], rtol=0.1)]
-    p.loop()
+    # p = PlotMicrobursts(6)
+    # p.filter_catalog(filterDict={'Dist_Total':[60, 200]})
+    # p.catalog = p.catalog[np.isclose(p.catalog['peak_width_A'], 
+    #                       p.catalog['peak_width_B'], rtol=0.1)]
+    # p.loop()

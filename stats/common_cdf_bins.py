@@ -12,11 +12,6 @@ version = 5
 catalog_path = ('/home/mike/research/ac6_microburst_scale_sizes/'
                 'data/microburst_catalogues'
                 '/AC6A_microbursts_v{}.txt'.format(version))
-# converters = {
-#             0:dateutil.parser.parse, 
-#             -1:dateutil.parser.parse, 
-#             -2:dateutil.parser.parse
-#             }
 data = pd.read_csv(catalog_path)
 
 # Binned counts directory

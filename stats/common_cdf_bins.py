@@ -98,8 +98,8 @@ for d_i, d in enumerate(D_bins):
             binName = 'AC6_counts_' + s + '.csv'
             binPath = os.path.join(bin_counts_dir, binName)
             binDf = pd.read_csv(binPath)
-            # Save the number of data points in that bin.
-            bin_burst_num[d][i, 4] = round(bin_burst_num[d][i, 0]/count_bin_samples[i], 4)
+            # Save the burst rate in units of microbursts/seconds
+            bin_burst_num[d][i, 4] = round(10*bin_burst_num[d][i, 0]/count_bin_samples[i], 4)
 
 # Organize this data into a dictionary of DataFrames
 columns = ['L', 'MLT', 'AE', 'burst_num', 'burst_rate']

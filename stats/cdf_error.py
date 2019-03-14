@@ -71,8 +71,30 @@ class CDF_error:
         a separation d and L-MLT-AE bin befined by row and cross
         correlates it a bunch of times.
         """
-        
-        return
+        n_ccd = 0
+        n_attempts = 0
+        CC_arr = np.nan*np.ones(N_CC)
+
+        while n_ccd < N_CC and n_attempts < N_MAX:
+            n_attempts += 1
+            iA = np.where(np.random.choice(microbursts['dateTime']) == counts['dateTime'])[0]
+            if len(iA) == 0:
+                continue
+            # assert len(iA) == 1, 'None or multiple microburst times found!\n{}\n{}'.format(
+            #                         iA, random_bursts.iloc[n_ccd].dateTime)
+
+            iB = np.random.choice(counts.index)
+
+            cc = CC(iA[0], iB, counts, window, window_thresh)
+            if not np.isnan(cc):
+                CC_arr[n_ccd] = cc
+                n_ccd += 1
+                
+        signif_cc = len(np.where((CC_arr > CC_thresh) & ~np.isnan(CC_arr))[0])
+        if signif_cc == 0:
+            return np.nan
+        #     print('\nCC_arr =',CC_arr)
+        return signif_cc/n_ccd
 
     def CC(self, iA, iB, counts, CC_width, CC_time_thresh):
         """ 

@@ -18,7 +18,7 @@ class CDF_error:
         # Determine the coincident microburst catalog path.
         if catalog_path is None:
             catalog_dir = ('/home/mike/research/ac6_microburst_scale_sizes/'
-                            'data/microburst_catalogues')
+                            'data/coincident_microbursts_catalogues')
             catalog_name = f'AC6_coincident_microbursts_sorted_v{catV}.txt'
             catalog_path = os.path.join(catalog_dir, catalog_name)
         # Determine the counts bin file directory and naming format.
@@ -30,17 +30,18 @@ class CDF_error:
                             'data/binned_counts')
         else:
             self.bin_dir = bin_dir
-            
+
         if bin_name is None:
             self.bin_name = lambda L, MLT, AE: (f'AC6_counts_{int(L)}_L_{int(L+self.dL)}'
                                                 f'_{int(MLT)}_MLT_{int(MLT+self.dMLT)}'
                                                 f'_{int(AE)}_AE_{int(AE+self.dAE)}.csv')
         else:
             self.bin_name = bin_name
-        
-
+            
         # Load the most common bins
         self.load_common_count_bins(common_bin_path)
+        # Load the catalog
+        self.load_microburst_catalog(catalog_path)
         return
 
     def load_common_count_bins(self, path):
@@ -52,6 +53,25 @@ class CDF_error:
         for _, row in df.iterrows():
             row_filtered = row.drop('d')
             self.count_bins[row.d].append(row_filtered)
+        return
+
+    def load_microburst_catalog(self, path, defaultFilter=True):
+        """ 
+        Load the microburst catalog file and optionally apply 
+        a default filter.
+        """
+        self.catalog = pd.read_csv(path)
+        if defaultFilter:
+            # L filter
+            self.catalog = self.catalog[(self.catalog['Lm_OPQ'] > 4) & 
+                                        (self.catalog['Lm_OPQ'] < 8)]
+        # Filter out data over the USA
+        self.catalog = self.catalog[
+            ((self.catalog['lon'] > -60) | (self.catalog['lon'] < -140)) |
+            ((self.catalog['lat'] > 70)  | (self.catalog['lat'] < 15))
+            ]
+        # Convert times.
+        #catalog['dateTime'] = pd.to_datetime(catalog['dateTime'])
         return
 
 if __name__ == '__main__':

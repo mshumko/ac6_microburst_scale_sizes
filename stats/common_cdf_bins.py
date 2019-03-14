@@ -29,6 +29,9 @@ data = data[
     ((data['lat'] > 70) | (data['lat'] < 15))
     ]
 
+# Number of highest rate bins to save.
+N_SAVE_BINS = 5 
+
 ### Create all of the L-MLT-AE bins to iterate over. ###
 dL = 1
 dMLT = 1
@@ -112,6 +115,19 @@ for key, df in df_dict.items():
     df_dict[key] = df_dict[key].dropna()
     # Sort by microburst rates
     df_dict[key] = df_dict[key].sort_values('burst_rate', ascending=False)
+    # Keep only N_SAVE_BINS count bins with highest occurance rates
+    df_dict[key] = df_dict[key].iloc[:N_SAVE_BINS]
+    # Insert a separation row.
+    df_dict[key].insert(0, 'd', key)
+
+    # If first time around write the header. Otherwise do not.
+    if os.path.exists('most_common_counts_bins.csv'):
+        header=False
+    else:
+        header=True
+    # Save to a csv file.
+    with open('most_common_counts_bins.csv', 'a') as f:
+        df_dict[key].to_csv(f, header=header, index=False)
 
 # # Put all of the data into one array.
 # d = np.stack(

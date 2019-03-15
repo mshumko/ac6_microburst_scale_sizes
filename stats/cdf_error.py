@@ -3,9 +3,10 @@ import os
 import numpy as np
 
 import pandas as pd
+
 class CDF_error:
     def __init__(self, catV, common_bin_path=None, 
-                 catalog_path=None, bin_dir=None, bin_name=None):
+                 catalog_path=None, count_bin_dir=None, count_bin_name=None):
         """
         This class calculates the CDF error from L-MLT-AE bins
         defined in the most_common_count_bins.csv file.
@@ -13,7 +14,7 @@ class CDF_error:
         # Determine appropriate paths
         # Determine the most common bin paths. 
         if common_bin_path is None:
-            bin_dir = '/home/mike/research/ac6_microburst_scale_sizes/data'
+            bin_dir = '/home/mike/research/ac6_microburst_scale_sizes/data/'
             bin_name = 'most_common_counts_bins.csv'
             common_bin_path = os.path.join(bin_dir, bin_name)
         # Determine the coincident microburst catalog path.
@@ -26,18 +27,19 @@ class CDF_error:
         self.dL = 1
         self.dMLT = 1
         self.dAE = 100
-        if bin_dir is None:
-            self.bin_dir = ('/home/mike/research/ac6_microburst_scale_sizes/'
+        if count_bin_dir is None:
+            self.count_bin_dir = ('/home/mike/research/ac6_microburst_scale_sizes/'
                             'data/binned_counts')
         else:
-            self.bin_dir = bin_dir
+            self.count_bin_dir = bin_dir
 
-        if bin_name is None:
-            self.bin_name = lambda L, MLT, AE: (f'AC6_counts_{int(L)}_L_{int(L+self.dL)}'
-                                                f'_{int(MLT)}_MLT_{int(MLT+self.dMLT)}'
-                                                f'_{int(AE)}_AE_{int(AE+self.dAE)}.csv')
+        if count_bin_name is None:
+            self.count_bin_name = lambda L, MLT, AE: (f'AC6_counts_{int(L)}_L_{int(L+self.dL)}' +
+                                                    f'_{int(MLT)}_MLT_{int(MLT+self.dMLT)}' +
+                                                    f'_{int(AE)}_AE_{int(AE+self.dAE)}.csv')
         else:
-            self.bin_name = bin_name
+            print('here')
+            self.count_bin_name = count_bin_name
 
         # Load the most common bins
         self.load_common_count_bins(common_bin_path)
@@ -51,7 +53,7 @@ class CDF_error:
         Main loop that does the cross correlating between
         microbursts and random count times
         """
-        count_bin_keys = self.count_bins.keys()
+        count_bin_keys = list(self.count_bins)
         # Define an array F that is n_sep_bins x n_common_bins in size.
         self.F = np.nan*np.ones((len(count_bin_keys), 
                                 len(self.count_bins[count_bin_keys[0]])))
@@ -59,13 +61,26 @@ class CDF_error:
         for i, key_d in enumerate(count_bin_keys):
             # Loop over the most common bins in each separation bin.
             for j, row_i in enumerate(self.count_bins[key_d]):
-                # Each "row_i" in this loop is a 1 column DataFrame.
-                # Pass the separation and count bin information to 
-                # self.CC_wrapper.
-                self.F[i, j] = self.CC_wrapper(key_d, row_i)
+                # Pass the counts bin and microbursts in that bin to
+                # self.CC_wrapper to cross-correlate.
+                print(key_d, row_i.values)
+                counts_bin_path = os.path.join(self.count_bin_dir, 
+                        self.count_bin_name(row_i.L, row_i.MLT, row_i.AE))
+                # counts = pd.read_csv(counts_bin_path)
+                counts = pd.read_csv(counts_bin_path, names=['dateTime', 'dos1rate'])
+                counts['dateTime'] = pd.to_datetime(counts['dateTime'])
+                print(counts.head())
+
+                microbursts = self._get_microbursts(key_d, row_i)
+                print(microbursts)
+                self.F[i, j] = self.CC_wrapper(microbursts, counts, 
+                                N_CC, N_MAX, window, window_thresh,
+                                CC_thresh)
+                print(self.F[i, j])
         return
 
-    def CC_wrapper(self, d, row):
+    def CC_wrapper(self, microbursts, counts, N_CC, N_MAX, window, 
+                    window_thresh, CC_thresh):
         """ 
         This method finds the microburst detections made above
         a separation d and L-MLT-AE bin befined by row and cross
@@ -80,12 +95,10 @@ class CDF_error:
             iA = np.where(np.random.choice(microbursts['dateTime']) == counts['dateTime'])[0]
             if len(iA) == 0:
                 continue
-            # assert len(iA) == 1, 'None or multiple microburst times found!\n{}\n{}'.format(
-            #                         iA, random_bursts.iloc[n_ccd].dateTime)
 
             iB = np.random.choice(counts.index)
 
-            cc = CC(iA[0], iB, counts, window, window_thresh)
+            cc = self.CC(iA[0], iB, counts, window, window_thresh)
             if not np.isnan(cc):
                 CC_arr[n_ccd] = cc
                 n_ccd += 1
@@ -144,7 +157,7 @@ class CDF_error:
         """ Load and process most common count bin csv file. """
         self.count_bins = collections.defaultdict(list)
         # Read csv file.
-        df = pd.read_csv(path)
+        df = pd.read_csv(path, dtype={'L':int, 'MLT':int, 'AE':int})
         # Loop over the count bin rows
         for _, row in df.iterrows():
             row_filtered = row.drop('d')
@@ -170,5 +183,21 @@ class CDF_error:
         #catalog['dateTime'] = pd.to_datetime(catalog['dateTime'])
         return
 
+    def _get_microbursts(self, d, row):
+        """ 
+        Helper function to filter microbursts out of self.catalog
+        """
+        microbursts = self.catalog[
+                            (self.catalog['Dist_Total'] > d) &
+                            (self.catalog['Lm_OPQ'] > row.L) & 
+                            (self.catalog['Lm_OPQ'] < row.L + self.dL) & 
+                            (self.catalog['MLT_OPQ'] > row.MLT) & 
+                            (self.catalog['MLT_OPQ'] < row.MLT + self.dMLT) & 
+                            (self.catalog['MLT_OPQ'] > row.AE) & 
+                            (self.catalog['MLT_OPQ'] < row.AE + self.dAE)
+                                ]
+        return microbursts
+
 if __name__ == '__main__':
     err = CDF_error(6)
+    err.loop()

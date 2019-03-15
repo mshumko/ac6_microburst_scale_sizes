@@ -79,6 +79,14 @@ class CDF_error:
                                     CC_thresh)
         return
 
+    def calc_save_std_err(self):
+        """ Calculates the squadrature sum error for self.F """
+        d = list(self.count_bins)
+        std = np.sqrt(np.nansum(self.F**2, axis=1))
+        df = pd.DataFrame(data=np.array([d, std]).T, columns=['d', 'std'])
+        df.to_csv('cdf_std_v0.csv', index=False)
+        return
+
     def CC_wrapper(self, microbursts, counts, N_CC, N_MAX, window, 
                     window_thresh, CC_thresh):
         """ 
@@ -87,8 +95,9 @@ class CDF_error:
         correlates it a bunch of times.
         """
         n_ccd = 0
+        n_signif = 0
         n_attempts = 0
-        CC_arr = np.nan*np.ones(N_CC)
+        #CC_arr = np.nan*np.ones(N_CC)
 
         while n_ccd < N_CC and n_attempts < N_MAX:
             n_attempts += 1
@@ -100,14 +109,21 @@ class CDF_error:
 
             cc = self.CC(iA[0], iB, counts, window, window_thresh)
             if not np.isnan(cc):
-                CC_arr[n_ccd] = cc
+                #CC_arr[n_ccd] = cc
                 n_ccd += 1
-                
-        signif_cc = len(np.where((CC_arr > CC_thresh) & ~np.isnan(CC_arr))[0])
-        if signif_cc == 0:
+                if cc > 0.8:
+                    n_signif += 1
+
+        if n_ccd == 0:
             return np.nan
+        else:
+            return n_signif/n_ccd
+                
+        #signif_cc = len(np.where((CC_arr > CC_thresh) & ~np.isnan(CC_arr))[0])
+        # if signif_cc == 0:
+        #     return np.nan
         #     print('\nCC_arr =',CC_arr)
-        return signif_cc/n_ccd
+        # return signif_cc/n_ccd
 
     def CC(self, iA, iB, counts, CC_width, CC_time_thresh):
         """ 
@@ -200,3 +216,4 @@ class CDF_error:
 if __name__ == '__main__':
     err = CDF_error(catV=5)
     err.loop()
+    err.calc_save_std_err()

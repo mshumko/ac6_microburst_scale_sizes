@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 class CDF_error:
-    def __init__(self, catV, common_bin_path=None, 
+    def __init__(self, catV=None, common_bin_path=None, 
                  catalog_path=None, count_bin_dir=None, count_bin_name=None):
         """
         This class calculates the CDF error from L-MLT-AE bins
@@ -19,9 +19,12 @@ class CDF_error:
             common_bin_path = os.path.join(bin_dir, bin_name)
         # Determine the coincident microburst catalog path.
         if catalog_path is None:
+            # catalog_dir = ('/home/mike/research/ac6_microburst_scale_sizes/'
+            #                 'data/coincident_microbursts_catalogues')
+            # catalog_name = f'AC6_coincident_microbursts_sorted_v{catV}.txt'
             catalog_dir = ('/home/mike/research/ac6_microburst_scale_sizes/'
-                            'data/coincident_microbursts_catalogues')
-            catalog_name = f'AC6_coincident_microbursts_sorted_v{catV}.txt'
+                            'data/microburst_catalogues')
+            catalog_name = f'AC6A_microbursts_v{catV}.txt'
             catalog_path = os.path.join(catalog_dir, catalog_name)
         # Determine the counts bin file directory and naming format.
         self.dL = 1
@@ -38,7 +41,6 @@ class CDF_error:
                                                     f'_{int(MLT)}_MLT_{int(MLT+self.dMLT)}' +
                                                     f'_{int(AE)}_AE_{int(AE+self.dAE)}.csv')
         else:
-            print('here')
             self.count_bin_name = count_bin_name
 
         # Load the most common bins
@@ -63,20 +65,18 @@ class CDF_error:
             for j, row_i in enumerate(self.count_bins[key_d]):
                 # Pass the counts bin and microbursts in that bin to
                 # self.CC_wrapper to cross-correlate.
-                print(key_d, row_i.values)
                 counts_bin_path = os.path.join(self.count_bin_dir, 
                         self.count_bin_name(row_i.L, row_i.MLT, row_i.AE))
                 # counts = pd.read_csv(counts_bin_path)
                 counts = pd.read_csv(counts_bin_path, names=['dateTime', 'dos1rate'])
                 counts['dateTime'] = pd.to_datetime(counts['dateTime'])
-                print(counts.head())
 
                 microbursts = self._get_microbursts(key_d, row_i)
-                print(microbursts)
-                self.F[i, j] = self.CC_wrapper(microbursts, counts, 
-                                N_CC, N_MAX, window, window_thresh,
-                                CC_thresh)
-                print(self.F[i, j])
+
+                if microbursts.shape[0] > 100:
+                    self.F[i, j] = self.CC_wrapper(microbursts, counts, 
+                                    N_CC, N_MAX, window, window_thresh,
+                                    CC_thresh)
         return
 
     def CC_wrapper(self, microbursts, counts, N_CC, N_MAX, window, 
@@ -187,17 +187,16 @@ class CDF_error:
         """ 
         Helper function to filter microbursts out of self.catalog
         """
-        microbursts = self.catalog[
-                            (self.catalog['Dist_Total'] > d) &
-                            (self.catalog['Lm_OPQ'] > row.L) & 
-                            (self.catalog['Lm_OPQ'] < row.L + self.dL) & 
-                            (self.catalog['MLT_OPQ'] > row.MLT) & 
-                            (self.catalog['MLT_OPQ'] < row.MLT + self.dMLT) & 
-                            (self.catalog['MLT_OPQ'] > row.AE) & 
-                            (self.catalog['MLT_OPQ'] < row.AE + self.dAE)
-                                ]
-        return microbursts
+        m = self.catalog.copy()
+        m = m[m['Dist_Total'] > d]
+        m = m[m['Lm_OPQ'] > row.L]
+        m = m[m['Lm_OPQ'] < row.L + self.dL]
+        m = m[m['MLT_OPQ'] > row.MLT]
+        m = m[m['MLT_OPQ'] < row.MLT + self.dMLT]
+        m = m[m['AE'] > row.AE]
+        m = m[m['AE'] < row.AE + self.dAE]
+        return m
 
 if __name__ == '__main__':
-    err = CDF_error(6)
+    err = CDF_error(catV=5)
     err.loop()

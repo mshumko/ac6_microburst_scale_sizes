@@ -8,6 +8,7 @@ import os
 import pandas as pd
 
 # Load microburst catalog
+<<<<<<< HEAD
 version = 5
 catalog_dir = ('/home/mike/research/ac6_microburst_scale_sizes/'
                 'data/microburst_catalogues')
@@ -16,6 +17,15 @@ catalog_name = f'/AC6A_microbursts_v{version}.txt'
 # catalog_dir = ('/home/mike/research/ac6_microburst_scale_sizes/'
 #                             'data/coincident_microbursts_catalogues')
 # catalog_name = f'AC6_coincident_microbursts_sorted_v{version}.txt'
+=======
+version = 6
+# catalog_path = ('/home/mike/research/ac6_microburst_scale_sizes/'
+#                 'data/microburst_catalogues'
+#                 '/AC6A_microbursts_v{}.txt'.format(version))
+catalog_dir = ('/home/mike/research/ac6_microburst_scale_sizes/'
+                            'data/coincident_microbursts_catalogues')
+catalog_name = f'AC6_coincident_microbursts_sorted_v{version}.txt'
+>>>>>>> 32b8a15fb7cd0b6907054394ab19ba0de8e0096d
 data = pd.read_csv(os.path.join(catalog_dir, catalog_name))
 
 # Binned counts directory
@@ -99,7 +109,7 @@ for d_i, d in enumerate(D_bins):
         bin_burst_num[d][i, 3] = filtered_catalog.shape[0] 
 
         # If enough microbursts were detected in that bin.
-        if filtered_catalog.shape[0] >= 100: 
+        if filtered_catalog.shape[0] >= 10: 
             # Load the current count bin
             s = index_to_name(Li, MLTi, AEi)
             binName = 'AC6_counts_' + s + '.csv'

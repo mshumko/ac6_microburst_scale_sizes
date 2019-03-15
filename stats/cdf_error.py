@@ -97,7 +97,6 @@ class CDF_error:
         n_ccd = 0
         n_signif = 0
         n_attempts = 0
-        #CC_arr = np.nan*np.ones(N_CC)
 
         while n_ccd < N_CC and n_attempts < N_MAX:
             n_attempts += 1
@@ -109,7 +108,6 @@ class CDF_error:
 
             cc = self.CC(iA[0], iB, counts, window, window_thresh)
             if not np.isnan(cc):
-                #CC_arr[n_ccd] = cc
                 n_ccd += 1
                 if cc > 0.8:
                     n_signif += 1
@@ -118,12 +116,6 @@ class CDF_error:
             return np.nan
         else:
             return n_signif/n_ccd
-                
-        #signif_cc = len(np.where((CC_arr > CC_thresh) & ~np.isnan(CC_arr))[0])
-        # if signif_cc == 0:
-        #     return np.nan
-        #     print('\nCC_arr =',CC_arr)
-        # return signif_cc/n_ccd
 
     def CC(self, iA, iB, counts, CC_width, CC_time_thresh):
         """ 

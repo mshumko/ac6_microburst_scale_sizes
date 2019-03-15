@@ -8,7 +8,6 @@ import os
 import pandas as pd
 
 # Load microburst catalog
-<<<<<<< HEAD
 version = 5
 catalog_dir = ('/home/mike/research/ac6_microburst_scale_sizes/'
                 'data/microburst_catalogues')
@@ -17,15 +16,6 @@ catalog_name = f'/AC6A_microbursts_v{version}.txt'
 # catalog_dir = ('/home/mike/research/ac6_microburst_scale_sizes/'
 #                             'data/coincident_microbursts_catalogues')
 # catalog_name = f'AC6_coincident_microbursts_sorted_v{version}.txt'
-=======
-version = 6
-# catalog_path = ('/home/mike/research/ac6_microburst_scale_sizes/'
-#                 'data/microburst_catalogues'
-#                 '/AC6A_microbursts_v{}.txt'.format(version))
-catalog_dir = ('/home/mike/research/ac6_microburst_scale_sizes/'
-                            'data/coincident_microbursts_catalogues')
-catalog_name = f'AC6_coincident_microbursts_sorted_v{version}.txt'
->>>>>>> 32b8a15fb7cd0b6907054394ab19ba0de8e0096d
 data = pd.read_csv(os.path.join(catalog_dir, catalog_name))
 
 # Binned counts directory

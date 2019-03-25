@@ -182,8 +182,8 @@ class CumulativeDist:
 
     def CC(self, iA, iB):
         """ 
-        This method calculates the normalized cross-correlation 
-        between two AC6 time series indexed by iA and iB.
+        This method calculates the normalized Pearson's cross-correlation 
+        coefficient between two AC6 time series indexed by iA and iB.
         """
         norm = np.sqrt(len(self.tenHzA['dos1rate'][iA])*\
                        len(self.tenHzB['dos1rate'][iB])*\

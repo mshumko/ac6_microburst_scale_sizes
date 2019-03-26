@@ -82,7 +82,18 @@ class CDF_error:
     def calc_save_std_err(self):
         """ Calculates the squadrature sum error for self.F """
         d = list(self.count_bins)
+        # Sum the signiifcant fraction above 0.8 CC in quadrature.
         std = np.sqrt(np.nansum(self.F**2, axis=1))
+        # For each separation bin, calculate the number of valid
+        # fraction entries. If no valid entires in a bin, make it
+        # a nan value.
+        n_valid_bins = np.sum(~np.isnan(self.F), axis=0)
+        print(std)
+        print(n_valid_bins)
+        n_valid_bins[n_valid_bins == 0] = np.nan
+        # Normalize
+        std /= n_valid_bins
+        # Format data in DataFrame and save to file.
         df = pd.DataFrame(data=np.array([d, std]).T, columns=['d', 'std'])
         df.to_csv('cdf_std_v0.csv', index=False)
         return

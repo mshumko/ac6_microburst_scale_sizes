@@ -87,15 +87,12 @@ class CDF_error:
         # For each separation bin, calculate the number of valid
         # fraction entries. If no valid entires in a bin, make it
         # a nan value.
-        n_valid_bins = np.sum(~np.isnan(self.F), axis=0)
-        print(std)
-        print(n_valid_bins)
-        n_valid_bins[n_valid_bins == 0] = np.nan
+        n_valid_bins = np.sum(~np.isnan(self.F), axis=1)
         # Normalize
         std /= n_valid_bins
         # Format data in DataFrame and save to file.
         df = pd.DataFrame(data=np.array([d, std]).T, columns=['d', 'std'])
-        df.to_csv('cdf_std_v0.csv', index=False)
+        df.to_csv('/home/mike/research/ac6_microburst_scale_sizes/data/cdf_std_v0.csv', index=False)
         return
 
     def CC_wrapper(self, microbursts, counts, N_CC, N_MAX, window, 

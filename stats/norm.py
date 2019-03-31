@@ -189,12 +189,19 @@ if __name__ == '__main__':
     # sDir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm'
     # ss.save_data(os.path.join(sDir, 'ac6_norm_all_3km_bins.csv'))
     
-    ss2=Hist1D(d=np.arange(2, 501, 5), 
-                filterDict={'dos1rate':[0, 1E6], 'Lm_OPQ':[4, 8]})
-    ss2.loop_data()
-    sDir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm'
-    ss2.save_data(os.path.join(sDir, 'ac6_norm_all_5km_bins_2km_offset.csv'))
-    print('Run time =', time.time()-start_time, 's')
+    bin_width = 5
+    bin_offset = 0
+    L_array = [4, 5, 6, 7, 8] #[4, 8]
+    for L_lower, L_upper in zip(L_array[:-1], L_array[1:]):
+        ss2=Hist1D(d=np.arange(bin_offset, 501, bin_width), 
+                    filterDict={'dos1rate':[0, 1E6], 
+                                'Lm_OPQ':[L_lower, L_upper]})
+        ss2.loop_data()
+        sDir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm'
+        ss2.save_data(os.path.join(sDir, 
+                f'ac6_norm_{L_lower}_L_{L_upper}'
+                f'_{bin_width}km_bins_offset.csv'))
+        print('Run time =', time.time()-start_time, 's')
     # print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
 
     ### SCRIPT TO MAKE L-dependent "Dst_Total" NORMALIZATION ###

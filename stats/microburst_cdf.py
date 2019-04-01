@@ -73,8 +73,8 @@ class Microburst_CDF:
 
     def plot_cdf_pdf(self, L_array=[4, 5, 6, 7, 8], plot_all=True):
         """ Plots the CDF and PDF values. """
-        _, ax = plt.subplots(2, figsize=(8, 8), sharex=True)
-        c=['r', 'b', 'g', 'c']
+        _, ax = plt.subplots(3, figsize=(8, 8), sharex=True)
+        c=['r', 'b', 'g', 'm']
         sample_file_dir = ('/home/mike/research/ac6_microburst'
                             '_scale_sizes/data/norm')
 
@@ -86,9 +86,10 @@ class Microburst_CDF:
             C, P, C_std, P_std = self.calc_cdf_pdf(self.microburst_catalog, 
                                                     4, 8)
             ax[0].errorbar(self.sep_bins[:-1], C, c='k', yerr=C_std, 
-                        label=f'4 < L < 8', lw=3)
+                        label=f'4 < L < 8', lw=3, capsize=5)
             ax[1].errorbar(self.sep_bins[:-2], P, c='k', yerr=P_std, 
                         label=f'4 < L < 8', lw=3)
+            ax[2].plot(self.sep_bins, self.samples.loc[:m.max_sep]/1000, c='k')
             
 
         for i, (lower_L, upper_L) in enumerate(zip(L_array[:-1], L_array[1:])):
@@ -98,14 +99,22 @@ class Microburst_CDF:
             C, P, C_std, P_std = self.calc_cdf_pdf(self.microburst_catalog, 
                                                     lower_L, upper_L)
             ax[0].errorbar(self.sep_bins[:-1], C, c=c[i], yerr=C_std, 
-                        label=f'{lower_L} < L < {upper_L}')
+                        label=f'{lower_L} < L < {upper_L}', capsize=5)
             ax[1].errorbar(self.sep_bins[:-2], P, c=c[i], yerr=P_std, 
                         label=f'{lower_L} < L < {upper_L}')
+            ax[2].plot(self.sep_bins, self.samples.loc[:m.max_sep]/1000, c=c[i])
             
         ax[0].legend()
-        ax[0].set_xlim(left=0, right=90)
+        ax[0].set_xlim(left=-1, right=90)
         ax[0].set_ylim(bottom=0)
         ax[1].set_ylim(bottom=0)
+        ax[0].set_ylabel('Microburst fraction')
+        ax[1].set_ylabel('Microburst PD')
+        ax[2].set_xlabel('Separation [km]')
+        ax[2].set_ylabel('Samples x 1000')
+        ax[2].set_ylim(bottom=0)
+        ax[2].set_xticks(np.arange(min(self.sep_bins), max(self.sep_bins)+1, 10))
+        plt.tight_layout()
         plt.show()
         return
 

@@ -84,9 +84,9 @@ class Microburst_Equatorial_CDF:
                         label=f'{lower_L} < L < {upper_L}')
             # Plot error bar every 4 data points
             ax[0].errorbar(self.bins[::4], cdf[::4], c=c[i], 
-                            yerr=cdf_error[::4], capsize=5)
+                            yerr=cdf_error[::4], capsize=5, ls='')
             ax[1].errorbar(self.bins[:-1:4], pdf[::4], c=c[i], 
-                            yerr=pdf_error[::4],capsize=5)
+                            yerr=pdf_error[::4],capsize=5, ls='')
 
         if plot_all:
             # Plot the CDF over all L shells in the belts.
@@ -96,19 +96,22 @@ class Microburst_Equatorial_CDF:
             # Plot just the line
             ax[0].errorbar(self.bins, cdf, c='k',
                         label=f'4 < L < 8', lw=3, capsize=5)
-            # Plot the error bar on top
-            ax[0].errorbar(self.bins[::4], cdf[::4], c='k', 
-                        yerr=cdf_error[::4], lw=3, capsize=5)
             ax[1].errorbar(self.bins[:-1], pdf, c='k', 
                         label=f'4 < L < 8', lw=3)
+            # Plot the error bar on top
+            ax[0].errorbar(self.bins[::4], cdf[::4], c='k', 
+                        yerr=cdf_error[::4], lw=3, capsize=5, ls='')
+            ax[1].errorbar(self.bins[:-1:4], pdf[::4], c='k', 
+                            yerr=pdf_error[::4], capsize=5, lw=3, ls='')
             
         ax[0].legend()
-        ax[0].set_xlim(left=-10, right=2000)
+        ax[0].set_xlim(left=1, right=2000)
         ax[0].set_ylim(bottom=0)
         ax[1].set_ylim(bottom=0)
         ax[0].set_ylabel('Microburst fraction')
         ax[1].set_ylabel('Microburst PD')
         ax[1].set_xlabel('Size [km]')
+        #ax[-2].set_xscale('log')
         #ax[2].set_xticks(np.arange(min(self.sep_bins), max(self.sep_bins)+1, 10))
         plt.tight_layout()
         plt.show()

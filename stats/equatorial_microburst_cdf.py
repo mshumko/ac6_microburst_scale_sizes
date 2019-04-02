@@ -1,4 +1,3 @@
-import os 
 import numpy as np
 import scipy.integrate
 import matplotlib.pyplot as plt
@@ -34,59 +33,77 @@ class Microburst_Equatorial_CDF:
         return
 
 
-    def calc_cdf_pdf(self, df, L_lower, L_upper):
+    def calc_cdf_pdf(self, df, L_lower, L_upper, bin_width=25):
         """
         This method calculates the pdf and cdf and errors from a dataframe
         and L shell filtering.
         """
         self.filtered_catalog = df[(df.Lm_OPQ > L_lower) & (df.Lm_OPQ < L_upper)]
         # Map to the magnetic equator
-        self.filtered_catalog['d_equator'] = np.array([
+        self.filtered_catalog.loc[:, 'd_equator'] = np.array([
                     self.map2equator(row.lat, row.lon, row.alt, 
                                     row.dateTime, row.Dist_Total) 
                     for _, row in self.filtered_catalog.iterrows()])
-
-        # for row in self.filtered_catalog.loc[['lat', 'lon', 'alt', 'dateTime', 'Dist_Total']].iterrows():
-        #     print(row)
-        # self.filtered_catalog['d_equator'] = np.array([
-        #             self.map2equator(*row) 
-        #             for row in self.filtered_catalog.loc[:, ('lat', 'lon', 'alt', 'dateTime', 'Dist_Total')]])
+        # self.filtered_catalog['d_equator'] = pd.Series([
+        #             self.map2equator(row.lat, row.lon, row.alt, 
+        #                             row.dateTime, row.Dist_Total) 
+        #             for _, row in self.filtered_catalog.iterrows()],
+        #             name='d_equator'
+        #             )
 
         # Calculate the CDF
-        self.bin_width = 25
+        self.bin_width = bin_width
         self.bins = np.arange(0, 2000, self.bin_width)
         total_detections = self.filtered_catalog.shape[0]
         cdf = np.array([len(np.where(self.filtered_catalog.d_equator > d)[0])/
                                 total_detections for d in self.bins])
         pdf = (cdf[:-1] - cdf[1:])/self.bin_width
-        return cdf, pdf
+
+        # Calculate CDF and PDF errors. Assume CDF errors are just due to 
+        # Counting statistics like I did in the LEO case.
+        cdf_error = cdf*np.sqrt([1/len(np.where(self.filtered_catalog.d_equator > d)[0]) +
+                                1/total_detections for d in self.bins])
+        pdf_error = np.sqrt(cdf_error[1:]**2 + cdf_error[:-1]**2)/self.bin_width
+        return cdf, pdf, cdf_error, pdf_error
 
     def plot_cdf_pdf(self, L_array=[4, 5, 6, 7, 8], plot_all=True):
         """ Plots the CDF and PDF values. """
         _, ax = plt.subplots(2, figsize=(8, 8), sharex=True)
         c=['r', 'b', 'g', 'm']
-        sample_file_dir = ('/home/mike/research/ac6_microburst'
-                            '_scale_sizes/data/norm')            
+        # sample_file_dir = ('/home/mike/research/ac6_microburst'
+        #                     '_scale_sizes/data/norm')            
 
         for i, (lower_L, upper_L) in enumerate(zip(L_array[:-1], L_array[1:])):
-            cdf, pdf = self.calc_cdf_pdf(self.microburst_catalog, 
+            cdf, pdf, cdf_error, pdf_error = self.calc_cdf_pdf(
+                                                    self.microburst_catalog, 
                                                     lower_L, upper_L)
-            ax[0].errorbar(self.bins, cdf, c=c[i], 
+            # Plot just the line
+            ax[0].errorbar(self.bins, cdf, c=c[i],
                         label=f'{lower_L} < L < {upper_L}', capsize=5)
             ax[1].errorbar(self.bins[:-1], pdf, c=c[i], 
                         label=f'{lower_L} < L < {upper_L}')
+            # Plot error bar every 4 data points
+            ax[0].errorbar(self.bins[::4], cdf[::4], c=c[i], 
+                            yerr=cdf_error[::4], capsize=5)
+            ax[1].errorbar(self.bins[:-1:4], pdf[::4], c=c[i], 
+                            yerr=pdf_error[::4],capsize=5)
 
         if plot_all:
             # Plot the CDF over all L shells in the belts.
-            cdf, pdf = self.calc_cdf_pdf(self.microburst_catalog, 
+            cdf, pdf, cdf_error, pdf_error = self.calc_cdf_pdf(
+                                                    self.microburst_catalog, 
                                                     4, 8)
-            ax[0].errorbar(self.bins, cdf, c='k', 
+            # Plot just the line
+            ax[0].errorbar(self.bins, cdf, c='k',
                         label=f'4 < L < 8', lw=3, capsize=5)
+            # Plot the error bar on top
+            ax[0].errorbar(self.bins[::4], cdf[::4], c='k', 
+                        yerr=cdf_error[::4], lw=3, capsize=5)
             ax[1].errorbar(self.bins[:-1], pdf, c='k', 
                         label=f'4 < L < 8', lw=3)
             
         ax[0].legend()
-        ax[0].set_xlim(left=-1, right=2000)
+        ax[0].set_xlim(left=-10, right=2000)
         ax[0].set_ylim(bottom=0)
         ax[1].set_ylim(bottom=0)
         ax[0].set_ylabel('Microburst fraction')

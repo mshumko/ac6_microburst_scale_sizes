@@ -8,6 +8,8 @@ import numpy as np
 import sys
 import os
 
+import pandas as pd
+
 # Import personal libraries
 #sys.path.insert(0, '/home/mike/research/mission-tools/ac6')
 import mission_tools.ac6.read_ac_data as read_ac_data
@@ -155,10 +157,14 @@ class Hist2D(Hist1D):
         """
         This histogram method overwrites the Hist1D's hist_data() method
         """
-        H, xedges, yedges = np.histogram2d(self.ac6dataB[self.histKeyX][ind],
-                                self.ac6dataB[self.histKeyY][ind], bins=self.bins)
-
-        self.count += H/10
+        # Exit if only one fileterd index on that day.
+        if len(ind) > 1:
+            H, xedges, yedges = np.histogram2d(
+                                    self.ac6dataB.loc[ind, self.histKeyX],
+                                    self.ac6dataB.loc[ind, self.histKeyY], 
+                                    bins=self.bins
+                                    )
+            self.count += H/10
         return
 
     def save_data(self, fPathBin, fPathNorm):
@@ -189,19 +195,19 @@ if __name__ == '__main__':
     # sDir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm'
     # ss.save_data(os.path.join(sDir, 'ac6_norm_all_3km_bins.csv'))
     
-    bin_width = 5
-    bin_offset = 0
-    L_array = [4, 5, 6, 7, 8] #[4, 8]
-    for L_lower, L_upper in zip(L_array[:-1], L_array[1:]):
-        ss2=Hist1D(d=np.arange(bin_offset, 501, bin_width), 
-                    filterDict={'dos1rate':[0, 1E6], 
-                                'Lm_OPQ':[L_lower, L_upper]})
-        ss2.loop_data()
-        sDir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm'
-        ss2.save_data(os.path.join(sDir, 
-                f'ac6_norm_{L_lower}_L_{L_upper}'
-                f'_{bin_width}km_bins_offset.csv'))
-        print('Run time =', time.time()-start_time, 's')
+    # bin_width = 5
+    # bin_offset = 0
+    # L_array = [4, 5, 6, 7, 8] #[4, 8]
+    # for L_lower, L_upper in zip(L_array[:-1], L_array[1:]):
+    #     ss2=Hist1D(d=np.arange(bin_offset, 501, bin_width), 
+    #                 filterDict={'dos1rate':[0, 1E6], 
+    #                             'Lm_OPQ':[L_lower, L_upper]})
+    #     ss2.loop_data()
+    #     sDir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm'
+    #     ss2.save_data(os.path.join(sDir, 
+    #             f'ac6_norm_{L_lower}_L_{L_upper}'
+    #             f'_{bin_width}km_bins_offset.csv'))
+    #     print('Run time =', time.time()-start_time, 's')
     # print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
 
     ### SCRIPT TO MAKE L-dependent "Dst_Total" NORMALIZATION ###
@@ -215,16 +221,20 @@ if __name__ == '__main__':
     # print('Norm.py ran in :{} s'.format((datetime.now()-st).total_seconds()))
 
     ### SCRIPT TO MAKE L-MLT NORMALIATION ###
-    # ss = Hist2D('Lm_OPQ', 'lon', bins=[np.arange(2, 10), np.arange(-180, 181, 5)])
+    # ss = Hist2D('Lm_OPQ', 'lon', 
+    #             bins=[np.arange(2, 10), np.arange(-180, 181, 5)], 
+    #             filterDict={'dos1rate':[0, 1E6]})
     # ss.loop_data()
-    # sDir = '/home/mike/research/ac6-microburst-scale-sizes/data/norm/'
+    sDir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm/'
     # ss.save_data(os.path.join(sDir, 'ac6_L_lon_bins.csv'), 
     #              os.path.join(sDir, 'ac6_L_lon_norm.csv'))
 
-    # ss2 = Hist2D('Lm_OPQ', 'MLT_OPQ', bins=[np.arange(2, 10), np.arange(0, 25)])
-    # ss2.loop_data()
-    # ss2.save_data(os.path.join(sDir, 'ac6_L_MLT_bins.csv'), 
-    #               os.path.join(sDir, 'ac6_L_MLT_norm.csv'))
+    ss2 = Hist2D('Lm_OPQ', 'MLT_OPQ', 
+                    bins=[np.arange(2, 10), np.arange(0, 25)],
+                    filterDict={'dos1rate':[0, 1E6]})
+    ss2.loop_data()
+    ss2.save_data(os.path.join(sDir, 'ac6_L_MLT_bins.csv'), 
+                  os.path.join(sDir, 'ac6_L_MLT_norm.csv'))
 
     ### SCRIPT TO MAKE MLT-LON NORMALIZATION ####
 #    ss = Hist2D('MLT_OPQ', 'lon', bins=[np.arange(0, 24.5, 0.5), np.arange(-180, 181, 5)])

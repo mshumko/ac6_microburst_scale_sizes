@@ -108,7 +108,7 @@ class Microburst_CDF:
                         label=f'{lower_L} < L < {upper_L} | N = {N}', capsize=5)
             ax[1].errorbar(self.sep_bins[:-2], P, c=c[i], 
                         label=f'{lower_L} < L < {upper_L}')
-            ax[2].plot(self.sep_bins, self.samples.loc[:m.max_sep]/1000, c=c[i])
+            ax[2].plot(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c=c[i])
             
         ax[0].legend()
         ax[0].set_xlim(left=0, right=90)

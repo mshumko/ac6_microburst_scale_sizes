@@ -87,12 +87,15 @@ class Microburst_CDF:
             C, P, C_std, P_std, N = self.calc_cdf_pdf(self.microburst_catalog, 
                                                     4, 8)
             P = np.convolve(np.ones(n)/n, P, mode='same')
-            ax[0].errorbar(self.sep_bins[:-1], C, c='k', yerr=C_std, 
-                        label=f'4 < L < 8 | N = {N}', lw=3, capsize=5)
-            ax[1].errorbar(self.sep_bins[:-2], P, c='k',
-                        label=f'4 < L < 8', lw=3)
+            ax[0].fill_between(self.sep_bins[:-1], C-C_std, C+C_std, facecolor='k', 
+                        alpha=0.5)
+            ax[0].plot(self.sep_bins[:-1], C, c='k', 
+                        label=f'4 < L < 8 | N = {N}', lw=3, alpha=0.5)
+            # ax[1].errorbar(self.sep_bins[:-2], P, c='k',
+            #             label=f'4 < L < 8', lw=3)
             ax[1].fill_between(self.sep_bins[:-2], P-P_std, P+P_std, facecolor='k',
                         label=f'4 < L < 8', lw=3, alpha=0.5)
+            ax[1].plot(self.sep_bins[:-2], P, c='k', lw=3)
             ax[2].plot(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c='k')
             
 

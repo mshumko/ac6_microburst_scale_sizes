@@ -217,13 +217,11 @@ class Equatorial_Hist(Hist1D):
                 continue # If one (or both) of the data files is empty
             # ind contains AC6-B indicies that have a correpsonding AC6-A time
             #  after all of the filtering.
-            ind = self.filterData()
+            self.indB = self.filterData()
             # Map to equator
-            d_equator_array = self.map2equator(ind)
+            d_equator_array = self.map2equator(self.indB)
             # Bin events.
-            # # If using Hist2D, the Hist1D's method will be overwritten.
-            # self.hist_data(ind) 
-
+            self.hist_data(self.indB, d_equator_array) 
         return
 
     def map2equator(self, indB):
@@ -246,6 +244,14 @@ class Equatorial_Hist(Hist1D):
             # Map to the equator.
             d_equator_array[i] = self._equator_mapper(i_a, i_b)
         return d_equator_array
+
+    def hist_data(self, indB, d_equator_array):
+        """ This method histrograms the histKey value"""
+        H, x_bins, y_bins = np.histogram2d(
+                    d_equator_array, self.ac6dataA[self.histKey][indB], 
+                    bins=[self.sep_bins, self.hist_bins])
+        self.counts += pd.DataFrame(H, index=x_bins, columns=y_bins)
+        return
 
     def save_data(self, file_path):
         """ 

@@ -250,7 +250,8 @@ class Equatorial_Hist(Hist1D):
         H, x_bins, y_bins = np.histogram2d(
                     d_equator_array, self.ac6dataA[self.histKey][indB], 
                     bins=[self.sep_bins, self.hist_bins])
-        self.counts += pd.DataFrame(H, index=x_bins, columns=y_bins)
+        self.counts += pd.DataFrame(H, index=self.sep_bins[:-1], 
+                                        columns=self.hist_bins[:-1])
         return
 
     def save_data(self, file_path):
@@ -343,6 +344,7 @@ if __name__ == '__main__':
         eq.loop_data()
     except:
         eq.save_data('equatorial_test_norm.csv')
+        raise
 
     #eq.loop_data()
     print(f'Run time = {time.time()-start_time} s')

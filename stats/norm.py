@@ -250,6 +250,8 @@ class Equatorial_Hist(Hist1D):
         for i, (i_a, i_b) in enumerate(zip(indA, indB)):
             # Map to the equator.
             d_equator[i] = self._equator_mapper(i_a, i_b)
+            if not np.isnan(d_equator[i]):
+                print(d_equator[i])
         return d_equator
 
     def _equator_mapper(self, i_a, i_b):
@@ -264,15 +266,16 @@ class Equatorial_Hist(Hist1D):
         # Run IRBEM
         X1_equator = self.model.find_magequator(X1, None)['XGEO']
         X2_equator = self.model.find_magequator(X2, None)['XGEO']
-        print(X1, X2)
-        print(X1_equator, X2_equator, '\n')
+        #print(X1, X2)
+        #print(X1_equator, X2_equator, '\n')
         # Calculate the separations.
         d_equator = Re*np.linalg.norm(X1_equator-X2_equator)
-        return d_equator
-        # if d_equator > 0:
-        #     return d_equator
-        # else:
-        #     return np.nan
+        #return d_equator
+        # If not error value.
+        if d_equator < 10*Re:
+            return d_equator
+        else:
+            return np.nan
 
 if __name__ == '__main__':
     ### SCRIPT TO MAKE "Dst_Total" NORMALIZATION ###

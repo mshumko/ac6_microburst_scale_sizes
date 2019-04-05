@@ -198,7 +198,9 @@ class Equatorial_Hist(Hist1D):
         self.histKey = hist_key
         self.hist_bins = hist_bins
 
-        self.count = np.zeros((len(self.sep_bins)-1, len(self.hist_bins)-1))
+        self.counts = pd.DataFrame(
+                        np.zeros((len(self.sep_bins)-1, len(self.hist_bins)-1)),
+                        index=self.sep_bins[:-1], columns=self.hist_bins[:-1])
 
         # Initialize IRBEM model
         self.model = IRBEM.MagFields(**modelKwargs)
@@ -217,7 +219,7 @@ class Equatorial_Hist(Hist1D):
             #  after all of the filtering.
             ind = self.filterData()
             # Map to equator
-            d_equator = self.map2equator(ind)
+            d_equator_array = self.map2equator(ind)
             # Bin events.
             # # If using Hist2D, the Hist1D's method will be overwritten.
             # self.hist_data(ind) 
@@ -244,6 +246,15 @@ class Equatorial_Hist(Hist1D):
             # Map to the equator.
             d_equator_array[i] = self._equator_mapper(i_a, i_b)
         return d_equator_array
+
+    def save_data(self, file_path):
+        """ 
+        Saves the counts array with rows and columns to a file. 
+        Example code to read this data back into python:
+        df = pd.read_csv(file_path, index_col=0)
+        """
+        self.counts.to_csv(file_path)
+        return
 
     def _equator_mapper(self, i_a, i_b):
         """ Helper function to format data for IRBEM and map to the equator. """
@@ -322,4 +333,10 @@ if __name__ == '__main__':
     ### SCRIPT TO FIND THE EQUATORIAL NORMALIZATION ###
     eq = Equatorial_Hist(np.arange(0, 2000, 25), 'Lm_OPQ', np.arange(4, 8.1),
                         filterDict={'dos1rate':[0, 1E6]})
-    eq.loop_data()
+    try:
+        eq.loop_data()
+    except:
+        eq.save_data('equatorial_test_norm.csv')
+
+    #eq.loop_data()
+    print(f'Run time = {time.time()-start_time} s')

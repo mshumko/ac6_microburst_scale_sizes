@@ -229,30 +229,21 @@ class Equatorial_Hist(Hist1D):
         Maps points from AC6 to the magnetic equator. ind index array
         is for AC6-B. 
         """
-        d_equator = np.nan*np.zeros_like(indB)
+        d_equator_array = np.nan*np.zeros_like(indB)
 
-        # Find corresponding indicies in AC6-A
+        # Find corresponding indicies in AC6-A.
+        # Note that indB has already been filtered for data flag
+        # and by other variables in filterDict.
         tA = date2num(self.ac6dataA['dateTime'])
         tB = date2num(self.ac6dataB['dateTime'][indB])
         indA = np.where(np.in1d(tA, tB, assume_unique=True))[0]
-
         if len(indA) != len(indB):
             raise ValueError('indA != indB')
-        # print('here')
-        # indA = np.nan*np.zeros_like(indB)
-        # for i, i_b in enumerate(indB):
-        #     i_a = np.where(self.ac6dataA['dateTime'] == self.ac6dataB['dateTime'][i_b])[0]
-        #     if len(i_a) > 1:
-        #         raise ValueError('More or less than 1 matching AC6-A data point found.')
-        #     indA[i] = i_a[0]
-        # print('there')
         
         for i, (i_a, i_b) in enumerate(zip(indA, indB)):
             # Map to the equator.
-            d_equator[i] = self._equator_mapper(i_a, i_b)
-            if not np.isnan(d_equator[i]):
-                print(d_equator[i])
-        return d_equator
+            d_equator_array[i] = self._equator_mapper(i_a, i_b)
+        return d_equator_array
 
     def _equator_mapper(self, i_a, i_b):
         """ Helper function to format data for IRBEM and map to the equator. """
@@ -266,16 +257,12 @@ class Equatorial_Hist(Hist1D):
         # Run IRBEM
         X1_equator = self.model.find_magequator(X1, None)['XGEO']
         X2_equator = self.model.find_magequator(X2, None)['XGEO']
-        #print(X1, X2)
-        #print(X1_equator, X2_equator, '\n')
-        # Calculate the separations.
-        d_equator = Re*np.linalg.norm(X1_equator-X2_equator)
-        #return d_equator
-        # If not error value.
-        if d_equator < 10*Re:
-            return d_equator
-        else:
+       
+        if (-1E31 in X1_equator) or (-1E31 in X2_equator):
             return np.nan
+        else:
+            # Calculate separation in units of km.
+            return Re*np.linalg.norm(X1_equator-X2_equator)
 
 if __name__ == '__main__':
     ### SCRIPT TO MAKE "Dst_Total" NORMALIZATION ###

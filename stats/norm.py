@@ -248,7 +248,7 @@ class Equatorial_Hist(Hist1D):
     def hist_data(self, indB, d_equator_array):
         """ This method histrograms the histKey value"""
         H, x_bins, y_bins = np.histogram2d(
-                    d_equator_array, self.ac6dataA[self.histKey][indB], 
+                    d_equator_array, self.ac6dataB.loc[indB, self.histKey], 
                     bins=[self.sep_bins, self.hist_bins])
         self.counts += pd.DataFrame(H, index=self.sep_bins[:-1], 
                                         columns=self.hist_bins[:-1])
@@ -339,12 +339,9 @@ if __name__ == '__main__':
 
     ### SCRIPT TO FIND THE EQUATORIAL NORMALIZATION ###
     eq = Equatorial_Hist(np.arange(0, 2000, 25), 'Lm_OPQ', np.arange(4, 8.1),
-                        filterDict={'dos1rate':[0, 1E6]})
-    try:
-        eq.loop_data()
-    except:
-        eq.save_data('equatorial_test_norm.csv')
-        raise
+                        filterDict={'dos1rate':[0, 1E6]}, startDate=datetime(2015,4,25))
+    eq.loop_data()
+    eq.save_data('equatorial_test_norm.csv')
 
     #eq.loop_data()
     print(f'Run time = {time.time()-start_time} s')

@@ -340,7 +340,8 @@ if __name__ == '__main__':
 
     ### SCRIPT TO FIND THE EQUATORIAL NORMALIZATION ###
     eq = Equatorial_Hist(np.arange(0, 2000, 25), 'Lm_OPQ', np.arange(4, 8.1),
-                        filterDict={'dos1rate':[0, 1E6]}, startDate=datetime(2015, 5, 26))
+                        filterDict={'dos1rate':[0, 1E6]})
+                        # startDate=datetime(2015, 5, 26)
     eq.loop_data()
     eq.save_data('equatorial_test_norm.csv')
 

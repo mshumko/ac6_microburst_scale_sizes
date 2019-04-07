@@ -220,8 +220,9 @@ class Equatorial_Hist(Hist1D):
             self.indB = self.filterData()
             # Map to equator
             d_equator_array = self.map2equator(self.indB)
-            # Bin events.
-            self.hist_data(self.indB, d_equator_array) 
+            if not np.isnan(d_equator_array).all():
+                # Bin events if at least one event is valid.
+                self.hist_data(self.indB, d_equator_array) 
         return
 
     def map2equator(self, indB):
@@ -339,7 +340,7 @@ if __name__ == '__main__':
 
     ### SCRIPT TO FIND THE EQUATORIAL NORMALIZATION ###
     eq = Equatorial_Hist(np.arange(0, 2000, 25), 'Lm_OPQ', np.arange(4, 8.1),
-                        filterDict={'dos1rate':[0, 1E6]})
+                        filterDict={'dos1rate':[0, 1E6]}, startDate=datetime(2015, 5, 26))
     eq.loop_data()
     eq.save_data('equatorial_test_norm.csv')
 

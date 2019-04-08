@@ -33,11 +33,12 @@ class Microburst_Equatorial_CDF:
         print(f'Number of microbursts {self.microburst_catalog.shape[0]}')
         return
 
-    def calc_cdf_pdf(self, df, L_lower, L_upper, bin_width=75):
+    def calc_cdf_pdf(self, df, L_lower, L_upper, bin_width=50):
         """
         This method calculates the pdf and cdf and errors from a dataframe
         and L shell filtering.
         """
+        self.bin_width = bin_width
         self.filtered_catalog = df[(df.Lm_OPQ > L_lower) & (df.Lm_OPQ < L_upper)]
         # Map to the magnetic equator
         self.filtered_catalog.loc[:, 'd_equator'] = np.array([
@@ -49,18 +50,29 @@ class Microburst_Equatorial_CDF:
         self._load_norm(bin_width)
 
         # Calculate the CDF
-        self.bin_width = bin_width
-        self.bins = np.arange(0, 2000, self.bin_width)
+        n = np.array([self.n_i(bi, bf, self.filtered_catalog) for bi, bf in 
+                    zip(self.norm.index[:-1], self.norm.index[1:])]).flatten()
+        # Before calculating the weights, sum over the appropriate normalization columns.
+        L_vals = np.arange(L_lower, L_upper)
+        samples = np.zeros_like(self.norm.index)
+        for L_col in L_vals:
+            samples += self.norm.loc[:, str(float(L_col))]
+        # Calculate the weights to scale each element in n by.
+        weights = (samples.loc[0:self.norm.index[-1]-self.bin_width].max()/
+                    samples.loc[0:self.norm.index[-1]-self.bin_width].values)
+        n_weighted = np.multiply(weights, n)
+
         total_detections = self.filtered_catalog.shape[0]
-        cdf = np.array([len(np.where(self.filtered_catalog.d_equator > d)[0])/
-                                total_detections for d in self.bins])
+        cdf = np.array([sum(n_weighted[i:])/sum(n_weighted) for i in range(len(n))])
         pdf = (cdf[:-1] - cdf[1:])/self.bin_width
 
         # Calculate CDF and PDF errors. Assume CDF errors are just due to 
         # Counting statistics like I did in the LEO case.
         cdf_error = cdf*np.sqrt([1/len(np.where(self.filtered_catalog.d_equator > d)[0]) +
-                                1/total_detections for d in self.bins])
+                                1/total_detections for d in self.norm.index[:-1]])
         pdf_error = np.sqrt(cdf_error[1:]**2 + cdf_error[:-1]**2)/self.bin_width
+        # cdf_error = 0
+        # pdf_error = 0
         return cdf, pdf, cdf_error, pdf_error, total_detections
 
     def plot_cdf_pdf(self, L_array=[4, 5, 6, 7, 8], plot_all=True):
@@ -75,9 +87,9 @@ class Microburst_Equatorial_CDF:
                                                     self.microburst_catalog, 
                                                     lower_L, upper_L)
             # Plot just the line
-            ax[0].errorbar(self.bins, cdf, c=c[i],
+            ax[0].errorbar(self.norm.index[:-1], cdf, c=c[i],
                         label=f'{lower_L} < L < {upper_L} | N = {N}', capsize=5)
-            ax[1].errorbar(self.bins[:-1], pdf, c=c[i], 
+            ax[1].errorbar(self.norm.index[:-2], pdf, c=c[i], 
                         label=f'{lower_L} < L < {upper_L}')
             # Plot error bar every 4 data points
             # ax[0].errorbar(self.bins[::4], cdf[::4], c=c[i], 
@@ -91,23 +103,24 @@ class Microburst_Equatorial_CDF:
                                                     self.microburst_catalog, 
                                                     4, 8)
             # Plot just the line
-            ax[0].errorbar(self.bins, cdf, c='k',
+            ax[0].errorbar(self.norm.index[:-1], cdf, c='k',
                         label=f'4 < L < 8 | N = {N}', lw=2, capsize=2)
-            ax[1].errorbar(self.bins[:-1], pdf, c='k', 
+            ax[1].errorbar(self.norm.index[:-2], pdf, c='k', 
                         label=f'4 < L < 8', lw=2)
             # Plot the error bar on top
             # ax[0].errorbar(self.bins[::1], cdf[::1], c='k', 
             #             yerr=cdf_error[::1], lw=1, capsize=2, ls='')
             # ax[1].errorbar(self.bins[:-1:1], pdf[::1], c='k', 
             #                 yerr=pdf_error[::1], capsize=2, lw=1, ls='')
+
             # Try using fill_between
-            ax[0].fill_between(self.bins[::1], cdf[::1]-cdf_error[::1], 
+            ax[0].fill_between(self.norm.index[:-1:1], cdf[::1]-cdf_error[::1], 
                         cdf[::1]+cdf_error[::1], facecolor='k', alpha=0.5)
-            ax[1].fill_between(self.bins[:-1:1], pdf[::1]-pdf_error[::1], 
+            ax[1].fill_between(self.norm.index[:-2:1], pdf[::1]-pdf_error[::1], 
                         pdf[::1]+pdf_error[::1], facecolor='k', alpha=0.5)
             
         ax[0].legend()
-        ax[0].set_xlim(left=1, right=2000)
+        ax[0].set_xlim(left=1)
         ax[0].set_ylim(bottom=0)
         ax[1].set_ylim(bottom=0)
         ax[0].set_ylabel('Microburst fraction')
@@ -118,6 +131,17 @@ class Microburst_Equatorial_CDF:
         plt.tight_layout()
         plt.show()
         return
+
+    def n_i(self, di, df, data=None):
+        """ 
+        Calculates the number of microbursts in data 
+        dataframe between separation di and df.
+        """
+        if data is None:
+            data = self.microburst_catalog
+        n = sum((data['d_equator'] >= di) & 
+                (data['d_equator'] < df))
+        return  n
 
     def _load_norm(self, bin_width):
         """ 

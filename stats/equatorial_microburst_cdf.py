@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.integrate
 import matplotlib.pyplot as plt
+import os
 
 import pandas as pd
 
@@ -32,7 +33,6 @@ class Microburst_Equatorial_CDF:
         print(f'Number of microbursts {self.microburst_catalog.shape[0]}')
         return
 
-
     def calc_cdf_pdf(self, df, L_lower, L_upper, bin_width=75):
         """
         This method calculates the pdf and cdf and errors from a dataframe
@@ -44,12 +44,9 @@ class Microburst_Equatorial_CDF:
                     self.map2equator(row.lat, row.lon, row.alt, 
                                     row.dateTime, row.Dist_Total) 
                     for _, row in self.filtered_catalog.iterrows()])
-        # self.filtered_catalog['d_equator'] = pd.Series([
-        #             self.map2equator(row.lat, row.lon, row.alt, 
-        #                             row.dateTime, row.Dist_Total) 
-        #             for _, row in self.filtered_catalog.iterrows()],
-        #             name='d_equator'
-        #             )
+        
+        # Load the equatorial normalization file.
+        self._load_norm(bin_width)
 
         # Calculate the CDF
         self.bin_width = bin_width
@@ -122,6 +119,26 @@ class Microburst_Equatorial_CDF:
         plt.show()
         return
 
+    def _load_norm(self, bin_width):
+        """ 
+        Load the equatorial normalization file and rebin if the bin_width 
+        is not equal to the index difference.
+        """
+        norm_dir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm'
+        norm_name = 'equatorial_norm.csv'
+        norm_path = os.path.join(norm_dir, norm_name)
+        self.norm = pd.read_csv(norm_path, index_col=0)
+        sep_min = self.norm.index.min()
+        sep_max = self.norm.index.max()
+
+        if self.norm.index[1] - self.norm.index[0] != bin_width:
+            # Now rebin by the bin sizes.
+            self.norm = self.norm.groupby(self.norm.index//bin_width).sum()
+            # Replace the consecutive indicies with [0, bin_width, 2*bin_width...] 
+            self.norm = self.norm.set_index(
+                        np.arange(sep_min, sep_max+1, bin_width))
+        return
+
     def deltaLat(self, d, alt):
         """
         Calculate the half of the change in angle for a spacecraft at
@@ -143,5 +160,5 @@ class Microburst_Equatorial_CDF:
         return self.d_equator
 
 if __name__ == "__main__":
-    m = Microburst_Equatorial_CDF(6)
-    m.plot_cdf_pdf()
+    eq = Microburst_Equatorial_CDF(6)
+    eq.plot_cdf_pdf()

@@ -126,7 +126,19 @@ class Microburst_CDF:
         plt.tight_layout()
         plt.show()
         return
+        
+    def save_data(self, path):
+        """ Save the CDF/PDF data and errors to a csv file. """
+        C, P, C_std, P_std, N = self.calc_cdf_pdf(self.microburst_catalog, 
+                                                    4, 8)
+        df = pd.DataFrame(data=np.array([C[:-1], P, C_std[:-1], P_std]).T, 
+                          columns=['CDF', 'PDF', 'CDF_std', 'PDF_std'], 
+                          index=self.sep_bins[:-2])
+        df.to_csv(path)
+        return
 
 if __name__ == "__main__":
     m = Microburst_CDF(6)
     m.plot_cdf_pdf()
+    m.save_data('/home/mike/research/ac6_microburst_scale_sizes/'
+                'data/microburst_cdf_pdf_norm_v3.csv')

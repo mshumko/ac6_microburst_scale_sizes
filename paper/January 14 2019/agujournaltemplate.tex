@@ -1,4 +1,3 @@
-%% March 2018
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % AGUJournalTemplate.tex: this template file is for articles formatted with LaTeX
 %
@@ -19,10 +18,11 @@
 %
 
 %% To submit your paper:
-\documentclass[draft,linenumbers]{agujournal2018}
-\usepackage{apacite}
+\documentclass[draft]{agujournal2019}
 \usepackage{url} %this package should fix any errors with URLs in refs.
-
+\usepackage{lineno}
+\usepackage{color}
+\linenumbers
 %%%%%%%
 % As of 2018 we recommend use of the TrackChanges package to mark revisions.
 % The trackchanges package adds five new LaTeX commands:
@@ -64,24 +64,12 @@
 %
 % ie, \journalname{Water Resources Research}
 
-\journalname{Enter journal name here}
+\journalname{Geophysical Research Letters}
 
 
 \begin{document}
 
-%% ------------------------------------------------------------------------ %%
-%  Title
-%
-% (A title should be specific, informative, and brief. Use
-% abbreviations only if they are defined in the abstract. Titles that
-% start with general keywords then specific terms are optimized in
-% searches)
-%
-%% ------------------------------------------------------------------------ %%
-
-% Example: \title{This is a test title}
-
-\title{=enter title here=}
+\title{Microburst Scale Size Distribution Derived with AeroCube-6}
 
 %% ------------------------------------------------------------------------ %%
 %
@@ -89,59 +77,24 @@
 %
 %% ------------------------------------------------------------------------ %%
 
-% Authors are individuals who have significantly contributed to the
-% research and preparation of the article. Group authors are allowed, if
-% each author in the group is separately identified in an appendix.)
-
-% List authors by first name or initial followed by last name and
-% separated by commas. Use \affil{} to number affiliations, and
-% \thanks{} for author notes.
-% Additional author notes should be indicated with \thanks{} (for
-% example, for current addresses).
-
-% Example: \authors{A. B. Author\affil{1}\thanks{Current address, Antartica}, B. C. Author\affil{2,3}, and D. E.
-% Author\affil{3,4}\thanks{Also funded by Monsanto.}}
-
-\authors{=list all authors here=}
+\authors{M. Shumko\affil{1}, T.P. O'Brien\affil{2}, J. Sample\affil{1}, A. Johnson\affil{1}, D.L. Turner\affil{2}, J.B. Blake\affil{2}, B.A. Griffith\affil{1}, S. Claudepierre\affil{2}, O. Agapitov\affil{3}}
 
 
-% \affiliation{1}{First Affiliation}
-% \affiliation{2}{Second Affiliation}
-% \affiliation{3}{Third Affiliation}
-% \affiliation{4}{Fourth Affiliation}
+\affiliation{1}{Department of Physics, Montana State University, Bozeman, Montana, USA}
+\affiliation{2}{Space Science Applications Laboratory, The Aerospace Corportation, El Segundo, California, USA}
+\affiliation{3}{Space Sciences Laboratory, University of California berkeley, Berkeley, California, USA}
 
-\affiliation{=number=}{=Affiliation Address=}
-%(repeat as many times as is necessary)
-
-%% Corresponding Author:
-% Corresponding author mailing address and e-mail address:
-
-% (include name and email addresses of the corresponding author.  More
-% than one corresponding author is allowed in this LaTeX file and for
-% publication; but only one corresponding author is allowed in our
-% editorial system.)
-
-% Example: \correspondingauthor{First and Last Name}{email@address.edu}
-
-\correspondingauthor{=name=}{=email address=}
+\correspondingauthor{M. Shumko}{msshumko@gmail.com}
 
 %% Keypoints, final entry on title page.
-
 %  List up to three key points (at least one is required)
 %  Key Points summarize the main points and conclusions of the article
-%  Each must be 100 characters or less with no special characters or punctuation
-
-% Example:
-% \begin{keypoints}
-% \item	List up to three key points (at least one is required)
-% \item	Key Points summarize the main points and conclusions of the article
-% \item	Each must be 100 characters or less with no special characters or punctuation
-% \end{keypoints}
+%  Each must be 100 characters or less with no special characters or punctuation and must be complete sentences
 
 \begin{keypoints}
-\item enter point 1 here
-\item enter point 2 here
-\item enter point 3 here
+\item Microburst scale size in low Earth orbit and the magnetic equator was estimated.
+\item Majority of microbursts in low Earth orbit have a scale size on the order of 10 km.
+\item The majority of microbursts correspond to the correlation scale of \textcolor{red}{high amplitude?} whistler-mode chorus waves at the magnetic equator.
 \end{keypoints}
 
 %% ------------------------------------------------------------------------ %%
@@ -158,23 +111,12 @@
 
 \begin{abstract}
 enter abstract here
+
 \end{abstract}
 
-%% ------------------------------------------------------------------------ %%
-%
-%  PLAIN LANGUAGE SUMMARY
-%
-% This is optional but will help expand the reach of your paper.
-% Information on writing a good plain language summary is available at:
-% http://sharingscience.agu.org/creating-plain-language-summary/
-%
-% If your paper doesn't include a Plain Language Summary, remove the
-% commands below.
-%% ------------------------------------------------------------------------ %%
+\section{Plain Language Summary}
+https://sharingscience.agu.org/creating-plain-language-summary/
 
-\begin{plainlanguage}
-Write your Plain Language Summary here or delete the plainlanguage environment.
-\end{plainlanguage}
 
 
 %% ------------------------------------------------------------------------ %%
@@ -208,8 +150,12 @@ Write your Plain Language Summary here or delete the plainlanguage environment.
 
 
 \section{= enter section title =}
-
 %Text here ===>>>
+
+
+
+
+
 
 %%
 
@@ -234,20 +180,26 @@ Write your Plain Language Summary here or delete the plainlanguage environment.
 %----------------
 % EXAMPLE FIGURE
 %
-% \begin{figure}[h]
-% \centering
-% when using pdflatex, use pdf file:
-% \includegraphics[natwidth=800px,natheight=600px]{figsamp.pdf}
 %
-% when using dvips, use .eps file:
-% \includegraphics[natwidth=800px,natheight=600px]{figsamp.eps}
+% Giving latex a width will help it to scale the figure properly. A simple trick is to use \textwidth. Try this if large figures run off the side of the page.
+% \begin{figure}
+% \noindent\includegraphics[width=\textwidth]{anothersample.png}
+%\caption{caption}
+%\label{pngfiguresample}
+%\end{figure}
 %
-% \caption{Short caption}
-% \label{figone}
-%  \end{figure}
 %
-% We recommend that you provide the native width and height (natwidth, natheight) of your figures.
-% Specifying native dimensions ensures that your figures are properly scaled
+%
+% If you get an error about an unknown bounding box, try specifying the width and height of the figure with the natwidth and natheight options.
+% \begin{figure}
+% \noindent\includegraphics[natwidth=800px,natheight=600px]{samplefigure.pdf}
+%\caption{caption}
+%\label{pdffiguresample}
+%\end{figure}
+%
+%
+% PDFLatex does not seem to be able to process EPS figures. You may want to try the epstopdf package.
+%
 %
 %
 % ---------------
@@ -388,25 +340,34 @@ Enter acknowledgments, including your data availability statement, here.
 %% References and Citations
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% BibTeX is preferred:
 %
-% \bibliography{<name of your .bib file>}
+% \bibliography{<name of your .bib file>} don't specify the file extension
 %
 % don't specify bibliographystyle
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\bibliography{enter your bibliography file here}
 
 
-% Please use ONLY \citet and \citep for reference citations.
-% DO NOT use other cite commands (e.g., \cite, \citeyear, \nocite, \citealp, etc.).
-%% Example \citet and \citep:
-%  ...as shown by \citet{Boug10}, \citet{Buiz07}, \citet{Fra10},
-%  \citet{Ghel00}, and \citet{Leit74}.
 
-%  ...as shown by \citep{Boug10}, \citep{Buiz07}, \citep{Fra10},
-%  \citep{Ghel00, Leit74}.
+%Reference citation instructions and examples:
+%
+% Please use ONLY \cite and \citeA for reference citations.
+% \cite for parenthetical references
+% ...as shown in recent studies (Simpson et al., 2019)
+% \citeA for in-text citations
+% ...Simpson et al. (2019) have shown...
+%
+%
+%...as shown by \citeA{jskilby}.
+%...as shown by \citeA{lewin76}, \citeA{carson86}, \citeA{bartoldy02}, and \citeA{rinaldi03}.
+%...has been shown \cite{jskilbye}.
+%...has been shown \cite{lewin76,carson86,bartoldy02,rinaldi03}.
+%...has been shown \cite [e.g.,][]{lewin76,carson86,bartoldy02,rinaldi03}.
+%
+% DO NOT use other cite commands (e.g., \citet, \citep, \citeyear, \nocite, \citealp, etc.).
+%
 
-%  ...has been shown \citep [e.g.,][]{Boug10,Buiz07,Fra10}.
 
 
 \end{document}

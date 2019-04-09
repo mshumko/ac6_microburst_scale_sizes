@@ -22,6 +22,7 @@
 \usepackage{url} %this package should fix any errors with URLs in refs.
 \usepackage{lineno}
 \usepackage{color}
+\graphicspath{ {figures/} }
 \linenumbers
 %%%%%%%
 % As of 2018 we recommend use of the TrackChanges package to mark revisions.
@@ -149,8 +150,82 @@ https://sharingscience.agu.org/creating-plain-language-summary/
 % \section{Conclusions}
 
 
-\section{= enter section title =}
-%Text here ===>>>
+\section{Introduction}
+Since the discovery of the Van Allen radiation belts in the 1960s, decades of research has made headway in understanding the dynamics of particle acceleration and loss mechanisms. One of these mechanisms is wave-particle scattering between whistler-mode chorus waves and electrons which has been modeled and observed as a source of electron acceleration and loss. DESCRIBE CHORUS WAVES AND THEIR GENERATION MECHANISM. Whistler mode chorus is widely believed to cause electron precipitation termed microbursts. Microbursts are a subsecond impulse increase of electrons that were first observed by high altitude balloons and satellites in low Earth orbit (LEO). Microburst’s role as a radiation belt electron loss mechanism has been estimated to be significant, with total radiation belt electron depletion due to microbursts estimated to be on the order of a day. 
+
+One of the unknown characteristics of microbursts that is critical to better quantify the role of microbursts as a loss mechanism is their size. Microburst size, together with their occurrence frequency (anything else?) are necessary parameters to more accurately quantify their contribution to radiation belt electron losses. Furthermore, by comparing the microburst scale size distribution at the magnetic equator to the wave scale sizes estimated in prior literature, the dominant scattering mechanism can be identified. Prior case studies have estimated the LEO microburst scale size between 4 and 50 km, an order of magnitude difference (cite Bern, me, Parks, Sarah, Alex). The large variance in prior results imply that there is a distribution of microburst scale sizes that this study aims to estimate.
+
+This study estimates the microburst scale size distributions in LEO and the magnetic equator and compares it to the scale size of the progenitor waves. The twin AeroCube-6 (AC6) CubeSats which took data together for three years with varying spacecraft separation between 2 and 800 km are utilized for this study. We first introduce the AC-6 mission including their orbit and instrumentation. Then we describe the procedure undertaken to identify microbursts observed by each spacecraft and how they are combined to make a list of the temporally coincident microbursts. Next, the procedure used to estimate the microburst scale size distributions in LEO and the magnetic equator is explained. Lastly, we summarize and compare these results to the microburst scale sizes estimated in prior literature and infer the properties of the whistler-mode chorus waves that are believed to cause microbursts.
+
+\section{Instrumentation}
+The AC6 mission consists of a pair of 0.5U (10x10x5 cm) CubeSats built by the Aerospace Corporation and launched on June 19th, 2014 into a 620 x 700 km, 98 degree inclination orbit. The two satellites, designated as AC6-A and AC6-B separated after launch and drifted apart. AC6 has an active attitude control system which allows them to change their differential drag to allow fine separation control. Figure 1a shows the AC6 separation for the duration of the mission.
+
+Each AC6 unit is equipped with a three Aerospace microdosimeters (licensed to Teledyne Microelectronics, Inc). The dosimeter used for this study is dos1 and is identical on both AC6 units. Dos1 has a 30 keV electron threshold and samples at 10 Hz. The AC6 orbit is in the dawn-dusk magnetic local times (MLTs) and Fig. 1b shows the number of good 10 Hz samples taken simultaneously by AC6 as a function and L and MLT. Good samples are samples which have a data quality flag of 0. More detailed technical information regarding the AC6 mission can be found in the cite AC6 README.
+
+\begin{figure}
+\includegraphics[width=\textwidth]{fig1.png}
+\caption{test} \label{fig1}
+\end{figure}
+
+\section{Methodology}
+\subsection{Microburst Detection}
+The first step to find microbursts observed simultaneously by both spacecraft is to identify them from each spacecraft separately. We have detected microbursts with two different methods that yielded quantitatively similar results. The first method is the burst parameter cite Paul’s paper and add equation. This algorithm has been successfully used in other microburst studies, mainly with the microbursts observed by the Solar Anomalous and Magnetospheric Particle Explorer add citations. For AC6, we found that a burst parameter threshold of 5 has good tradeoff between false positive and false negative microburst detections.
+
+Maybe not go into as much in detail in the following paragraph? The other microburst detection algorithm that was developed for this study is based on wavelet transforms and frequency filtering cite Torrence and Compo. The AC6 time series if first transformed into wavelet space by convolving it with a set of Ricker wavelets (more commonly known as the Mexican hat wavelet). An example of the wavelet transformation is shown in Fig. 2. Figure 2a shows the original time series in blue for one radiation belt pass and Fig. 2b shows the wavelet power as a function of period of oscillation and time. At times when microbursts were observed, there is substantial wavelet power in periods less than one second.
+
+A high pass filter at one second was then applied on the wavelet space representation of the microburst time series. Then the remaining wavelet space was inverse filtered to produce a time series which is zero or near-zero everywhere except microbursts. Lastly, a threshold test was applied to identify microbursts. Example detections of microbursts are shown with green stars in Fig. 2a.
+
+\subsection{Transmitter Noise Removal}
+The transmitters on AC6 can cause unphysical count impulses in the dosimeters. One source of transmitter noise was observed at times when AC6 was in contact with the ground stations above mainland US for data downloads and commanding. This source of noise mainly manifests itself at lower radiation belt L shells. To account for this noise, detections made above the US were discarded.
+
+Another source of noise is crosslink transmissions between the AC6 units. These transmissions occurred when either spacecraft transitioned from the survey mode to 10 Hz mode. This noise is often not caught by the data quality flag, so an automated noise identification process was developed. To identify this noise, a dosimeter with a 250 keV nominal electron threshold, dos2 was used. Dos2 typically has negligible count rates when dos1 is observing microbursts, and substantial count rates during downlinks and crosslinks. Furthermore, the crosslink transmissions are relatively easy to identify since they are observed near the start and end of the 10 Hz data periods, and are very periodic. The automated noise identification algorithm applied cross-correlation (CC) and autocorrelation (AC) to the dos1 and dos2 time series. Microburst detections were removed when the following two conditions were met. The first condition is true if the dos1 or dos2 time series had an AC peak at 0.2 or 0.4 s lag. The second condition is true if dos2 observed unphysically high count rates or dos1 and dos2 had a Pearson CC coefficient > 0.9. The first condition can be met with a train of microbursts alone and to not remove these valid detections, we imply a second constraint that dos2 experiences unphysical counts or dos1 and dos2 well cross correlate which is unlikely due to an order of magnitude difference in dos1 and dos2 energy thresholds. This admittedly complex algorithm successfully removed most transmitter noise while preserving most valid microburst detections.
+
+\subsection{Coincident Microburst Detection}
+At this stage we have lists of microbursts observed by both spacecraft individually and now we combine these lists to identify microbursts observed simultaneously by both AC6 units. Show the microburst detection schematic? The general approach is to CC the time series around microbursts detections made by one spacecraft against the other spacecraft. Ideally, if both spacecraft observed the same microburst, the two time series should correlate well and correlate poorly when a microburst is correlated against random non-microburst times. A CC threshold of 0.8 was chosen as it is a good compromise to identify microbursts superposed with noise and rejecting moderate correlations between a microburst and random features in the other time series.  Due to noise, this CC threshold sometimes failed to reject times when microbursts and non-microburst features were well correlated so all of the events were spot checked by two authors to remove these events. Figure 3, panels (A), (CC), and (E) show examples of microbursts observed by both AC6 units when they were separated by 6, 17, and 69 km.
+
+\begin{figure}
+\includegraphics[width=\textwidth]{fig2.png}
+\caption{test} \label{fig2}
+\end{figure}
+	
+A physical phenomena that can influence our results are narrow spatial structures termed curtains cite Bern and Paul’s paper. These structures appear as microbursts in a time series from a single satellite, but with two satellites you can adjust the time series of one spacecraft by the in-track lag to identify spatial features. Figure 3b, d, and f show the AC6 spatially aligned time series and show that the these three cases were indeed microbursts.  
+	
+When the two spacecraft were as little as a few kilometers apart it is very difficult to distinguish between temporal features such as microbursts from spatial features such as curtains. Since the prevalence of curtains is independent of the spacecraft separation, this will effectively reduce the number of microbursts observed at very small separations. No attempt has been made to remove this bias.
+
+\subsection{Microburst Size Distribution in LEO and Magnetic Equator}
+When AC6 observes a coincident microburst at a separation d, the microburst’s size must be greater than d. This idea is similar to cite Joy et al., paper who investigated the most probable Jovian bow shock and magnetopause standoff distances. Following Joy’s argument, the fraction of coincident microbursts observed above a distance d is microburst cumulative distribution for the following reason.  If P(A) is the cumulative probability that a microburst is larger than d and P(B) is the probability that AC6 is separated by d, then the fraction of microbursts observed at d is the conditional probability P(A|B). Using Bayes’ theorem, 
+
+P(A|B) = P(A\&B)/P(B)
+
+Where P(A\&B) is the joint probability. Since the AC6 separation is independent of microburst size, P(A\&B) = P(A)P(B). Hence
+
+P(A|B) = P(A)P(B)/P(B) = P(A).
+
+
+The microburst cumulative probability is then calculated with 
+
+f(d) = N(d)N(0)
+
+where N(d) is the number of microbursts observed by AC6 above d and is defined as
+					$N(d) =bins > dnbinsSmaxSbin$
+where $n_{bins}$ is the number of coincident microbursts detected in that bin. The normalization term $S_max/S_bin$ is a ratio of the number of samples observed in the most sampled bin to the number of samples in the current bin. This normalization factor corrects for AC6’s non-uniform sampling as a function of separation. With this normalization, f(d) can be interpreted as the fraction of microbursts observed above d assuming AC6 sampled evenly in separation.
+	The microburst cumulative distribution in LEO is shown by the black curve in Fig. 4a for the entire radiation belt (4 < L < 8) and split up by 1-L-wide bins with the colored curves. The overall trend consists of a sudden cumulative probability drop off, followed by a shoulder up to around 70 km where the cumulative distribution drops to zero. The shaded region around the black curve shows the standard error due to counting statistics. The cumulative distribution trends can be interpreted as 
+	
+\begin{figure}
+\includegraphics[width=\textwidth]{fig3.png}
+\caption{test} \label{fig3}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{fig4.png}
+\caption{test} \label{fig4}
+\end{figure}
+
+\section{Discussion and Conclusions}
+\begin{enumerate}
+\item Relate the LEO scale sizes to prior work
+\item Compare the equatorial scale size to Oleksiy’s and Santolik’s work. Need to get Oleksiy on board here.
+\end{enumerate}
 
 
 
@@ -346,9 +421,7 @@ Enter acknowledgments, including your data availability statement, here.
 % don't specify bibliographystyle
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\bibliography{enter your bibliography file here}
-
-
+\bibliography{/home/mike/Dropbox/0_firebird_research/A_presentations/refs}
 
 %Reference citation instructions and examples:
 %

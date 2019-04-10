@@ -33,7 +33,7 @@ class Microburst_Equatorial_CDF:
         print(f'Number of microbursts {self.microburst_catalog.shape[0]}')
         return
 
-    def calc_cdf_pdf(self, df, L_lower, L_upper, bin_width=25):
+    def calc_cdf_pdf(self, df, L_lower, L_upper, bin_width=100):
         """
         This method calculates the pdf and cdf and errors from a dataframe
         and L shell filtering.

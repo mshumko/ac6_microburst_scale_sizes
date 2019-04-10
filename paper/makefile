@@ -1,0 +1,5 @@
+mshumko_microburst_paper.pdf: shumko_ac6_microburst_scale_size_v0_0.tex
+	pdflatex shumko_ac6_microburst_scale_size_v0_0
+	bibtex shumko_ac6_microburst_scale_size_v0_0
+	pdflatex shumko_ac6_microburst_scale_size_v0_0
+	pdflatex shumko_ac6_microburst_scale_size_v0_0

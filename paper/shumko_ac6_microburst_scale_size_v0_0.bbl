@@ -1,0 +1,667 @@
+\begin{thebibliography}{}
+
+\bibitem [\protect \citeauthoryear {%
+Anderson%
+\ \BBA {} Milton%
+}{%
+Anderson%
+\ \BBA {} Milton%
+}{%
+{\protect \APACyear {1964}}%
+}]{%
+Anderson1964}
+\APACinsertmetastar {%
+Anderson1964}%
+\begin{APACrefauthors}%
+Anderson, K\BPBI A.%
+\BCBT {}\ \BBA {} Milton, D\BPBI W.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1964}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Balloon observations of {X} rays in the auroral zone: 3.
+  {H}igh time resolution studies} {Balloon observations of {X} rays in the
+  auroral zone: 3. {H}igh time resolution studies}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research}{69}{21}{4457--4479}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1029/JZ069i021p04457}
+  \end{APACrefURL}
+\newblock
+\begin{APACrefDOI} \doi{10.1029/JZ069i021p04457} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Bortnik%
+, Thorne%
+\BCBL {}\ \BBA {} Inan%
+}{%
+Bortnik%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2008}}%
+}]{%
+Bortnik2008}
+\APACinsertmetastar {%
+Bortnik2008}%
+\begin{APACrefauthors}%
+Bortnik, J.%
+, Thorne, R.%
+\BCBL {}\ \BBA {} Inan, U\BPBI S.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2008}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Nonlinear interaction of energetic electrons with large
+  amplitude chorus} {Nonlinear interaction of energetic electrons with large
+  amplitude chorus}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Geophysical Research Letters}{35}{21}{}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Breneman%
+\ \protect \BOthers {.}}{%
+Breneman%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2017}}%
+}]{%
+Breneman2017}
+\APACinsertmetastar {%
+Breneman2017}%
+\begin{APACrefauthors}%
+Breneman, A.%
+, Crew, A.%
+, Sample, J.%
+, Klumpar, D.%
+, Johnson, A.%
+, Agapitov, O.%
+\BDBL {}others%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2017}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Observations directly linking relativistic electron
+  microbursts to whistler mode chorus: Van Allen Probes and {FIREBIRD II}}
+  {Observations directly linking relativistic electron microbursts to whistler
+  mode chorus: Van allen probes and {FIREBIRD II}}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Geophysical Research Letters}{}{}{}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Crew%
+\ \protect \BOthers {.}}{%
+Crew%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2016}}%
+}]{%
+Crew2016}
+\APACinsertmetastar {%
+Crew2016}%
+\begin{APACrefauthors}%
+Crew, A\BPBI B.%
+, Spence, H\BPBI E.%
+, Blake, J\BPBI B.%
+, Klumpar, D\BPBI M.%
+, Larsen, B\BPBI A.%
+, O'Brien, T\BPBI P.%
+\BDBL {}Widholm, M.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2016}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {First multipoint in situ observations of electron
+  microbursts: Initial results from the {NSF} {FIREBIRD II} mission} {First
+  multipoint in situ observations of electron microbursts: Initial results from
+  the {NSF} {FIREBIRD II} mission}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{121}{6}{5272--5283}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1002/2016JA022485}
+  \end{APACrefURL}
+\newblock
+\APACrefnote{2016JA022485}
+\newblock
+\begin{APACrefDOI} \doi{10.1002/2016JA022485} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Horne%
+\ \BBA {} Thorne%
+}{%
+Horne%
+\ \BBA {} Thorne%
+}{%
+{\protect \APACyear {2003}}%
+}]{%
+Horne2003}
+\APACinsertmetastar {%
+Horne2003}%
+\begin{APACrefauthors}%
+Horne, R\BPBI B.%
+\BCBT {}\ \BBA {} Thorne, R\BPBI M.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2003}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Relativistic electron acceleration and precipitation
+  during resonant interactions with whistler-mode chorus} {Relativistic
+  electron acceleration and precipitation during resonant interactions with
+  whistler-mode chorus}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Geophysical Research Letters}{30}{10}{}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1029/2003GL016973}
+  \end{APACrefURL}
+\newblock
+\APACrefnote{1527}
+\newblock
+\begin{APACrefDOI} \doi{10.1029/2003GL016973} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Joy%
+\ \protect \BOthers {.}}{%
+Joy%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2002}}%
+}]{%
+Joy2002}
+\APACinsertmetastar {%
+Joy2002}%
+\begin{APACrefauthors}%
+Joy, S.%
+, Kivelson, M.%
+, Walker, R.%
+, Khurana, K.%
+, Russell, C.%
+\BCBL {}\ \BBA {} Ogino, T.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2002}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Probabilistic models of the Jovian magnetopause and bow
+  shock locations} {Probabilistic models of the jovian magnetopause and bow
+  shock locations}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{107}{A10}{SMP--17}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Lee%
+\ \protect \BOthers {.}}{%
+Lee%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2012}}%
+}]{%
+Lee2012}
+\APACinsertmetastar {%
+Lee2012}%
+\begin{APACrefauthors}%
+Lee, J\BPBI J.%
+, Parks, G\BPBI K.%
+, Lee, E.%
+, Tsurutani, B\BPBI T.%
+, Hwang, J.%
+, Cho, K\BPBI S.%
+\BDBL {}McCarthy, M\BPBI P.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2012}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Anisotropic pitch angle distribution of ~100 {keV}
+  microburst electrons in the loss cone: measurements from {STSAT-1}}
+  {Anisotropic pitch angle distribution of ~100 {keV} microburst electrons in
+  the loss cone: measurements from {STSAT-1}}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Annales Geophysicae}{30}{11}{1567--1573}.
+\newblock
+\begin{APACrefURL} \url{https://www.ann-geophys.net/30/1567/2012/}
+  \end{APACrefURL}
+\newblock
+\begin{APACrefDOI} \doi{10.5194/angeo-30-1567-2012} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Lee%
+\ \protect \BOthers {.}}{%
+Lee%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2005}}%
+}]{%
+Lee2005}
+\APACinsertmetastar {%
+Lee2005}%
+\begin{APACrefauthors}%
+Lee, J\BHBI J.%
+, Parks, G\BPBI K.%
+, Min, K\BPBI W.%
+, Kim, H\BPBI J.%
+, Park, J.%
+, Hwang, J.%
+\BDBL {}Park, H\BPBI Y.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2005}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Energy spectra of 170-360 {keV} electron microbursts
+  measured by the Korean {STSAT-1}} {Energy spectra of 170-360 {keV} electron
+  microbursts measured by the korean {STSAT-1}}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Geophysical Research Letters}{32}{13}{}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1029/2005GL022996}
+  \end{APACrefURL}
+\newblock
+\APACrefnote{L13106}
+\newblock
+\begin{APACrefDOI} \doi{10.1029/2005GL022996} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Lorentzen%
+, Blake%
+, Inan%
+\BCBL {}\ \BBA {} Bortnik%
+}{%
+Lorentzen%
+, Blake%
+\BCBL {}\ \protect \BOthers {.}}{%
+{\protect \APACyear {2001}}%
+}]{%
+Lorentzen2001a}
+\APACinsertmetastar {%
+Lorentzen2001a}%
+\begin{APACrefauthors}%
+Lorentzen, K\BPBI R.%
+, Blake, J\BPBI B.%
+, Inan, U\BPBI S.%
+\BCBL {}\ \BBA {} Bortnik, J.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2001}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Observations of relativistic electron microbursts in
+  association with {VLF} chorus} {Observations of relativistic electron
+  microbursts in association with {VLF} chorus}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{106}{A4}{6017--6027}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1029/2000JA003018}
+  \end{APACrefURL}
+\newblock
+\begin{APACrefDOI} \doi{10.1029/2000JA003018} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Lorentzen%
+, Looper%
+\BCBL {}\ \BBA {} Blake%
+}{%
+Lorentzen%
+, Looper%
+\BCBL {}\ \BBA {} Blake%
+}{%
+{\protect \APACyear {2001}}%
+}]{%
+Lorentzen2001b}
+\APACinsertmetastar {%
+Lorentzen2001b}%
+\begin{APACrefauthors}%
+Lorentzen, K\BPBI R.%
+, Looper, M\BPBI D.%
+\BCBL {}\ \BBA {} Blake, J\BPBI B.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2001}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Relativistic electron microbursts during the {GEM}
+  storms} {Relativistic electron microbursts during the {GEM} storms}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Geophysical Research Letters}{28}{13}{2573--2576}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1029/2001GL012926}
+  \end{APACrefURL}
+\newblock
+\begin{APACrefDOI} \doi{10.1029/2001GL012926} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Meredith%
+\ \protect \BOthers {.}}{%
+Meredith%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2002}}%
+}]{%
+Meredith2002}
+\APACinsertmetastar {%
+Meredith2002}%
+\begin{APACrefauthors}%
+Meredith, N.%
+, Horne, R.%
+, Summers, D.%
+, Thorne, R.%
+, Iles, R.%
+, Heynderickx, D.%
+\BCBL {}\ \BBA {} Anderson, R.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2002}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Evidence for acceleration of outer zone electrons to
+  relativistic energies by whistler mode chorus} {Evidence for acceleration of
+  outer zone electrons to relativistic energies by whistler mode
+  chorus}.{\BBCQ}
+\newblock
+\BIn{} \APACrefbtitle {Annales Geophysicae} {Annales geophysicae}\ (\BVOL~20,
+  \BPGS\ 967--979).
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Millan%
+\ \BBA {} Thorne%
+}{%
+Millan%
+\ \BBA {} Thorne%
+}{%
+{\protect \APACyear {2007}}%
+}]{%
+Millan2007}
+\APACinsertmetastar {%
+Millan2007}%
+\begin{APACrefauthors}%
+Millan, R.%
+\BCBT {}\ \BBA {} Thorne, R.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2007}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Review of radiation belt relativistic electron losses}
+  {Review of radiation belt relativistic electron losses}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Atmospheric and Solar-Terrestrial
+  Physics}{69}{3}{362 - 377}.
+\newblock
+\begin{APACrefURL}
+  \url{//www.sciencedirect.com/science/article/pii/S1364682606002768}
+  \end{APACrefURL}
+\newblock
+\begin{APACrefDOI} \doi{http://dx.doi.org/10.1016/j.jastp.2006.06.019}
+  \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Mozer%
+, Agapitov%
+, Blake%
+\BCBL {}\ \BBA {} Vasko%
+}{%
+Mozer%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2018}}%
+}]{%
+Mozer2018}
+\APACinsertmetastar {%
+Mozer2018}%
+\begin{APACrefauthors}%
+Mozer, F\BPBI S.%
+, Agapitov, O\BPBI V.%
+, Blake, J\BPBI B.%
+\BCBL {}\ \BBA {} Vasko, I\BPBI Y.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2018}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {SIMULTANEOUS OBSERVATIONS OF LOWER BAND CHORUS EMISSIONS
+  AT THE EQUATOR AND MICROBURST PRECIPITATING ELECTRONS IN THE IONOSPHERE}
+  {Simultaneous observations of lower band chorus emissions at the equator and
+  microburst precipitating electrons in the ionosphere}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Geophysical Research Letters}{}{}{}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1002/2017GL076120}
+  \end{APACrefURL}
+\newblock
+\begin{APACrefDOI} \doi{10.1002/2017GL076120} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+O'Brien%
+, Looper%
+\BCBL {}\ \BBA {} Blake%
+}{%
+O'Brien%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2004}}%
+}]{%
+O'Brien2004}
+\APACinsertmetastar {%
+O'Brien2004}%
+\begin{APACrefauthors}%
+O'Brien, T\BPBI P.%
+, Looper, M\BPBI D.%
+\BCBL {}\ \BBA {} Blake, J\BPBI B.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2004}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Quantification of relativistic electron microburst
+  losses during the {GEM} storms} {Quantification of relativistic electron
+  microburst losses during the {GEM} storms}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Geophysical Research Letters}{31}{4}{}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1029/2003GL018621}
+  \end{APACrefURL}
+\newblock
+\APACrefnote{L04802}
+\newblock
+\begin{APACrefDOI} \doi{10.1029/2003GL018621} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+O'Brien%
+\ \protect \BOthers {.}}{%
+O'Brien%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2003}}%
+}]{%
+O'Brien2003}
+\APACinsertmetastar {%
+O'Brien2003}%
+\begin{APACrefauthors}%
+O'Brien, T\BPBI P.%
+, Lorentzen, K\BPBI R.%
+, Mann, I\BPBI R.%
+, Meredith, N\BPBI P.%
+, Blake, J\BPBI B.%
+, Fennell, J\BPBI F.%
+\BDBL {}Anderson, R\BPBI R.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2003}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {{Energization of relativistic electrons in the presence
+  of ULF power and MeV microbursts: Evidence for dual ULF and VLF
+  acceleration}} {{Energization of relativistic electrons in the presence of
+  ULF power and MeV microbursts: Evidence for dual ULF and VLF
+  acceleration}}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{108}{A8}{}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1029/2002JA009784}
+  \end{APACrefURL}
+\newblock
+\begin{APACrefDOI} \doi{10.1029/2002JA009784} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Parks%
+}{%
+Parks%
+}{%
+{\protect \APACyear {1967}}%
+}]{%
+Parks1967}
+\APACinsertmetastar {%
+Parks1967}%
+\begin{APACrefauthors}%
+Parks, G\BPBI K.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1967}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Spatial characteristics of auroral-zone {X-ray}
+  microbursts} {Spatial characteristics of auroral-zone {X-ray}
+  microbursts}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research}{72}{1}{215--226}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Thorne%
+, O'Brien%
+, Shprits%
+, Summers%
+\BCBL {}\ \BBA {} Horne%
+}{%
+Thorne%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2005}}%
+}]{%
+Thorne2005}
+\APACinsertmetastar {%
+Thorne2005}%
+\begin{APACrefauthors}%
+Thorne, R\BPBI M.%
+, O'Brien, T\BPBI P.%
+, Shprits, Y\BPBI Y.%
+, Summers, D.%
+\BCBL {}\ \BBA {} Horne, R\BPBI B.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2005}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Timescale for {MeV} electron microburst loss during
+  geomagnetic storms} {Timescale for {MeV} electron microburst loss during
+  geomagnetic storms}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{110}{A9}{}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1029/2004JA010882}
+  \end{APACrefURL}
+\newblock
+\APACrefnote{A09202}
+\newblock
+\begin{APACrefDOI} \doi{10.1029/2004JA010882} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Van~Allen%
+}{%
+Van~Allen%
+}{%
+{\protect \APACyear {1959}}%
+}]{%
+Allen1959}
+\APACinsertmetastar {%
+Allen1959}%
+\begin{APACrefauthors}%
+Van~Allen, J\BPBI A.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1959}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {The geomagnetically trapped corpuscular radiation} {The
+  geomagnetically trapped corpuscular radiation}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research}{64}{11}{1683--1689}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1029/JZ064i011p01683}
+  \end{APACrefURL}
+\newblock
+\begin{APACrefDOI} \doi{10.1029/JZ064i011p01683} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Vernov%
+\ \BBA {} Chudakov%
+}{%
+Vernov%
+\ \BBA {} Chudakov%
+}{%
+{\protect \APACyear {1960}}%
+}]{%
+Vernov1960}
+\APACinsertmetastar {%
+Vernov1960}%
+\begin{APACrefauthors}%
+Vernov, S.%
+\BCBT {}\ \BBA {} Chudakov, A.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1960}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Investigation of radiation in outer space}
+  {Investigation of radiation in outer space}.{\BBCQ}
+\newblock
+\BIn{} \APACrefbtitle {International Cosmic Ray Conference} {International
+  cosmic ray conference}\ (\BVOL~3, \BPG~19).
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Woodger%
+\ \protect \BOthers {.}}{%
+Woodger%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2015}}%
+}]{%
+Woodger2015}
+\APACinsertmetastar {%
+Woodger2015}%
+\begin{APACrefauthors}%
+Woodger, L.%
+, Halford, A.%
+, Millan, R.%
+, McCarthy, M.%
+, Smith, D.%
+, Bowers, G.%
+\BDBL {}Liang, X.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2015}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {A summary of the {BARREL} campaigns: Technique for
+  studying electron precipitation} {A summary of the {BARREL} campaigns:
+  Technique for studying electron precipitation}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{120}{6}{4922--4935}.
+\PrintBackRefs{\CurrentBib}
+
+\end{thebibliography}

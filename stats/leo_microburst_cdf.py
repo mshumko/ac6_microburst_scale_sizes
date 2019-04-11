@@ -117,7 +117,7 @@ class Microburst_CDF:
         ax[0].set_xlim(left=0, right=90)
         ax[0].set_ylim(bottom=0)
         ax[1].set_ylim(bottom=0)
-        ax[0].set_ylabel('Microburst fraction')
+        ax[0].set_ylabel('Fraction of Microbursts Larger')
         ax[1].set_ylabel('Microburst PD')
         ax[2].set_xlabel('Separation [km]')
         ax[2].set_ylabel(r'Samples x $10^4$')

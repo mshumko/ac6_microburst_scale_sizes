@@ -195,39 +195,35 @@ A physical phenomena that can influence our results are narrow spatial structure
 When the two spacecraft were as little as a few kilometers apart it is very difficult to distinguish between temporal features such as microbursts from spatial features such as curtains. Since the prevalence of curtains is independent of the spacecraft separation, this will effectively reduce the number of microbursts observed at very small separations. No attempt has been made to remove this bias.
 
 \subsection{Microburst Size Distribution in LEO and Magnetic Equator}
-When AC6 observes a coincident microburst at a separation $d$, the microburst’s size must be greater than $d$. This idea is similar to \citeA{Joy2002} who investigated the most probable Jovian bow shock and magnetopause standoff distances. Following Joy’s argument, the fraction of coincident microbursts observed above a distance d is microburst cumulative distribution for the following reason.  If P(A) is the cumulative probability that a microburst is larger than $d$ and P(B) is the probability that AC6 is separated by $d$, then the fraction of microbursts observed at d is the conditional probability $P(A \ \vert \ B)$. Using Bayes’ theorem, 
+When AC6 observes a coincident microburst at a separation $d$, the microburst’s size must be greater than $d$. This idea is similar to \citeA{Joy2002} who investigated the most probable Jovian bow shock and magnetopause standoff distances. Following Joy’s argument, the fraction of coincident microbursts observed above a distance d is microburst complementary cumulative distribution $F(d)$.  If P(A) is the probability that a microburst is larger than $d$ and P(B) is the probability that AC6 is separated by $d$, then the fraction of microbursts observed at d is the conditional probability $P(A \ \vert \ B)$. Using Bayes’ theorem, 
 \begin{equation}
 P(A \ \vert \ B) = \frac{P(A \ \& \ B)}{P(B)}
 \end{equation}
 
-
 Where $P(A \ \& \ B)$ is the joint probability. Since the AC6 separation is independent of microburst size, $P(A \ \& \ B) = P(A)P(B)$. Hence
 
 \begin{equation}
-P(A \ \vert \ B) = \frac{P(A)P(B)}{P(B)} = P(A).
-\end{equation}
-
-The microburst cumulative probability is then calculated by
+P(A \ \vert \ B) = \frac{P(A)P(B)}{P(B)} = P(A)
+\end{equation} and
 
 \begin{equation}
-f(d) = \frac{N(d)}{N(0)}
+F(d) = \frac{N(d)}{N(0)}
 \end{equation} where $N(d)$ is the number of microbursts observed by AC6 above separation $d$ and is defined as
 
 \begin{equation}
 N(d) = \sum_{\mathrm{bins > d}} n_{bin} \frac{S_{max}}{S_{bin}}
-\end{equation} where $n_{bin}$ is the number of coincident microbursts detected in that bin. The normalization term $S_{max}/S_{bin}$ is a ratio of the number of samples observed in the most sampled bin to the number of samples in the current bin. This normalization factor corrects for AC6's non-uniform sampling in separation. With this normalization, $f(d)$ can be interpreted as the fraction of microbursts observed above $d$ assuming AC6 sampled evenly in separation.
+\end{equation} where $n_{bin}$ is the number of microbursts detected by both AC6 units in that bin. The normalization term $S_{max}/S_{bin}$ is a ratio of the number of samples observed in the most sampled bin to the number of samples in the current bin. This normalization factor corrects for AC6's non-uniform sampling in separation. With this normalization, $F(d)$ can be interpreted as the fraction of microbursts observed above $d$ assuming AC6 sampled evenly in separation. Microburst $F(d)$ in LEO is shown by the black curve in Fig. 3a for the entire radiation belt ($4 < \mathrm{L}< 8$) and split into one L-wide bins with the colored curves. The overall trend consists of a sudden cumulative probability drop off, followed by a shoulder up to about 70 km where the cumulative distribution drops to zero. The shaded region around the black curve shows the standard error due to counting statistics. Figure \ref{fig3}b shows the microburst probability density derived numerically from $F(d)$ and shows a peak at $d < 20 $ km as well as another less-defined peak between 70-80 km. \textcolor{red}{Discuss how other bin widths and offsets and change these results.}
 
-The microburst cumulative distribution in LEO is shown by the black curve in Fig. 3a for the entire radiation belt ($4 < \mathrm{L}< 8$) and split into one L-wide bins with the colored curves. The overall trend consists of a sudden cumulative probability drop off, followed by a shoulder up to around 70 km where the cumulative distribution drops to zero. The shaded region around the black curve shows the standard error due to counting statistics. The cumulative distribution trends can be interpreted as 
-	
 \begin{figure}
 \includegraphics[width=\textwidth]{fig3.png}
-\caption{Microbrust scale size distribution in LEO. Panel (a) shows the microburst cumulative distribution as a function of spacecraft separation. Panel (b) shows the microburst probability density as a function of separation. Lastly, panel (c) shows the number of simultaneous samples AC6 observed as a function of separation. The colored lines show the distributions broken up by L, and the thick black line shows the overall cumulative distribution in the radiation belt ($4 < L < 8$). The gray shading shows the uncertainty due to counting statistics. The cumulative distribution at separation $d$ can be interpreted as the fraction of microbursts observed above $d$.}
+\caption{Microbrust scale size distribution in LEO. Panel (a) shows the microburst complementary cumulative distribution as a function of spacecraft separation. The complementary cumulative distribution at separation $d$ can be interpreted as the fraction of microbursts observed above $d$. Panel (b) shows the microburst probability density as a function of separation. Lastly, panel (c) shows the number of simultaneous samples AC6 observed as a function of separation. The colored lines show the distributions broken up by L, and the thick black line shows the overall cumulative distribution in the radiation belt ($4 < L < 8$). The gray shading shows the uncertainty due to counting statistics.}
 \label{fig3}
 \end{figure}
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig4.png}
-\caption{Microbrust scale size distribution mapped to the magnetic equator.} \label{fig4}
+\caption{Microbrust scale size distribution in the same format as Fig. \ref{fig3} and mapped to the magnetic equator.} 
+\label{fig4}
 \end{figure}
 
 \section{Discussion and Conclusions}

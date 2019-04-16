@@ -285,13 +285,18 @@ class Equatorial_Hist(Hist1D):
 
 if __name__ == '__main__':
     ### SCRIPT TO MAKE "Dst_Total" NORMALIZATION ###
-    import time
-    start_time = time.time()
-    # ss=Hist1D(d=np.arange(0, 501, 3), 
-    #             filterDict={'dos1rate':[0, 1E6], 'Lm_OPQ':[4, 8]})
-    # ss.loop_data()
-    # sDir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm'
-    # ss.save_data(os.path.join(sDir, 'ac6_norm_all_3km_bins.csv'))
+    #import time
+    #start_time = time.time()
+    ss=Hist1D(d=np.arange(0, 501, 10), 
+                filterDict={'dos1rate':[0, 1E6], 'Lm_OPQ':[4, 8]})
+    ss.loop_data()
+    sDir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm'
+    ss.save_data(os.path.join(sDir, 'ac6_norm_all_10km_bins.csv'))
+
+    ss2=Hist1D(d=np.arange(0, 501, 20), 
+                filterDict={'dos1rate':[0, 1E6], 'Lm_OPQ':[4, 8]})
+    ss2.loop_data()
+    ss2.save_data(os.path.join(sDir, 'ac6_norm_all_20km_bins.csv'))
     
     # bin_width = 5
     # bin_offset = 0

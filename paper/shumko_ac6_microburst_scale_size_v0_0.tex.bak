@@ -240,7 +240,11 @@ TO-DO
 \textcolor{blue}{
 TO-DO
 \begin{itemize}
-\item 
+\item Get error bars in the data CDF by taking random trials and randomly remove events that can be randomly coincident. This will give us the error bars.
+\item Talk about the brute force MC model.
+\item Show a LEO CDF model assuming a fixed-sized microburst population.
+\item Decide if I should show a two-fixed-sized microburst population or a microburst CDF.
+\item Show the residuals in the plots.
 \end{itemize}
 }
 
@@ -252,20 +256,11 @@ TO-DO
 \item Discuss the secondary peak.
 \item Talk about how these sizes fit in with prior work and how they can be used to estimate microburst loss rates.
 \item Maybe add a plot with Oleksiy's data?
-\item Use the wave data to interpret the equatorial scale size distri
+\item Use the wave data to interpret the equatorial scale size distribution. Is the < 200 km peak due to high amplitude waves, or is it just that waves are most common at those scales?
 \end{itemize}
 }
 
 \section{Conclusions}
-\begin{enumerate}
-\item Relate the LEO scale sizes to prior work
-\item Compare the equatorial scale size to Oleksiy’s and Santolik’s work. Need to get Oleksiy on board here.
-\end{enumerate}
-
-
-
-
-
 
 %%
 

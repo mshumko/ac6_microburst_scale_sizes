@@ -20,6 +20,26 @@ SAVE_PATH = ('/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
 CDF_DATA_PATH = ('/home/mike/research/ac6_microburst_scale_sizes'
             '/data/microburst_cdf_pdf_norm_v3.csv')
 
+# Define the analytic models.
+def A(r, d): 
+    """ 
+    Calculates the intersecting area between two cirlces from the 
+    analytic_coincident_microburst_scale_size_bounds.svg file.
+
+    Derivation: http://mathworld.wolfram.com/Circle-CircleIntersection.html
+    """
+    return 2*r**2*np.arccos(d/(2*r)) - d/2*np.sqrt(4*r**2 - d**2)
+
+def F(r, d):
+    """ 
+    Wrapper for A(r, d). Thus function calculates the fraction of coincident 
+    microbursts observed at separation array values d. The cdf valie is 1 at 
+    d[0] and monotonically approaches 0.
+    """
+    cdf = np.array([np.nansum(A(r, d[i:]))/np.nansum(A(r, d)) 
+                    for i in range(len(d))])
+    return cdf 
+
 def distance(x1, y1, x2, y2):
     return np.sqrt((x2-x1)**2 + (y2-y1)**2)
 

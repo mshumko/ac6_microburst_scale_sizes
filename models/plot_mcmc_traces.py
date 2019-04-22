@@ -9,7 +9,7 @@ import pandas as pd
 import mcmc_models
 
 TRACE_DIR = '/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
-TRACE_NAMES = ['analytic_trace_single_r.csv', 'mc_trace_single_r.csv', 'mc_trace_two_r.csv']
+TRACE_NAMES = ['analytic_trace_single_r.csv', 'mc_trace_single_r.csv'] #'mc_trace_two_r.csv']
 CDF_DATA_PATH = ('/home/mike/research/ac6_microburst_scale_sizes'
             '/data/microburst_cdf_pdf_norm_v3.csv')
 
@@ -49,11 +49,11 @@ for i in trace_stats[0].to_numpy():
 for i in trace_stats[1].to_numpy():
     ax[1, 1].plot(SIZE_BINS, mcmc_models.mc_brute_force(i[0], bins=SIZE_BINS))
 
-for row in trace_stats[2].iterrows():
-    cdf = (row[1].a*mcmc_models.mc_brute_force(row[1].r0, bins=SIZE_BINS) + 
-          (1-row[1].a)*mcmc_models.mc_brute_force(row[1].r1, bins=SIZE_BINS))
-    ax[2, 1].plot(SIZE_BINS, cdf)
-    # row[1].r0
+#for row in trace_stats[2].iterrows():
+#    cdf = (row[1].a*mcmc_models.mc_brute_force(row[1].r0, bins=SIZE_BINS) + 
+#          (1-row[1].a)*mcmc_models.mc_brute_force(row[1].r1, bins=SIZE_BINS))
+#    ax[2, 1].plot(SIZE_BINS, cdf)
+#    # row[1].r0
 
 plt.tight_layout()
 plt.show()

@@ -114,7 +114,7 @@ if __name__ == '__main__':
     # Initial guess on the microburst size.
     start = [prior_i.rvs() for prior_i in prior]
     # How much to jump. Assuming a N(mu, sigma) proposal, ~60% of the time the next proposed jump will be less than proposal_jump km away.
-    proposal_jump = [0.1, 2, 2]
+    proposal_jump = [0.05, 2, 2]
 
     def proposal(p, proposal_jump=proposal_jump):
         new_vals = [scipy.stats.norm(loc=p_i, scale=jump_i).rvs() 
@@ -131,9 +131,9 @@ if __name__ == '__main__':
     target = lambda p: Likelihood(p, cdf_data['Separation [km]'], 
                                 cdf_data['CDF'])*np.prod(
                                 [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])
-    niter = 100
+    niter = 1000
     trace = metroplis(start, target, proposal, niter, 
-                            nburn=10, thin=1, verbose=False)
+                            nburn=100, thin=1, verbose=False)
     # Save data
     df = pd.DataFrame(data=trace, columns=['a', 'r0', 'r1'])
     df.to_csv(SAVE_PATH, index=False)

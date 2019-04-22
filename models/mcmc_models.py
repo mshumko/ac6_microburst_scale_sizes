@@ -98,41 +98,42 @@ def Likelihood(p, x, y):
     return np.exp(-0.5*args/np.var(y))/C
 
 
-if os.path.exists(SAVE_PATH):
-    raise ValueError('Data already saved. Use a different savePath. Aborting.')
+if __name__ == '__main__':
+    if os.path.exists(SAVE_PATH):
+        raise ValueError('Data already saved. Use a different savePath. Aborting.')
 
-# Load the CDF data to model
-cdf_data = pd.read_csv(CDF_DATA_PATH)
-    
-# Specify priors for the one fixed-sized microburst model.
-# Two parameter model. First parameter is the mixing term, and second and third 
-# parameters are the two microburst sizes.
-prior = [scipy.stats.uniform(0, 1), 
-         scipy.stats.uniform(0, 100), 
-         scipy.stats.uniform(0, 100)]
-# Initial guess on the microburst size.
-start = [prior_i.rvs() for prior_i in prior]
-# How much to jump. Assuming a N(mu, sigma) proposal, ~60% of the time the next proposed jump will be less than proposal_jump km away.
-proposal_jump = [0.1, 2, 2]
+    # Load the CDF data to model
+    cdf_data = pd.read_csv(CDF_DATA_PATH)
+        
+    # Specify priors for the one fixed-sized microburst model.
+    # Two parameter model. First parameter is the mixing term, and second and third 
+    # parameters are the two microburst sizes.
+    prior = [scipy.stats.uniform(0, 1), 
+            scipy.stats.uniform(0, 100), 
+            scipy.stats.uniform(0, 100)]
+    # Initial guess on the microburst size.
+    start = [prior_i.rvs() for prior_i in prior]
+    # How much to jump. Assuming a N(mu, sigma) proposal, ~60% of the time the next proposed jump will be less than proposal_jump km away.
+    proposal_jump = [0.1, 2, 2]
 
-def proposal(p, proposal_jump=proposal_jump):
-    new_vals = [scipy.stats.norm(loc=p_i, scale=jump_i).rvs() 
-                      for p_i, jump_i in zip(p, proposal_jump)]
-    # If the mixing term is not between 0 and 1, force it to 1 or 0.                  
-    if new_vals[0] > 1:
-        new_vals[0] = 1
-    elif new_vals[0] < 0:
-        new_vals[0] = 0
-    return new_vals
+    def proposal(p, proposal_jump=proposal_jump):
+        new_vals = [scipy.stats.norm(loc=p_i, scale=jump_i).rvs() 
+                        for p_i, jump_i in zip(p, proposal_jump)]
+        # If the mixing term is not between 0 and 1, force it to 1 or 0.                  
+        if new_vals[0] > 1:
+            new_vals[0] = 1
+        elif new_vals[0] < 0:
+            new_vals[0] = 0
+        return new_vals
 
-# The target function. If probability is higher, take the new value given from proposal. Else do the Metroplis thing where you draw a random number between 
-# 0 and 1 and compare to the target value (which will be less than 1).
-target = lambda p: Likelihood(p, cdf_data['Separation [km]'], 
-                              cdf_data['CDF'])*np.prod(
-                              [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])
-niter = 100
-trace = metroplis(start, target, proposal, niter, 
-                        nburn=10, thin=1, verbose=False)
-# Save data
-df = pd.DataFrame(data=trace, columns=['a', 'r0', 'r1'])
-df.to_csv(SAVE_PATH, index=False)
+    # The target function. If probability is higher, take the new value given from proposal. Else do the Metroplis thing where you draw a random number between 
+    # 0 and 1 and compare to the target value (which will be less than 1).
+    target = lambda p: Likelihood(p, cdf_data['Separation [km]'], 
+                                cdf_data['CDF'])*np.prod(
+                                [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])
+    niter = 100
+    trace = metroplis(start, target, proposal, niter, 
+                            nburn=10, thin=1, verbose=False)
+    # Save data
+    df = pd.DataFrame(data=trace, columns=['a', 'r0', 'r1'])
+    df.to_csv(SAVE_PATH, index=False)

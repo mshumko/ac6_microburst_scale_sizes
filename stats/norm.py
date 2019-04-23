@@ -287,16 +287,12 @@ if __name__ == '__main__':
     ### SCRIPT TO MAKE "Dst_Total" NORMALIZATION ###
     #import time
     #start_time = time.time()
-    ss=Hist1D(d=np.arange(0, 501, 10), 
-                filterDict={'dos1rate':[0, 1E6], 'Lm_OPQ':[4, 8]})
-    ss.loop_data()
+    s=Hist1D(d=np.arange(0, 501, 1), 
+                filterDict={'dos1rate':[0, 1E6], 
+                            'Lm_OPQ':[4, 8]})
+    s.loop_data()
     sDir = '/home/mike/research/ac6_microburst_scale_sizes/data/norm'
-    ss.save_data(os.path.join(sDir, 'ac6_norm_all_10km_bins.csv'))
-
-    ss2=Hist1D(d=np.arange(0, 501, 20), 
-                filterDict={'dos1rate':[0, 1E6], 'Lm_OPQ':[4, 8]})
-    ss2.loop_data()
-    ss2.save_data(os.path.join(sDir, 'ac6_norm_all_20km_bins.csv'))
+    s.save_data(os.path.join(sDir, 'ac6_norm_all_1km_bins.csv'))
     
     # bin_width = 5
     # bin_offset = 0
@@ -344,11 +340,11 @@ if __name__ == '__main__':
 #                 os.path.join(sDir, 'ac6_MLT_lon_norm_2.csv'))
 
     ### SCRIPT TO FIND THE EQUATORIAL NORMALIZATION ###
-    eq = Equatorial_Hist(np.arange(0, 2000, 25), 'Lm_OPQ', np.arange(4, 8.1),
-                        filterDict={'dos1rate':[0, 1E6]})
-                        # startDate=datetime(2015, 5, 26)
-    eq.loop_data()
-    eq.save_data('equatorial_test_norm.csv')
+#    eq = Equatorial_Hist(np.arange(0, 2000, 25), 'Lm_OPQ', np.arange(4, 8.1),
+#                        filterDict={'dos1rate':[0, 1E6]})
+#                        # startDate=datetime(2015, 5, 26)
+#    eq.loop_data()
+#    eq.save_data('equatorial_test_norm.csv')
 
-    #eq.loop_data()
-    print(f'Run time = {time.time()-start_time} s')
+#    #eq.loop_data()
+#    print(f'Run time = {time.time()-start_time} s')

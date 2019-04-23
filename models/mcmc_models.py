@@ -43,7 +43,7 @@ def F(r, d):
 def distance(x1, y1, x2, y2):
     return np.sqrt((x2-x1)**2 + (y2-y1)**2)
 
-def mc_brute_force(r, n_bursts=int(1E5), bins=np.arange(0, 100, 5)):
+def mc_brute_force(d, n_bursts=int(1E5), bins=np.arange(0, 100, 5)):
     """ 
     Brute force MC method that is computationally slow
     but should be the closest to reality.
@@ -51,8 +51,8 @@ def mc_brute_force(r, n_bursts=int(1E5), bins=np.arange(0, 100, 5)):
     N = np.zeros_like(bins)
     
     # If supplied a single valued radius r.
-    if not hasattr(r, '__len__'):
-        r = r*np.ones(n_bursts)
+    if not hasattr(d, '__len__'):
+        d = d*np.ones(n_bursts)
     
     for i, bin_i in enumerate(bins):
         # Generate n_bursts number of microbursts randomly scattered in a grid
@@ -62,8 +62,8 @@ def mc_brute_force(r, n_bursts=int(1E5), bins=np.arange(0, 100, 5)):
         
         # Now loop over the bursts and tally up the number of microbursts 
         # observed by hypothetical spacercaft at (0, 0) and (0, bin_i).
-        for bx, by, br in zip(burst_x, burst_y, r):
-            if (distance(bx, by, 0, 0) <= br) and (distance(bx, by, 0, bin_i) <= br): 
+        for bx, by, bd in zip(burst_x, burst_y, d):
+            if (distance(bx, by, 0, 0) <= bd/2) and (distance(bx, by, 0, bin_i) <= bd/2): 
                 N[i] += 1
     total_N = np.sum(N)
     cdf = np.array([np.sum(N[i:])/total_N for i in range(len(bins))])

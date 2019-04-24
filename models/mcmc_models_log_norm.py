@@ -28,7 +28,7 @@ prior = [scipy.stats.uniform(0, 100),
 start = [prior_i.rvs() for prior_i in prior]
 # How much to jump. Assuming a N(mu, sigma) proposal, ~60% of the time the 
 # next proposed jump will be less than proposal_jump km away.
-proposal_jump = [2, 1]
+proposal_jump = [5, 0.1]
 
 def proposal(p, proposal_jump=proposal_jump):
     new_vals = np.array([scipy.stats.norm(loc=p_i, scale=jump_i).rvs() 

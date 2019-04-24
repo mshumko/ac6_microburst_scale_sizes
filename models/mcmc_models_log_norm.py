@@ -31,9 +31,10 @@ start = [prior_i.rvs() for prior_i in prior]
 proposal_jump = [2, 1]
 
 def proposal(p, proposal_jump=proposal_jump):
-    new_vals = [scipy.stats.norm(loc=p_i, scale=jump_i).rvs() 
-                    for p_i, jump_i in zip(p, proposal_jump)]
-    # If the mixing term is not between 0 and 1, force it to 1 or 0.                  
+    new_vals = np.array([scipy.stats.norm(loc=p_i, scale=jump_i).rvs() 
+                        for p_i, jump_i in zip(p, proposal_jump)])
+    # If parameters are less than 0, force them to 0.    
+    new_vals[new_vals < 0] = 0              
     return new_vals
 
 def Likelihood(p, x, y):

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 import pandas as pd
 
-class Flase_Coincidence:
+class False_Coincidence:
     def __init__(self, coincident_name, microburst_a_name, microburst_b_name, save_path):
         """
         Given a dataset from input_path, calculate the random 

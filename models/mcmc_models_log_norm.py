@@ -14,8 +14,8 @@ SAVE_PATH = ('/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
 CDF_DATA_PATH = ('/home/mike/research/ac6_microburst_scale_sizes'
             '/data/microburst_cdf_pdf_norm_v3.csv')
 
-if os.path.exists(SAVE_PATH):
-        raise ValueError('Data already saved. Use a different savePath. Aborting.')
+# if os.path.exists(SAVE_PATH):
+#         raise ValueError('Data already saved. Use a different savePath. Aborting.')
 
 # Load the CDF data to model
 cdf_data = pd.read_csv(CDF_DATA_PATH)
@@ -51,7 +51,7 @@ def Likelihood(p, x, y):
 target = lambda p: Likelihood(p, cdf_data['Separation [km]'], 
                             cdf_data['CDF'])*np.prod(
                             [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])
-niter = 1000
+niter = 10000
 trace = mcmc_models.metroplis(start, target, proposal, niter, 
                         nburn=100, thin=1, verbose=False)
 # Save data

@@ -1,4 +1,4 @@
-# This program calculates the random microburst rate for coincident 
+# This program calculates the false microburst rate for coincident 
 # microbursts.
 
 import numpy as np
@@ -34,16 +34,16 @@ class Random_Coincidence:
         mean occurance rate of microbursts in time_intergration_seconds time 
         span around that microburst time.
         """
-        # self.coincident_microbursts['random_rate'] = self._get_rate(
-        #     self.coincident_microbursts.index, microburst_width_seconds,
-        #     time_range_seconds)
-        # self.coincident_microbursts['random_rate'] = self.coincident_microbursts.apply(
-        #     self._get_rate(microburst_width_seconds, time_range_seconds))
-        self.coincident_microbursts['random_rate'] = np.nan
+        self.coincident_microbursts['false_rate'] = np.nan
         # Probably a better way to do this...
         for index in self.coincident_microbursts.index:
-            self.coincident_microbursts['random_rate'].loc[index] = self._get_rate(
+            self.coincident_microbursts['false_rate'].loc[index] = self._get_rate(
                 index, microburst_width_seconds, time_intergration_seconds)
+        return
+
+    def save_catalog(self):
+        """ Saves the coincident microburst dataframe to a csv file. """
+        self.coincident_microbursts.to_csv(self.save_path)
         return
 
     def _load_catalog(self, path):
@@ -82,8 +82,9 @@ if __name__ == '__main__':
     r = Random_Coincidence(coincident_name, microburst_a_name, 
                             microburst_b_name, save_path)
     r.loop()
+    r.save_catalog()
 
-    plt.hist(r.coincident_microbursts.random_rate*100, bins=np.linspace(0, 15, num=25))
+    plt.hist(r.coincident_microbursts.false_rate*100, bins=np.linspace(0, 15, num=25))
     plt.title('AC6 microburst false coincidence rate\n'
              'microburst_width = 0.5 s | integration_width = 60 s')
     plt.xlabel('Rate [%]')

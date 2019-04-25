@@ -28,10 +28,10 @@ class Random_Coincidence:
         self.save_path = save_path
         return
 
-    def loop(self, microburst_width_seconds=0.5, time_range_seconds=60):
+    def loop(self, microburst_width_seconds=0.5, time_intergration_seconds=60):
         """ 
         Loops through the coincident microbursts and calculates the 
-        mean occurance rate of microbursts in time_range_seconds time 
+        mean occurance rate of microbursts in time_intergration_seconds time 
         span around that microburst time.
         """
         # self.coincident_microbursts['random_rate'] = self._get_rate(
@@ -40,10 +40,10 @@ class Random_Coincidence:
         # self.coincident_microbursts['random_rate'] = self.coincident_microbursts.apply(
         #     self._get_rate(microburst_width_seconds, time_range_seconds))
         self.coincident_microbursts['random_rate'] = np.nan
-        for index, row in self.coincident_microbursts.iterrows():
+        # Probably a better way to do this...
+        for index in self.coincident_microbursts.index:
             self.coincident_microbursts['random_rate'].loc[index] = self._get_rate(
-                index, microburst_width_seconds, time_range_seconds)
-        #self.coincident_microbursts['random_rate']
+                index, microburst_width_seconds, time_intergration_seconds)
         return
 
     def _load_catalog(self, path):
@@ -52,20 +52,22 @@ class Random_Coincidence:
         catalog.index = pd.to_datetime(catalog.index)
         return catalog
 
-    def _get_rate(self, t0, microburst_width_seconds, time_range_seconds):
+    def _get_rate(self, t0, microburst_width_seconds, time_intergration_seconds):
         """ 
         Helper function to calculate the mean microburst occurance centered 
         on time t0 and full range time_range_seconds. Microbursts are assumed
         to all be the same width of microburst_width_seconds
         """
-        dt = pd.Timedelta(seconds=time_range_seconds/2)
+        dt = pd.Timedelta(seconds=time_intergration_seconds/2)
         # Find all microbursts in AC6-A and AC6-B data in the time range.
         bursts_a = self.microbursts_a.loc[t0-dt:t0+dt]
         bursts_b = self.microbursts_b.loc[t0-dt:t0+dt]
         # Take the mean number of microbursts and calculate the microburst rate.
-        mean_number_bursts_interval = (bursts_a.shape[0] + bursts_b.shape[0])/2
-        rate = microburst_width_seconds*mean_number_bursts_interval/time_range_seconds
-        return rate
+        # mean_number_bursts_interval = (bursts_a.shape[0] + bursts_b.shape[0])/2
+        # rate = microburst_width_seconds*mean_number_bursts_interval/time_intergration_seconds
+        weight = (microburst_width_seconds/time_intergration_seconds)**2
+        false_rate = bursts_a.shape[0]*bursts_b.shape[0]*weight
+        return false_rate
 
 if __name__ == '__main__':
     coincident_name = 'AC6_coincident_microbursts_sorted_v6.txt'
@@ -81,8 +83,9 @@ if __name__ == '__main__':
                             microburst_b_name, save_path)
     r.loop()
 
-    plt.hist(r.coincident_microbursts.random_rate*100)
-    plt.title('AC6 mean microburst rate | microburst_width = 0.5 s\nintegration_width = 60 s')
+    plt.hist(r.coincident_microbursts.random_rate*100, bins=np.linspace(0, 15, num=25))
+    plt.title('AC6 microburst false coincidence rate\n'
+             'microburst_width = 0.5 s | integration_width = 60 s')
     plt.xlabel('Rate [%]')
     plt.ylabel('Number of Microbursts')
     plt.show()

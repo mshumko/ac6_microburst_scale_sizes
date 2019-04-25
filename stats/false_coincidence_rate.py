@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 import pandas as pd
 
-class Random_Coincidence:
+class Flase_Coincidence:
     def __init__(self, coincident_name, microburst_a_name, microburst_b_name, save_path):
         """
         Given a dataset from input_path, calculate the random 
@@ -79,12 +79,12 @@ if __name__ == '__main__':
     save_name = 'AC6_coincident_microbursts_sorted_err_v6.txt'
     save_path = os.path.join(save_dir, save_name)
 
-    r = Random_Coincidence(coincident_name, microburst_a_name, 
+    f = False_Coincidence(coincident_name, microburst_a_name, 
                             microburst_b_name, save_path)
-    r.loop()
-    r.save_catalog()
+    f.loop()
+    f.save_catalog()
 
-    plt.hist(r.coincident_microbursts.false_rate*100, bins=np.linspace(0, 15, num=25))
+    plt.hist(f.coincident_microbursts.false_rate*100, bins=np.linspace(0, 15, num=25))
     plt.title('AC6 microburst false coincidence rate\n'
              'microburst_width = 0.5 s | integration_width = 60 s')
     plt.xlabel('Rate [%]')

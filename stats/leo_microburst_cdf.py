@@ -71,7 +71,7 @@ class Microburst_CDF:
         pdf_std = np.sqrt(cdf_std[1:]**2 + cdf_std[:-1]**2)/self.bin_width
         return cdf, pdf, cdf_std, pdf_std, filtered_catalog.shape[0]
 
-    def calc_cdf_pdf_resample(self, df, L_lower, L_upper, N_resample=int(1E5)):
+    def calc_cdf_pdf_resample(self, df, L_lower, L_upper, N_resample=int(100)):
         """
         This method calculates the pdf and cdf and errors from a dataframe
         and L shell filtering. The CDF and PDF curves are estimated in the 
@@ -104,9 +104,13 @@ class Microburst_CDF:
         cdf = np.mean(cdf_array, axis=1)
         pdf = np.mean(pdf_array, axis=1)
         # Calculate PDF and CDF standard deviations.
-        cdf_std = np.std(cdf_array, axis=1)
-        pdf_std = np.std(pdf_array, axis=1)
-        return cdf, pdf, cdf_std, pdf_std, filtered_catalog.shape[0]
+        # cdf_err = np.std(cdf_array, axis=1)
+        # pdf_err = np.std(pdf_array, axis=1)
+        # Calculate the 95% confidence intervals
+        cdf_err = np.percentile(cdf_array, [2.5, 97.5], axis=1)
+        pdf_err = np.percentile(pdf_array, [2.5, 97.5], axis=1)
+        print(cdf_err[1] - cdf_err[0])
+        return cdf, pdf, cdf_err, pdf_err, filtered_catalog.shape[0]
 
     def plot_cdf_pdf(self, L_array=[4, 5, 6, 7, 8], plot_all=True, err_mode='stats', plot_L=False):
         """ Plots the CDF and PDF values. """
@@ -122,21 +126,28 @@ class Microburst_CDF:
                 os.path.join(sample_file_dir, 'ac6_norm_all_cdf.csv')
                 )
             if err_mode == 'stats':
-                C, P, C_std, P_std, N = self.calc_cdf_pdf_stats(self.microburst_catalog, 
+                C, P, C_err, P_err, N = self.calc_cdf_pdf_stats(self.microburst_catalog, 
                                                         4, 8)
                 P = np.convolve(np.ones(n)/n, P, mode='same')
             else: 
-                C, P, C_std, P_std, N = self.calc_cdf_pdf_resample(self.microburst_catalog, 
+                C, P, C_err, P_err, N = self.calc_cdf_pdf_resample(self.microburst_catalog, 
                                                         4, 8)
                 P = np.convolve(np.ones(n)/n, P, mode='same')
-            ax[0].fill_between(self.sep_bins[:-1], C-C_std, C+C_std, facecolor='k', 
-                        alpha=0.5)
+
+            # If the errors are symmetric about the mean (standard deviation). 
+            if len(C_err.shape) == 1:
+                ax[0].fill_between(self.sep_bins[:-1], C-C_err, C+C_err, facecolor='k', 
+                                    alpha=0.5)
+                ax[1].fill_between(self.sep_bins[:-2], P-P_err, P+P_err, facecolor='k',
+                        label=f'4 < L < 8', lw=3, alpha=0.5)
+            else:
+                ax[0].fill_between(self.sep_bins[:-1], C_err[0], C_err[1], facecolor='k', 
+                                    alpha=0.5)
+                ax[1].fill_between(self.sep_bins[:-2], P_err[0], P_err[1], facecolor='k',
+                        label=f'4 < L < 8', lw=3, alpha=0.5)
+
             ax[0].plot(self.sep_bins[:-1], C, c='k', 
                         label=f'4 < L < 8 | N = {N}', lw=3, alpha=0.5)
-            # ax[1].errorbar(self.sep_bins[:-2], P, c='k',
-            #             label=f'4 < L < 8', lw=3)
-            ax[1].fill_between(self.sep_bins[:-2], P-P_std, P+P_std, facecolor='k',
-                        label=f'4 < L < 8', lw=3, alpha=0.5)
             ax[1].plot(self.sep_bins[:-2], P, c='k', lw=3)
             ax[2].plot(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c='k')
             

@@ -12,3 +12,4 @@ data/daily_microburst_catalogues/*
 */binned_counts/
 data/binned_counts_old/
 *.pyc
+.vscode/ipch/*

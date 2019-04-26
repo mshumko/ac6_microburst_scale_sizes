@@ -88,10 +88,10 @@ class Microburst_CDF:
         pdf_array = np.nan*np.ones((len(self.sep_bins), N_resample))
 
         for i in range(N_resample):
-            # Resample the catalog.
-            keep_indicies = np.random.choice(filtered_catalog.index, 
-                                                p=1-filtered_catalog.false_rate, 
-                                                replace=False)
+            # Resample the catalog by "flippiping" filtered_catalog.shape[0] number of "coins"
+            # one time to get a random sample of microbursts assuming a random false_rate.
+            random_flips = np.random.binomial(1, p=1-filtered_catalog.false_rate)
+            keep_indicies = filtered_catalog.index[random_flips != 0]
             # Apply the separation bins to the n_i function to get an array.
             n = np.array([self.n_i(bi, bf, filtered_catalog.loc[keep_indicies]) for bi, bf in 
                         zip(self.sep_bins[:-1], self.sep_bins[1:])]).flatten()
@@ -192,6 +192,6 @@ if __name__ == "__main__":
                         'AC6_coincident_microbursts_sorted'
                         f'_err_v{catalog_version}.txt')
     m = Microburst_CDF(catalog_version=None, catalog_path=catalog_path)
-    m.plot_cdf_pdf(err_mode='')
+    #m.plot_cdf_pdf(err_mode='')
     # m.save_data('/home/mike/research/ac6_microburst_scale_sizes/'
     #             'data/microburst_cdf_pdf_norm_v3.csv')

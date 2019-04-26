@@ -28,7 +28,7 @@ class Microburst_CDF:
         print(f'Number of microbursts {self.microburst_catalog.shape[0]}')
         return
 
-    def _load_sample_file_(self, path, sum_N=5, offset=0):
+    def _load_sample_file_(self, path, sum_N=5, offset=1):
         """
         Loads the samples vs. separation CSV file 
         """
@@ -182,7 +182,7 @@ class Microburst_CDF:
                 ax[2].plot(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c=c[i])
             
         ax[0].legend()
-        ax[0].set_xlim(left=0, right=90)
+        ax[0].set_xlim(left=0)#, right=90)
         ax[0].set_ylim(bottom=0)
         ax[1].set_ylim(bottom=0)
         ax[0].set_ylabel('Fraction of Microbursts Larger')

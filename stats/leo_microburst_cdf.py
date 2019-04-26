@@ -186,7 +186,7 @@ class Microburst_CDF:
         
     def save_data(self, path):
         """ Save the CDF/PDF data and errors to a csv file. """
-        C, P, C_std, P_std, N = self.calc_cdf_pdf(self.microburst_catalog, 
+        C, P, C_std, P_std, N = self.calc_cdf_pdf_stats(self.microburst_catalog, 
                                                     4, 8)
         df = pd.DataFrame(data=np.array([C[:-1], P, C_std[:-1], P_std]).T, 
                           columns=['CDF', 'PDF', 'CDF_std', 'PDF_std'], 
@@ -202,6 +202,6 @@ if __name__ == "__main__":
                         'AC6_coincident_microbursts_sorted'
                         f'_err_v{catalog_version}.txt')
     m = Microburst_CDF(catalog_version=None, catalog_path=catalog_path)
-    m.plot_cdf_pdf(err_mode='')
+    m.plot_cdf_pdf(err_mode='stats', plot_L=True)
     # m.save_data('/home/mike/research/ac6_microburst_scale_sizes/'
     #             'data/microburst_cdf_pdf_norm_v3.csv')

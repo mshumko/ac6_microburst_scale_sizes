@@ -28,11 +28,19 @@ class Microburst_CDF:
         print(f'Number of microbursts {self.microburst_catalog.shape[0]}')
         return
 
-    def _load_sample_file_(self, path):
+    def _load_sample_file_(self, path, sum_N=5, offset=0):
         """
         Loads the samples vs. separation CSV file 
         """
         self.samples = pd.read_csv(path, index_col=0)
+        if sum_N > 1 or offset != 0:
+            # Resample by taking the sum over sum_N elements and 
+            # shift index by offset.
+            self.samples = self.samples.groupby(
+                            (m.samples.index+offset)//sum_N).sum()
+            # Reasign new index array.
+            self.samples = self.samples.set_index(offset+self.samples.index*sum_N)
+
         self.bin_width = self.samples.index[1] - self.samples.index[0]
         self.sep_bins = self.samples.loc[0:self.max_sep].index
         return
@@ -62,7 +70,8 @@ class Microburst_CDF:
                     self.samples['Seconds'].loc[0:self.max_sep-self.bin_width].values)
         n_weighted = np.multiply(weights, n)
         # Calculate the CDF and PDF
-        cdf = np.array([sum(n_weighted[i:])/sum(n_weighted) for i in range(len(n))])
+        cdf = np.array([np.nansum(n_weighted[i:])/np.nansum(n_weighted) 
+                        for i in range(len(n))])
         pdf = np.convolve([-1, 1], cdf, mode='valid')/self.bin_width
         # Calculate the CDF and PDF uncertanties.
         n_prime_std = np.sqrt([sum(n[i:]*weights[i:]**2) for i in range(len(n))])
@@ -112,7 +121,9 @@ class Microburst_CDF:
         print(cdf_err[1] - cdf_err[0])
         return cdf, pdf, cdf_err, pdf_err, filtered_catalog.shape[0]
 
-    def plot_cdf_pdf(self, L_array=[4, 5, 6, 7, 8], plot_all=True, err_mode='stats', plot_L=False):
+    def plot_cdf_pdf(self, L_array=[4, 5, 6, 7, 8], plot_all=True, 
+                     err_mode='stats', plot_L=False, 
+                     sample_name='ac6_norm_all_cdf.csv'):
         """ Plots the CDF and PDF values. """
         _, ax = plt.subplots(3, figsize=(8, 8), sharex=True)
         c=['r', 'b', 'g', 'm']
@@ -123,7 +134,7 @@ class Microburst_CDF:
         if plot_all:
             # Plot the CDF over all L shells in the belts.
             self._load_sample_file_(
-                os.path.join(sample_file_dir, 'ac6_norm_all_cdf.csv')
+                os.path.join(sample_file_dir, sample_name)
                 )
             if err_mode == 'stats':
                 C, P, C_err, P_err, N = self.calc_cdf_pdf_stats(self.microburst_catalog, 
@@ -202,6 +213,6 @@ if __name__ == "__main__":
                         'AC6_coincident_microbursts_sorted'
                         f'_err_v{catalog_version}.txt')
     m = Microburst_CDF(catalog_version=None, catalog_path=catalog_path)
-    m.plot_cdf_pdf(err_mode='stats', plot_L=True)
+    m.plot_cdf_pdf(err_mode='stats', plot_L=False, sample_name='ac6_norm_all_1km_bins.csv')
     # m.save_data('/home/mike/research/ac6_microburst_scale_sizes/'
     #             'data/microburst_cdf_pdf_norm_v3.csv')

@@ -84,8 +84,8 @@ class Microburst_CDF:
         weights = (self.samples['Seconds'].loc[0:self.max_sep-self.bin_width].max()/
                     self.samples['Seconds'].loc[0:self.max_sep-self.bin_width].values)
 
-        cdf_array = np.nan*np.ones((len(self.sep_bins), N_resample))
-        pdf_array = np.nan*np.ones((len(self.sep_bins), N_resample))
+        cdf_array = np.nan*np.ones((len(self.sep_bins)-1, N_resample))
+        pdf_array = np.nan*np.ones((len(self.sep_bins)-2, N_resample))
 
         for i in range(N_resample):
             # Resample the catalog by "flippiping" filtered_catalog.shape[0] number of "coins"
@@ -98,8 +98,7 @@ class Microburst_CDF:
             n_weighted = np.multiply(weights, n)
             # Calculate the CDF and PDF
             cdf_array[:, i] = np.array([sum(n_weighted[i:])/sum(n_weighted) for i in range(len(n))])
-            cdf_array[:, i] = np.convolve([-1, 1], cdf_array[:, i], mode='valid')/self.bin_width
-        print(cdf_array)
+            pdf_array[:, i] = np.convolve([-1, 1], cdf_array[:, i], mode='valid')/self.bin_width
 
         # Calculate the CDF and PDF
         cdf = np.mean(cdf_array, axis=1)
@@ -109,7 +108,7 @@ class Microburst_CDF:
         pdf_std = np.std(pdf_array, axis=1)
         return cdf, pdf, cdf_std, pdf_std, filtered_catalog.shape[0]
 
-    def plot_cdf_pdf(self, L_array=[4, 5, 6, 7, 8], plot_all=True, err_mode='stats'):
+    def plot_cdf_pdf(self, L_array=[4, 5, 6, 7, 8], plot_all=True, err_mode='stats', plot_L=False):
         """ Plots the CDF and PDF values. """
         _, ax = plt.subplots(3, figsize=(8, 8), sharex=True)
         c=['r', 'b', 'g', 'm']
@@ -141,24 +140,24 @@ class Microburst_CDF:
             ax[1].plot(self.sep_bins[:-2], P, c='k', lw=3)
             ax[2].plot(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c='k')
             
-
-        for i, (lower_L, upper_L) in enumerate(zip(L_array[:-1], L_array[1:])):
-            self._load_sample_file_(
-                os.path.join(sample_file_dir, f'ac6_norm_{lower_L}_L_{upper_L}_5km_bins.csv')
-                )
-            if err_mode == 'stats':
-                C, P, C_std, P_std, N = self.calc_cdf_pdf_stats(self.microburst_catalog, 
-                                                        lower_L, upper_L)
-            else:
-                C, P, C_std, P_std, N = self.calc_cdf_pdf_resample(self.microburst_catalog, 
-                                                        4, 8)
-            # Running average on the PDF
-            P = np.convolve(np.ones(n)/n, P, mode='same')
-            ax[0].errorbar(self.sep_bins[:-1], C, c=c[i],
-                        label=f'{lower_L} < L < {upper_L} | N = {N}', capsize=5)
-            ax[1].errorbar(self.sep_bins[:-2], P, c=c[i], 
-                        label=f'{lower_L} < L < {upper_L}')
-            ax[2].plot(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c=c[i])
+        if plot_L:
+            for i, (lower_L, upper_L) in enumerate(zip(L_array[:-1], L_array[1:])):
+                self._load_sample_file_(
+                    os.path.join(sample_file_dir, f'ac6_norm_{lower_L}_L_{upper_L}_5km_bins.csv')
+                    )
+                if err_mode == 'stats':
+                    C, P, C_std, P_std, N = self.calc_cdf_pdf_stats(self.microburst_catalog, 
+                                                            lower_L, upper_L)
+                else:
+                    C, P, C_std, P_std, N = self.calc_cdf_pdf_resample(self.microburst_catalog, 
+                                                            4, 8)
+                # Running average on the PDF
+                P = np.convolve(np.ones(n)/n, P, mode='same')
+                ax[0].errorbar(self.sep_bins[:-1], C, c=c[i],
+                            label=f'{lower_L} < L < {upper_L} | N = {N}', capsize=5)
+                ax[1].errorbar(self.sep_bins[:-2], P, c=c[i], 
+                            label=f'{lower_L} < L < {upper_L}')
+                ax[2].plot(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c=c[i])
             
         ax[0].legend()
         ax[0].set_xlim(left=0, right=90)
@@ -192,6 +191,6 @@ if __name__ == "__main__":
                         'AC6_coincident_microbursts_sorted'
                         f'_err_v{catalog_version}.txt')
     m = Microburst_CDF(catalog_version=None, catalog_path=catalog_path)
-    #m.plot_cdf_pdf(err_mode='')
+    m.plot_cdf_pdf(err_mode='')
     # m.save_data('/home/mike/research/ac6_microburst_scale_sizes/'
     #             'data/microburst_cdf_pdf_norm_v3.csv')

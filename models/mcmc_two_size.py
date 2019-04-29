@@ -97,7 +97,7 @@ def Likelihood(p, x, y, niter):
                 for (y_i, y_model_i) in zip(y, y_model)])
     return np.exp(-0.5*args/np.var(y))/C
 
-def proposal(p, proposal_jump=[0.1, 5, 5]):
+def proposal(p, proposal_jump=[0.01, 5, 5]):
     """ 
     Generate a new proposal, or "guess" for the MCMC to try next. 
     The new proposed value is picked from a Normal, centered on 
@@ -123,9 +123,9 @@ if __name__ == '__main__':
     # parameters are the two microburst sizes.
     # prior = [scipy.stats.halfnorm(loc=0, scale=60)]
     prior = [
-            scipy.stats.halfnorm(loc=0, scale=0.5), 
+            scipy.stats.halfnorm(loc=0, scale=0.1), 
             scipy.stats.norm(loc=100, scale=50),
-            scipy.stats.norm(loc=40, scale=20) 
+            scipy.stats.norm(loc=30, scale=20) 
             ]
     # Initial guess on the microburst size.
     start = [prior_i.rvs() for prior_i in prior]

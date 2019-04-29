@@ -28,21 +28,28 @@ class Microburst_CDF:
         print(f'Number of microbursts {self.microburst_catalog.shape[0]}')
         return
 
-    def _load_sample_file_(self, path, sum_N=5, offset=1):
+    def _load_sample_file_(self, path, sum_N=5, offset=0):
         """
-        Loads the samples vs. separation CSV file 
+        Loads the samples vs. separation CSV file. The sum_N and offset kwargs 
+        rebins the sample file. sum_N comnines N separations bins into 1. The
+        offset kwarg offsets each bin. The offsets make sense only if they are
+        less than sum_N.
         """
         self.samples = pd.read_csv(path, index_col=0)
-        if sum_N > 1 or offset != 0:
+
+        if offset != 0:
+            self.samples = self.samples[offset:]
+
+        if sum_N > 1:
             # Resample by taking the sum over sum_N elements and 
             # shift index by offset.
-            self.samples = self.samples.groupby(
-                            (m.samples.index+offset)//sum_N).sum()
+            self.samples = self.samples.groupby(np.arange(self.samples.shape[0])//sum_N).sum()
             # Reasign new index array.
-            self.samples = self.samples.set_index(offset+self.samples.index*sum_N)
+            self.samples = self.samples.set_index(self.samples.index*sum_N+offset)
 
         self.bin_width = self.samples.index[1] - self.samples.index[0]
         self.sep_bins = self.samples.loc[0:self.max_sep].index
+        print('Sample normalization bins:', self.sep_bins.values)
         return
             
     def n_i(self, di, df, data=None):

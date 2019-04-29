@@ -97,7 +97,7 @@ def Likelihood(p, x, y, niter):
                 for (y_i, y_model_i) in zip(y, y_model)])
     return np.exp(-0.5*args/np.var(y))/C
 
-def proposal(p, proposal_jump=[0.05, 5, 5]):
+def proposal(p, proposal_jump=[0.1, 5, 5]):
     """ 
     Generate a new proposal, or "guess" for the MCMC to try next. 
     The new proposed value is picked from a Normal, centered on 
@@ -108,8 +108,10 @@ def proposal(p, proposal_jump=[0.05, 5, 5]):
     new_vals = np.array([scipy.stats.norm(loc=p_i, scale=jump_i).rvs() 
                     for p_i, jump_i in zip(p, proposal_jump)])  
     # Keep the mixing probability between 0 and 1 inclusive.
-    if new_vals[0] < 0: new_vals[0] = 0
-    elif new_vals[0] > 1: new_vals[1] = 1
+    new_vals[new_vals < 0] = 0 # Keep the microburst sizes positive as well.
+    #if new_vals[0] < 0: new_vals[0] = 0
+    if new_vals[0] > 1: 
+        new_vals[0] = 1
     return new_vals
 
 if __name__ == '__main__':
@@ -120,9 +122,11 @@ if __name__ == '__main__':
     # Two parameter model. First parameter is the mixing term, and second and third 
     # parameters are the two microburst sizes.
     # prior = [scipy.stats.halfnorm(loc=0, scale=60)]
-    prior = [scipy.stats.uniform(0, 1), 
-            scipy.stats.uniform(0, 200), 
-            scipy.stats.uniform(0, 200)]
+    prior = [
+            scipy.stats.halfnorm(loc=0, scale=0.5), 
+            scipy.stats.norm(loc=100, scale=50),
+            scipy.stats.norm(loc=40, scale=20) 
+            ]
     # Initial guess on the microburst size.
     start = [prior_i.rvs() for prior_i in prior]
 
@@ -143,9 +147,11 @@ if __name__ == '__main__':
     else:
         print('Data already saved. Aborting MCMC.')
         df = pd.read_csv(SAVE_PATH)
+        
+    print(df.quantile([0.025, 0.5, 0.975]))
 
     ### PLOTTING CODE ###
-    fig = plt.figure()
+    fig = plt.figure(figsize=(10, 8))
     gs = gridspec.GridSpec(3, 3)
     ax = np.zeros((2, 3), dtype=object)
     for row in range(ax.shape[0]):
@@ -153,7 +159,7 @@ if __name__ == '__main__':
             ax[row, column] = plt.subplot(gs[row, column])
     bx = plt.subplot(gs[2, :])
 
-    #colors = ['r', 'g', 'b']
+    colors = ['r', 'g', 'b']
     ax[0,0].plot(df.a, c='k')
     ax[1,0].hist(df.a, density=True, bins=np.linspace(0, 1), color='k')
     ax[1,0].plot(np.linspace(0, 1), prior[0].pdf(np.linspace(0, 1)))
@@ -167,6 +173,18 @@ if __name__ == '__main__':
     ax[1,2].plot(np.linspace(0, 200), prior[2].pdf(np.linspace(0, 200)))
 
     bx.plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k')
+    
+    for i,row in enumerate(df.quantile([0.025, 0.5, 0.975]).values):
+        n_a = int(row[0]*niter)
+        burst_diameters = np.concatenate((
+            row[1]*np.ones(n_a),
+            row[2]*np.ones(niter-n_a)
+            ))
+        #print(burst_diameters)
+        y_model = mc_brute_vectorized(burst_diameters, 
+                                bins=cdf_data['Separation [km]'])
+        bx.plot(cdf_data['Separation [km]'], y_model, c=colors[i])
+        
     # for i, size in enumerate(np.percentile(df.r0, [2.5, 50, 97.5])):
     #     ax[2].plot(cdf_data['Separation [km]'], 
     #                 mc_brute_vectorized(size, bins=cdf_data['Separation [km]']), 
@@ -174,5 +192,5 @@ if __name__ == '__main__':
     #     ax[1].axvline(size, c=colors[i])
 
     plt.suptitle('Two microburst population MCMC model')
-    gs.tight_layout(fig)
+    #gs.tight_layout(fig)
     plt.show()

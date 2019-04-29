@@ -120,14 +120,13 @@ if __name__ == '__main__':
     niter = 100000
 
     if not os.path.exists(SAVE_PATH):
-        print('Data already saved. Aborting MCMC.')
         trace = metroplis(start, target, proposal, niter, 
                                 nburn=10000, thin=1, verbose=False)
         # Save data
         df = pd.DataFrame(data=trace, columns=['r'])
         df.to_csv(SAVE_PATH, index=False)
-
     else:
+        print('Data already saved. Aborting MCMC.')
         df = pd.read_csv(SAVE_PATH)
 
     ### PLOTTING CODE ###

@@ -108,8 +108,8 @@ def proposal(p, proposal_jump=[0.05, 5, 5]):
     new_vals = np.array([scipy.stats.norm(loc=p_i, scale=jump_i).rvs() 
                     for p_i, jump_i in zip(p, proposal_jump)])  
     # Keep the mixing probability between 0 and 1 inclusive.
-    new_vals[new_vals < 0] = 0
-    new_vals[new_vals > 1] = 1
+    if new_vals[0] < 0: new_vals[0] = 0
+    elif new_vals[0] > 1: new_vals[1] = 1
     return new_vals
 
 if __name__ == '__main__':
@@ -134,7 +134,6 @@ if __name__ == '__main__':
                                 [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])
 
     if not os.path.exists(SAVE_PATH):
-        print('Data already saved. Aborting MCMC.')
         trace = metroplis(start, target, proposal, niter, 
                                 nburn=10000, thin=1, verbose=False)
         # Save data
@@ -142,6 +141,7 @@ if __name__ == '__main__':
         df.to_csv(SAVE_PATH, index=False)
 
     else:
+        print('Data already saved. Aborting MCMC.')
         df = pd.read_csv(SAVE_PATH)
 
     ### PLOTTING CODE ###

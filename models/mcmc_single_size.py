@@ -133,8 +133,8 @@ if __name__ == '__main__':
     ### PLOTTING CODE ###
     _, ax = plt.subplots(3, 1, figsize=(8, 9))
     ax[0].plot(df.r)
-    ax[1].hist(df.r, density=True)
-    ax[1].plot(np.linspace(0, 100), prior[0].pdf(np.linspace(0, 100)))
+    ax[1].hist(df.r, density=True, bins=np.arange(0, 200))
+    ax[1].plot(np.linspace(0, 200), prior[0].pdf(np.linspace(0, 200)))
     ax[2].plot(cdf_data['Separation [km]'], cdf_data['CDF'])
     for i in np.percentile(df.r, [2.5, 50, 97.5]):
         ax[2].plot(cdf_data['Separation [km]'], mc_brute_vectorized(i, bins=cdf_data['Separation [km]']))

@@ -195,16 +195,14 @@ A physical phenomena that can influence our results are narrow spatial structure
 When the two spacecraft were as little as a few kilometers apart it is very difficult to distinguish between temporal features such as microbursts from spatial features such as curtains. Since the prevalence of curtains is independent of the spacecraft separation, this will effectively reduce the number of microbursts observed at very small separations. No attempt has been made to remove this bias.
 
 \subsection{Microburst Size Distribution in LEO and Magnetic Equator}
-When AC6 observes a coincident microburst at a separation $d$, the microburst’s size must be greater than $d$. This idea is similar to \citeA{Joy2002} who investigated the most probable Jovian bow shock and magnetopause standoff distances. Following Joy’s argument, the fraction of coincident microbursts observed above a distance d is microburst complementary cumulative distribution $F(d)$.  If P(A) is the probability that a microburst is larger than $d$ and P(B) is the probability that AC6 is separated by $d$, then the fraction of microbursts observed at d is the conditional probability $P(A \ \vert \ B)$. Using Bayes’ theorem, 
+When AC6 observes a coincident microburst at a separation $d$, the microburst`s size must be greater than $d$. This idea is similar to \citeA{Joy2002} who investigated the most probable Jovian bow shock and magnetopause standoff distances. Following the arguments presented in Section 4 in \citeA{Joy2002}, we investigate the dependence of the number of coincident microbursts observed above $d$, as a function of $d$ that is the microburst complementary cumulative distribution $F(d)$.  If P(A) is the probability that a microburst is larger than $d$ and P(B) is the probability that AC6 is separated by $d$, then the fraction of microbursts observed at $d$ is the conditional probability $P(A \ \vert \ B)$. Using Bayes’ theorem, 
 \begin{equation}
 P(A \ \vert \ B) = \frac{P(A \ \& \ B)}{P(B)}
-\end{equation}
-
-Where $P(A \ \& \ B)$ is the joint probability. Since the AC6 separation is independent of microburst size, $P(A \ \& \ B) = P(A)P(B)$. Hence
+\end{equation} where $P(A \ \& \ B)$ is the joint probability. Since the AC6 separation is independent of microburst size, $P(A \ \& \ B) = P(A)P(B)$. Hence
 
 \begin{equation}
 P(A \ \vert \ B) = \frac{P(A)P(B)}{P(B)} = P(A)
-\end{equation} and
+\end{equation} and \textcolor{red}{seems like a big jump in logic...}
 
 \begin{equation}
 F(d) = \frac{N(d)}{N(0)}

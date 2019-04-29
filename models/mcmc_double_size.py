@@ -1,7 +1,9 @@
-# This program run a MCMC simulation of a fixed-sized microburst population
+# This program run a MCMC simulation of a two fixed-sized microburst 
+# populations
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import scipy.stats
 import os
 
@@ -11,7 +13,7 @@ import progressbar
 GRID_SIZE = 200
 # csv save data path. Will NOT overwrite if it already exists!
 SAVE_PATH = ('/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
-            '/mcmc_single_size_trace.csv')
+            '/mcmc_two_size_trace.csv')
 CDF_DATA_PATH = ('/home/mike/research/ac6_microburst_scale_sizes'
             '/data/microburst_cdf_pdf_norm_v3.csv')
     
@@ -80,15 +82,22 @@ def metroplis(start, target, proposal, niter, nburn=0,
             print(f'Current values {current}')
     return post[int(nburn)::thin, :]
 
-def Likelihood(p, x, y):
+def Likelihood(p, x, y, niter):
     """ Gaussian likelihood. """
     C = (np.std(y)*np.sqrt(2*np.pi))
-    y_model = mc_brute_vectorized(p[0], bins=x)
+    n_a = int(p[0]*niter)
+    burst_diameters = np.concatenate((
+        p[1]*np.ones(n_a),
+        p[2]*np.ones(niter-n_a)
+        ))
+    #print(burst_diameters)
+    y_model = mc_brute_vectorized(burst_diameters, 
+                            bins=x, n_bursts=niter)
     args = sum([(y_i - y_model_i)**2 
                 for (y_i, y_model_i) in zip(y, y_model)])
     return np.exp(-0.5*args/np.var(y))/C
 
-def proposal(p, proposal_jump=[5]):
+def proposal(p, proposal_jump=[0.05, 5, 5]):
     """ 
     Generate a new proposal, or "guess" for the MCMC to try next. 
     The new proposed value is picked from a Normal, centered on 
@@ -97,7 +106,10 @@ def proposal(p, proposal_jump=[5]):
     parameter value.
     """
     new_vals = np.array([scipy.stats.norm(loc=p_i, scale=jump_i).rvs() 
-                    for p_i, jump_i in zip(p, proposal_jump)])         
+                    for p_i, jump_i in zip(p, proposal_jump)])  
+    # Keep the mixing probability between 0 and 1 inclusive.
+    new_vals[new_vals < 0] = 0
+    new_vals[new_vals > 1] = 1
     return new_vals
 
 if __name__ == '__main__':
@@ -108,41 +120,59 @@ if __name__ == '__main__':
     # Two parameter model. First parameter is the mixing term, and second and third 
     # parameters are the two microburst sizes.
     # prior = [scipy.stats.halfnorm(loc=0, scale=60)]
-    prior = [scipy.stats.uniform(0, 200)]
+    prior = [scipy.stats.uniform(0, 1), 
+            scipy.stats.uniform(0, 200), 
+            scipy.stats.uniform(0, 200)]
     # Initial guess on the microburst size.
     start = [prior_i.rvs() for prior_i in prior]
 
     # The target function. If probability is higher, take the new value given from proposal. Else do the Metroplis thing where you draw a random number between 
     # 0 and 1 and compare to the target value (which will be less than 1).
-    target = lambda p: Likelihood(p, cdf_data['Separation [km]'], 
-                                cdf_data['CDF'])*np.prod(
-                                [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])
     niter = 100000
+    target = lambda p: Likelihood(p, cdf_data['Separation [km]'], 
+                                cdf_data['CDF'], niter)*np.prod(
+                                [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])
 
     if not os.path.exists(SAVE_PATH):
         print('Data already saved. Aborting MCMC.')
         trace = metroplis(start, target, proposal, niter, 
                                 nburn=10000, thin=1, verbose=False)
         # Save data
-        df = pd.DataFrame(data=trace, columns=['r'])
+        df = pd.DataFrame(data=trace, columns=['a', 'r0', 'r1'])
         df.to_csv(SAVE_PATH, index=False)
 
     else:
         df = pd.read_csv(SAVE_PATH)
 
     ### PLOTTING CODE ###
-    colors = ['r', 'g', 'b']
-    _, ax = plt.subplots(3, 1, figsize=(8, 9))
-    ax[0].plot(df.r, c='k')
-    ax[1].hist(df.r, density=True, bins=np.arange(0, 200), color='k')
-    ax[1].plot(np.linspace(0, 200), prior[0].pdf(np.linspace(0, 200)))
-    ax[2].plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k')
-    for i, size in enumerate(np.percentile(df.r, [2.5, 50, 97.5])):
-        ax[2].plot(cdf_data['Separation [km]'], 
-                    mc_brute_vectorized(size, bins=cdf_data['Separation [km]']), 
-                    c=colors[i])
-        ax[1].axvline(size, c=colors[i])
+    fig = plt.figure()
+    gs = gridspec.GridSpec(3, 3)
+    ax = np.zeros((2, 3), dtype=object)
+    for row in range(ax.shape[0]):
+        for column in range(ax.shape[1]):
+            ax[row, column] = plt.subplot(gs[row, column])
+    bx = plt.subplot(gs[2, :])
 
-    ax[0].set_title('Fixed-sized microburst MCMC model')
-    plt.tight_layout()
+    #colors = ['r', 'g', 'b']
+    ax[0,0].plot(df.a, c='k')
+    ax[1,0].hist(df.a, density=True, bins=np.linspace(0, 1), color='k')
+    ax[1,0].plot(np.linspace(0, 1), prior[0].pdf(np.linspace(0, 1)))
+
+    ax[0,1].plot(df.r0, c='k')
+    ax[1,1].hist(df.r0, density=True, bins=np.linspace(0, 200), color='k')
+    ax[1,1].plot(np.linspace(0, 200), prior[1].pdf(np.linspace(0, 200)))
+
+    ax[0,2].plot(df.r1, c='k')
+    ax[1,2].hist(df.r1, density=True, bins=np.linspace(0, 200), color='k')
+    ax[1,2].plot(np.linspace(0, 200), prior[2].pdf(np.linspace(0, 200)))
+
+    bx.plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k')
+    # for i, size in enumerate(np.percentile(df.r0, [2.5, 50, 97.5])):
+    #     ax[2].plot(cdf_data['Separation [km]'], 
+    #                 mc_brute_vectorized(size, bins=cdf_data['Separation [km]']), 
+    #                 c=colors[i])
+    #     ax[1].axvline(size, c=colors[i])
+
+    plt.suptitle('Two microburst population MCMC model')
+    gs.tight_layout(fig)
     plt.show()

@@ -193,7 +193,7 @@ A physical phenomena that can influence our results are narrow spatial structure
 	
 When the two spacecraft were as little as a few kilometers apart it is very difficult to distinguish between temporal features such as microbursts from spatial features such as curtains. Since the prevalence of curtains is independent of the spacecraft separation, this will effectively reduce the number of microbursts observed at very small separations. No attempt has been made to remove this bias.
 
-\subsection{Microburst Size Distribution in LEO and Magnetic Equator}
+\subsection{Microburst Size Distribution in LEO and Magnetic Equator}\label{microburst_distribution}
 When AC6 observes a coincident microburst at a separation $d$, the microburst`s size must be greater than $d$. This idea is similar to \citeA{Joy2002} who investigated the most probable Jovian bow shock and magnetopause standoff distances. Following the arguments presented in Section 4 in \citeA{Joy2002}, we investigate the dependence of the number of coincident microbursts observed above $d$, as a function of $d$ that is the microburst complementary cumulative distribution $F(d)$.  If P(A) is the probability that a microburst is larger than $d$ and P(B) is the probability that AC6 is separated by $d$, then the fraction of microbursts observed at $d$ is the conditional probability $P(A \ \vert \ B)$. Using Bayes’ theorem, 
 \begin{equation}
 P(A \ \vert \ B) = \frac{P(A \ \& \ B)}{P(B)}
@@ -217,7 +217,7 @@ To estimate the equatorial microburst scale size distribution, the microburst ev
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig3.png}
-\caption{Microburst scale size distribution in LEO. Panel (a) shows the microburst complementary cumulative distribution as a function of spacecraft separation. The complementary cumulative distribution at separation $d$ can be interpreted as the fraction of microbursts observed above $d$. Panel (b) shows the microburst probability density as a function of separation. Lastly, panel (c) shows the number of simultaneous samples AC6 observed as a function of separation. The colored lines show the distributions broken up by L, and the thick black line shows the overall cumulative distribution in the radiation belt ($4 < L < 8$). The gray shading shows the uncertainty due to counting statistics.}
+\caption{Microburst scale size distribution in LEO. Panel (a) shows the microburst complementary cumulative distribution as a function of spacecraft separation. The complementary cumulative distribution at separation $d$ can be interpreted as the fraction of microbursts observed above $d$. Panel (b) shows the microburst probability density as a function of separation. Lastly, panel (c) shows the number of simultaneous samples AC6 observed as a function of separation. The colored lines show the distributions broken up by L, and the thick black line shows the overall cumulative distribution in the radiation belt ($4 < L < 8$). The gray shading shows the uncertainty due to counting statistics. \textcolor{red}{change xlabel to spacecraft separation}}
 \label{fig3}
 \end{figure}
 
@@ -227,17 +227,51 @@ To estimate the equatorial microburst scale size distribution, the microburst ev
 \label{fig4}
 \end{figure}
 
-\section{Monte Carlo Microburst Modeling}
+\section{Modeling Microburst Size}
 \textcolor{blue}{
 TO-DO
 \begin{itemize}
-\item Get error bars in the data CDF by taking random trials and randomly remove events that can be randomly coincident. This will give us the error bars.
 \item Talk about the brute force MC model.
 \item Show a LEO CDF model assuming a fixed-sized microburst population.
 \item Decide if I should show a two-fixed-sized microburst population or a microburst CDF.
 \item Show the residuals in the plots.
 \end{itemize}
 }
+
+In this section we discuss the model developed to understand the relation between $F(d)$ shown in Fig. \ref{fig3}a and the true distribution of microburst sizes. This relation is not immediately clear since microbursts are randomly scattered around the spacecraft location during a radiation belt pass, and have an unknown geometry. We address these issues with a Monte Carlo (MC) and analytic models and we assume that microbursts are circular with a radius $r$. For simplicity we first assume that all microbursts are the same $r$ and then generalize their size to a microburst probability density function (PDF). 
+
+The MC model first randomly scattered $10^5$ microburst centers in a 400 x 400 km grid around the spacecraft. Spacecraft A is placed at the origin, and spacecraft B is placed along the positive y-axis at the same distances from the origin as the separation bins used in Section \ref{microburst_distribution}. Then the number of microbursts observed by the both spacecraft as a function of the spacecraft B distance was counted and the modeled fraction of microbursts is then
+
+\begin{equation}
+F(d) = \frac{\sum_{d > D} }{\sum_{d \in D} A(r, d)}
+\end{equation}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Here is the geometric model of the problem. The diagram below shows two spacecraft as blue cubes, separated by some distance $d$. Now imagine an extreme case of a microburst ofradius $r$ that is the furthest distance from both spacecraft and still observed by both. These microbursts are left-right symmetric and the distance between the microburst centers and the two spacecraft is $r$. This case is shown with two black circles. The center of both black circles is marked with a black dot.
+
+In the current configuration the microburst will be observed by both spacecraft. Equilantly, microbursts with centers closer to the origin than the current microburst centers will also be observed by both spacecraft. These new points imply that there is an infinite family of microburst centers for which a microburst will be observed by both spacecraft as a function of $d$ and $r$. Our goal is to quantify this by calculating the area $A(r, d)$ in which a microburst center will be observed by both spacecraft.
+
+Observe that if you take the origional geometry and rotate the right circle clockwise about the top spacecraft, its origin will trace out a curve that connects the two black circle centers which is shown by the lower red-dotted line. This problem is symmetric and we can also rotate the right circle counter-clockwise about the lower spacecraft and trace out an upper red-dotted curve. Now if a microburst center lies anywhere in the area bounded by the red-dotted curves, it will encompass both spacecraft.
+
+How do we find $A(r, d)$? Imagine that instead of just tracing out the red-dotted curves, we continue rotating the circles for a rull revolution. This will trace out a second set of circles shown with a solid red curve. These circles have a radius $r$ as before, and they are separated by a distance d. Now if $d < 2r$ the circles will intersect and the area we want is just the circle-intersection area http://mathworld.wolfram.com/Circle-CircleIntersection.html
+
+\begin{equation}
+A(r, d) = 2r^2 \cos^{-1}{\Big( \frac{d}{2r} \Big)} - \frac{d}{2} \sqrt{4r^2 - d^2}
+\end{equation}
+
+Lastly we calculate the microburst CDF. Compare the number of microbursts of size $r$ that would be observed by both spacecraft at a spacecraft separation $d_0$ and $d_1$ with $d_0 < d_1$. The fraction of the number of microbursts observed at $d_1$ compared to $d_0$ is just the fraction of the areas since microbursts are uniformly distributed around the two spacecraft. Now we can compare these areas to the CDF derived from the data. For now assume a fixed microburst scale size, and a range of separations $D$. Then 
+
+\begin{equation}
+CDF(r, D) = \frac{\sum_{d > D} A(r, d)}{\sum_{d \in D} A(r, d)}
+\end{equation}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+\includegraphics[width=\textwidth]{fig5.png}
+\caption{Modeling a single-sized microburst distribution. Panel A shows the geometry of the analytic model.} 
+\label{fig5}
+\end{figure}
+
 
 \section{Discussion}
 \textcolor{blue}{

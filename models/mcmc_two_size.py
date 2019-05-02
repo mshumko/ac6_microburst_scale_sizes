@@ -11,6 +11,9 @@ import pandas as pd
 import progressbar
 
 GRID_SIZE = 200
+OVERWRITE = True
+LIKELIHOOD_ERROR = 0.1
+
 # csv save data path. Will NOT overwrite if it already exists!
 SAVE_PATH = ('/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
             '/mcmc_two_size_trace.csv')
@@ -64,17 +67,25 @@ def mc_brute_vectorized(burst_diamaters, n_bursts=100000,
     return cdf
 
 def metroplis(start, target, proposal, niter, nburn=0, 
-            thin=1, verbose=False):
+            thin=1, verbose=False, log_likelihood=False):
     """
     This function implements the Metropolis–Hastings sampler.
+    Does not use the log-Likelihood yet.
     """
     niter = int(niter)
     current = start
     post = -1E31*np.ones((niter, len(start)), dtype=float)
 
+    # Determine if the target will be comparing the 
+    # likelihood or log-likelihood.
+    if log_likelihood:
+        compare_value = 0
+    else:
+        compare_value = 1
+
     for i in progressbar.progressbar(range(niter)):
         proposed = proposal(current)
-        p = min(target(proposed)/target(current), 1)
+        p = min(target(proposed)/target(current), compare_value)
         if np.random.random() < p:
             current = proposed
         post[i, :] = current
@@ -82,7 +93,7 @@ def metroplis(start, target, proposal, niter, nburn=0,
             print(f'Current values {current}')
     return post[int(nburn)::thin, :]
 
-def Likelihood(p, x, y, niter):
+def gaus_likelihood(p, x, y, niter):
     """ Gaussian likelihood. """
     C = (np.std(y)*np.sqrt(2*np.pi))
     n_a = int(p[0]*niter)
@@ -95,7 +106,7 @@ def Likelihood(p, x, y, niter):
                             bins=x, n_bursts=niter)
     args = sum([(y_i - y_model_i)**2 
                 for (y_i, y_model_i) in zip(y, y_model)])
-    return np.exp(-0.5*args/np.var(y))/C
+    return np.exp(-0.5*args/LIKELIHOOD_ERROR**2)/C
 
 def proposal(p, proposal_jump=[0.01, 5, 5]):
     """ 
@@ -123,7 +134,7 @@ if __name__ == '__main__':
     # parameters are the two microburst sizes.
     # prior = [scipy.stats.halfnorm(loc=0, scale=60)]
     prior = [
-            scipy.stats.halfnorm(loc=0, scale=0.1), 
+            scipy.stats.halfnorm(loc=0, scale=0.3), 
             scipy.stats.norm(loc=100, scale=50),
             scipy.stats.norm(loc=30, scale=20) 
             ]
@@ -133,15 +144,15 @@ if __name__ == '__main__':
     # The target function. If probability is higher, take the new value given from proposal. Else do the Metroplis thing where you draw a random number between 
     # 0 and 1 and compare to the target value (which will be less than 1).
     niter = 100000
-    target = lambda p: Likelihood(p, cdf_data['Separation [km]'], 
+    target = lambda p: gaus_likelihood(p, cdf_data['Separation [km]'], 
                                 cdf_data['CDF'], niter)*np.prod(
                                 [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])
 
-    if not os.path.exists(SAVE_PATH):
+    if OVERWRITE or (not os.path.exists(SAVE_PATH)):
         trace = metroplis(start, target, proposal, niter, 
                                 nburn=10000, thin=1, verbose=False)
         # Save data
-        df = pd.DataFrame(data=trace, columns=['a', 'r0', 'r1'])
+        df = pd.DataFrame(data=trace, columns=['a', 'd0', 'd1'])
         df.to_csv(SAVE_PATH, index=False)
 
     else:
@@ -159,19 +170,40 @@ if __name__ == '__main__':
             ax[row, column] = plt.subplot(gs[row, column])
     bx = plt.subplot(gs[2, :])
 
+    N = df.shape[0]
     colors = ['r', 'g', 'b']
-    ax[0,0].plot(df.a, c='k')
+    ax[0,0].plot(np.arange(N)/1E4, df.a, c='k')
     ax[1,0].hist(df.a, density=True, bins=np.linspace(0, 1), color='k')
+    ax[0,0].set(xlabel=r'Iteration x $10^4$', ylabel='a trace')
     ax[1,0].plot(np.linspace(0, 1), prior[0].pdf(np.linspace(0, 1)))
+    ax[1,0].set(xlabel='a', ylabel='a posterior PD')
 
-    ax[0,1].plot(df.r0, c='k')
-    ax[1,1].hist(df.r0, density=True, bins=np.linspace(0, 200), color='k')
+    ax[0,1].plot(np.arange(N)/1E4, df.d0, c='k')
+    ax[0,1].set(xlabel=r'Iteration x $10^4$', ylabel=r'$d_0$ trace')
+    ax[1,1].hist(df.d0, density=True, bins=np.linspace(0, 200), color='k')
     ax[1,1].plot(np.linspace(0, 200), prior[1].pdf(np.linspace(0, 200)))
+    ax[1,1].set(xlabel=r'$d_0$', ylabel=r'$d_0$ posterior PD')
 
-    ax[0,2].plot(df.r1, c='k')
-    ax[1,2].hist(df.r1, density=True, bins=np.linspace(0, 200), color='k')
+    ax[0,2].plot(np.arange(N)/1E4, df.d1, c='k')
+    ax[0,2].set(xlabel=r'Iteration x $10^4$', ylabel=r'$d_1$ trace')
+    ax[1,2].hist(df.d1, density=True, bins=np.linspace(0, 200), color='k')
     ax[1,2].plot(np.linspace(0, 200), prior[2].pdf(np.linspace(0, 200)))
+    ax[1,2].set(xlabel=r'$d_1$', ylabel=r'$d_1$ posterior PD')
 
+    # Pick 100 traces
+    rand_ind = np.random.choice(np.arange(N), size=100)
+
+    # Plot 100 random traces on top of the data.
+    for i, row in df.loc[rand_ind, :].iterrows():
+        n_a = int(row.a*niter)
+        burst_diameters = np.concatenate((
+            row[1]*np.ones(n_a),
+            row[2]*np.ones(niter-n_a)
+            ))
+        #print(burst_diameters)
+        y_model = mc_brute_vectorized(burst_diameters, 
+                                bins=cdf_data['Separation [km]'])
+        bx.plot(cdf_data['Separation [km]'], y_model, c='grey', alpha=0.2)
     bx.plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k')
     
     for i,row in enumerate(df.quantile([0.025, 0.5, 0.975]).values):
@@ -191,6 +223,6 @@ if __name__ == '__main__':
     #                 c=colors[i])
     #     ax[1].axvline(size, c=colors[i])
 
-    plt.suptitle('Two microburst population MCMC model')
-    #gs.tight_layout(fig)
+    ax[0, 1].set_title('Two microburst population MCMC model')
+    gs.tight_layout(fig)
     plt.show()

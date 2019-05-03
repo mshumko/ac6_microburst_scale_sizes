@@ -61,9 +61,9 @@ Anderson, K\BPBI A.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
-Blake%
+J.~Blake%
 \ \protect \BOthers {.}}{%
-Blake%
+J.~Blake%
 \ \protect \BOthers {.}}{%
 {\protect \APACyear {1996}}%
 }]{%
@@ -95,6 +95,41 @@ Blake, J.%
 \newblock
 \begin{APACrefDOI} \doi{http://dx.doi.org/10.1016/0273-1177(95)00969-8}
   \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+J\BPBI B.~Blake%
+\ \BBA {} O'Brien%
+}{%
+J\BPBI B.~Blake%
+\ \BBA {} O'Brien%
+}{%
+{\protect \APACyear {2016}}%
+}]{%
+Blake2016}
+\APACinsertmetastar {%
+Blake2016}%
+\begin{APACrefauthors}%
+Blake, J\BPBI B.%
+\BCBT {}\ \BBA {} O'Brien, T\BPBI P.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2016}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Observations of small-scale latitudinal structure in
+  energetic electron precipitation} {Observations of small-scale latitudinal
+  structure in energetic electron precipitation}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{121}{4}{3031--3035}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1002/2015JA021815}
+  \end{APACrefURL}
+\newblock
+\APACrefnote{2015JA021815}
+\newblock
+\begin{APACrefDOI} \doi{10.1002/2015JA021815} \end{APACrefDOI}
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
@@ -646,33 +681,6 @@ Mozer, F\BPBI S.%
   \end{APACrefURL}
 \newblock
 \begin{APACrefDOI} \doi{10.1002/2017GL076120} \end{APACrefDOI}
-\PrintBackRefs{\CurrentBib}
-
-\bibitem [\protect \citeauthoryear {%
-O'Brien%
-, Blake%
-\BCBL {}\ \BBA {} W.%
-}{%
-O'Brien%
-\ \protect \BOthers {.}}{%
-{\protect \APACyear {2016}}%
-}]{%
-Obrien2016}
-\APACinsertmetastar {%
-Obrien2016}%
-\begin{APACrefauthors}%
-O'Brien, T\BPBI P.%
-, Blake, J\BPBI B.%
-\BCBL {}\ \BBA {} W., G\BPBI J.%
-\end{APACrefauthors}%
-\unskip\
-\newblock
-\APACrefYearMonthDay{2016}{May}{}.
-\newblock
-\APACrefbtitle {AeroCube-6 Dosimeter Data README} {Aerocube-6 dosimeter data
-  readme}\ \APACbVolEdTR{}{\BTR{}\ \BNUM\ TOR-2016-01155}.
-\newblock
-\APACaddressInstitution{}{The Aerospace Corporation}.
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%

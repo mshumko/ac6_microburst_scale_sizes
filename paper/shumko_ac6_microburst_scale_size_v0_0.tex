@@ -170,22 +170,22 @@ Each AC6 unit is equipped with a three Aerospace microdosimeters (licensed to Te
 
 \section{Methodology}
 \subsection{Microburst Detection}
-The first step to find microbursts observed simultaneously by both spacecraft is to identify them from each spacecraft separately. We have detected microbursts with two different methods that yielded quantitatively similar results. The first method is the burst parameter cite Paul’s paper and add equation. This algorithm has been successfully used in other microburst studies, mainly with the microbursts observed by the Solar Anomalous and Magnetospheric Particle Explorer add citations. For AC6, we found that a burst parameter threshold of 5 has good tradeoff between false positive and false negative microburst detections.
+The first step to find microbursts observed simultaneously by both spacecraft is to identify them from each spacecraft separately. We have detected microbursts with two different methods that yielded quantitatively similar results. The first method is the burst parameter \cite{O'Brien2003}. This algorithm has been successfully used in other microburst studies, mainly with the microbursts observed by the Solar Anomalous and Magnetospheric Particle Explorer add citations. For AC6, we found that a burst parameter threshold of 5 has good tradeoff between false positive and false negative microburst detections. \textcolor{red}{Talk about the wavelet based detector as well?}
 
-The transmitters on AC6 can cause unphysical count impulses in the dosimeters that resembles periodic trains of microbursts. These false detections were removed to remove their bias. One source of transmitter noise was observed at times when AC6 was in contact with the ground stations above mainland US for data downloads and commanding thus the mostly low L detections made above the US were discarded.
+The transmitters on AC6 can cause unphysical count impulses in the dosimeters that resembles periodic trains of microbursts. These false detections were removed to remove their bias. One source of transmitter noise was observed at times when AC6 was in contact with the ground stations above mainland US for data downloads and commanding thus the mostly low L detections made above the US were discarded. 
 
 Another source of noise is crosslink transmissions between the AC6 units. These transmissions occurred when either spacecraft transitioned from the survey mode to 10 Hz mode. This noise is sometimes not caught by the data quality flag, so the following empirically-derived criteria was developed to remove those detections. The dosimeter with a 250 keV nominal electron threshold, dos2 was used because it had a similar response to noise while rarely responded to microbursts. Since the transmitter noise is very periodic, cross-correlation (CC) and autocorrelation (AC) methods were applied to the dos1 and dos2 time series. Detections were removed if the following two criteria were met: either dos1 or dos2 time series had a AC peak at a 0.2 or 0.4 s lag, and the dos1-dos2 CC was greater than 0.9. The AC lag criteria alone sometimes falsely removed legitimate trains of microbursts, so the second criteria insured that the detection was removed if there was a very high correlation across an order of magnitude in energy.
 
-Now the lists of microbursts observed individually by AC6 were merged into a temporally coincident list with the following procedure. \textcolor{red}{Show the microburst detection cartoon I`ve showed in conferences?} The general approach is to CC the time series around microbursts detections made by one spacecraft against the other spacecraft. Ideally, if both spacecraft observed the same microburst, the two time series should correlate well and correlate poorly when a microburst is correlated against random non-microburst times. A CC threshold of 0.8 was chosen as it is a good compromise to identify microbursts superposed with noise and rejecting moderate correlations between a microburst and random features in the other time series. This CC threshold sometimes failed to reject times when microbursts and non-microburst features were well correlated due to Poisson noise so all of the events were spot checked by two authors to remove these events. All things considered, 662 confirmed microburst detections are used to calculate the microburst scale size distribution in the following section. Figure 3, panels (a), (c), and (e) show examples of microbursts observed by both AC6 units when they were separated by 6, 17, and 69 km, respectively.
+The lists of microbursts observed by either AC6 unit were merged into a temporally coincident list with the following procedure. \textcolor{red}{Show the microburst detection cartoon I`ve showed in conferences?} The general idea is that a microburst detection on one spacecraft will CC well will the time series from the other spacecraft if it observed a similar microburst, and poorly if there was no microburst observed by the other spacecraft. Each microburst detection made by either spacecraft was CC with the time series from the other spacecraft. Windows of 1 and 1.2 s were used to CC the time series. Different window sizes were used to account for numerical uncertainty due to Poisson noise. Microbursts detections with a CC above 0.8 were considered temporally coincident. This CC threshold was chosen as it is low enough to identify temporally coincident microbursts superposed with noise, and high enough to reject most non-coincident events. Figure \ref{fig2}, panels (a), (c), and (e) show examples of microbursts observed by both AC6 units when they were separated by 6, 17, and 69 km, respectively. 
+
+The last CC criteria required that the temporal CC must be greater than the spatial CC + 0.3. The spatial CC was calculated by shifting the AC6-B time series by the in-track lag to CC in latitude. This criteria was applied to remove curtains, spatially stationary and narrow in latitude structures obsered by AC6 \cite{Blake2016} and sometimes appear as microbursts. Figure \ref{fig2}, panels (b), (d), and (f) show the AC6 spatially aligned time series to confirm that the three cases shown were indeed microbursts. The coincident microburst list was then spot checked by two authors to any remove poorly correlated events. Considering the CC criteria and data availability, 662 confirmed simultaneous microburst detections are used to calculate the microburst scale size distribution in the following section.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig2.png}
-\caption{Examples of microbursts observed simulatenously by AC6. Panels (a), (c) and (e) shows the temporally-aligned time series at spacecraft separations of 5.6 km, 16.5 km, and 68.5 km, respectively. Pabels (b), (d), and (f) show the spatially aligned time series corresponding to the time series in the same column. The clear temporal correlation and lack of spatial correlation demonstrates that these events are microbursts.} \label{fig2}
+\caption{Examples of microbursts observed simulatenously by AC6. Panels (a), (c) and (e) shows the temporally-aligned time series at spacecraft separations of 5.6 km, 16.5 km, and 68.5 km, respectively. Pabels (b), (d), and (f) show the spatially aligned time series corresponding to the time series in the same column. The clear temporal correlation and lack of spatial correlation demonstrates that these events are microbursts.} 
+\label{fig2}
 \end{figure}
 	
-A physical phenomena that can influence our results are narrow spatial structures termed curtains cite Bern and Paul’s paper. These structures appear as microbursts in a time series from a single satellite, but with two satellites you can adjust the time series of one spacecraft by the in-track lag to identify spatial features. Figure 3b, d, and f show the AC6 spatially aligned time series and show that the these three cases were indeed microbursts.  
-	
-When the two spacecraft were as little as a few kilometers apart it is very difficult to distinguish between temporal features such as microbursts from spatial features such as curtains. Since the prevalence of curtains is independent of the spacecraft separation, this will effectively reduce the number of microbursts observed at very small separations. No attempt has been made to remove this bias.
 
 \subsection{Microburst Size Distribution in LEO and Magnetic Equator}\label{microburst_distribution}
 When AC6 observes a coincident microburst at a separation $d$, the microburst`s size must be greater than $d$. This idea is similar to \citeA{Joy2002} who investigated the most probable Jovian bow shock and magnetopause standoff distances. Following the arguments presented in Section 4 in \citeA{Joy2002}, we investigate the dependence of the number of coincident microbursts observed above $d$, as a function of $d$ that is the microburst complementary cumulative distribution $F(d)$.  If P(A) is the probability that a microburst is larger than $d$ and P(B) is the probability that AC6 is separated by $d$, then the fraction of microbursts observed at $d$ is the conditional probability $P(A \ \vert \ B)$. Using Bayes’ theorem, 
@@ -225,9 +225,9 @@ To estimate the equatorial microburst scale size distribution, the microburst ev
 \textcolor{blue}{
 TO-DO
 \begin{itemize}
+\item Talk about the brute force MC model.
 \item Show a LEO CDF model assuming a fixed-sized microburst population.
 \item Decide if I should show a two-fixed-sized microburst population or a microburst CDF.
-\item Think about other distributions e.g. gamma, log-normal, Weibull, Extreme Value Distribution, or Skew normal.
 \item Show the residuals in the plots.
 \end{itemize}
 }
@@ -250,16 +250,14 @@ A(r, d) = 2r^2 \cos^{-1}{\Big( \frac{d}{2r} \Big)} - \frac{d}{2} \sqrt{4r^2 - d^
 \end{equation} \textcolor{red}{Cite anything? Wolfram: http://mathworld.wolfram.com/Circle-CircleIntersection.html} Lastly, the fraction of microbursts as a function of separation is given by 
 \begin{equation}
 F(r, d) = \frac{\sum_{d > D} A(r, d)}{\sum_{d \in D} A(r, d)}.
-\end{equation} Where the denominator is the normalization factor. An example of the analytic $F(r=20 \ \mathrm{km}, d)$ is shown in Fig. \ref{fig5}b with the dashed blue curve. The modeled $F(d)$ fits the initial falloff very well, but greatly departs around 20 km that is indicative that there is a distribution of microburst sizes and not all microbursts are the same size. Furthermore this toy model illustrates the effect that randomly scattered microbursts have on interpreting the results. 
+\end{equation} Where the denominator is the normalization factor. An example of the analytic $F(r=20 \ \mathrm{km}, d)$ is shown in Fig. \ref{fig5}b with the dashed blue curve. 
 
-To expand on the one-sized microburst results, a two-sized microburst distribution model was developed. The microburst PDF is modeled as 
-\begin{equation}
-f(d, d_1, d_2, a) = a \delta(d-d_1) + (1-a) \delta(d-d_2)
-\end{equation} where $\delta$ is the Dirac delta function, $d_1$ and $d_2$ are the two microburst sizes, and $a$ is the microburst population mixing i.e. fraction term.
+%Lastly we calculate the microburst CDF. Compare the number of microbursts of size $r$ that %would be observed by both spacecraft at a spacecraft separation $d_0$ and $d_1$ with $d_0 < d_1$. The fraction of the number of microbursts observed at $d_1$ compared to $d_0$ is just the fraction of the areas since microbursts are uniformly distributed around the two spacecraft. Now we can compare these areas to the CDF derived from the data. For now assume a fixed microburst scale size, and a range of separations $D$. Then 
+
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig5.png}
-\caption{Modeling a one-sized microburst distribution. Panel A shows the geometry of the analytic model. Assuming a microburst radius $r$ (microbursts shown with black circles) and spacecraft separation $d$, the area $A$ shows all possible microburst center locations where a microburst will be simultaneously observed by both spacecraft. The two black circles show the most distant microburst location that is observed by both spacecraft. The red solid and dashed curves are found by rotating either of the black circles about the top and bottom spacecraft. Panel B shows the microburst fraction, $F(d)$ as a function of separation from the AC6 data in solid black. The red and dashed blue curves show the $F(d)$ assuming all microbursts have a 40 km diameter.} 
+\caption{Modeling a single-sized microburst distribution. Panel A shows the geometry of the analytic model. Assuming a microburst radius $r$ (microbursts shown with black circles) and spacecraft separation $d$, the area $A$ shows all possible microburst center locations where a microburst will be simultaneously observed by both spacecraft. The two black circles show the most distant microburst location that is observed by both spacecraft. The red solid and dashed curves are found by rotating either of the black circles about the top and bottom spacecraft. Panel B shows the microburst fraction, $F(d)$ as a function of separation from the AC6 data in solid black. The red and dashed blue curves show the $F(d)$ assuming all microbursts have a 40 km diameter.} 
 \label{fig5}
 \end{figure}
 
@@ -454,7 +452,7 @@ TO-DO
 
 
 \acknowledgments
-Thank LANL folks, AC6 folks, and NASA/NESSF. Include data availability
+Enter acknowledgments, including your data availability statement, here.
 
 
 %% ------------------------------------------------------------------------ %%

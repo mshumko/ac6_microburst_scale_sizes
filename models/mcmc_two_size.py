@@ -173,7 +173,7 @@ if __name__ == '__main__':
     N = df.shape[0]
     colors = ['g', 'r', 'b']
     ax[0,0].plot(np.arange(N)/1E4, df.a, c='k')
-    ax[1,0].hist(df.a, density=True, bins=np.linspace(0, 1), color='k')
+    ax[1,0].hist(df.a, density=True, bins=np.linspace(0, 1, num=100), color='k')
     ax[0,0].set(xlabel=r'Iteration x $10^4$', ylabel='a trace')
     ax[1,0].plot(np.linspace(0, 1), prior[0].pdf(np.linspace(0, 1)))
     ax[1,0].set(xlabel='a', ylabel='a posterior PD')

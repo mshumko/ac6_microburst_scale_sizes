@@ -121,15 +121,15 @@ if __name__ == '__main__':
     # loc=p[0], scale=p[1], a=p[2])
     prior = [
             scipy.stats.uniform(5, 100), 
-            scipy.stats.uniform(0, 50), 
-            scipy.stats.uniform(0, 20)
+            scipy.stats.uniform(0, 80), 
+            scipy.stats.uniform(0, 40)
             ]
     # Initial guess on the microburst size.
     start = [prior_i.rvs() for prior_i in prior]
 
     # The target function. If probability is higher, take the new value given from proposal. Else do the Metroplis thing where you draw a random number between 
     # 0 and 1 and compare to the target value (which will be less than 1).
-    niter = 100000
+    niter = 1000000
     target = lambda p: Likelihood(p, cdf_data['Separation [km]'], 
                                 cdf_data['CDF'], niter)*np.prod(
                                 [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])

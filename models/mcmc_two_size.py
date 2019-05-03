@@ -16,7 +16,7 @@ LIKELIHOOD_ERROR = 0.1
 
 # csv save data path. Will NOT overwrite if it already exists!
 SAVE_PATH = ('/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
-            '/mcmc_two_size_trace.csv')
+            '/mcmc_two_size_uniform_trace.csv')
 CDF_DATA_PATH = ('/home/mike/research/ac6_microburst_scale_sizes'
             '/data/microburst_cdf_pdf_norm_v3.csv')
     
@@ -133,10 +133,15 @@ if __name__ == '__main__':
     # Two parameter model. First parameter is the mixing term, and second and third 
     # parameters are the two microburst sizes.
     # prior = [scipy.stats.halfnorm(loc=0, scale=60)]
+    # prior = [
+    #         scipy.stats.halfnorm(loc=0, scale=0.3), 
+    #         scipy.stats.norm(loc=100, scale=50),
+    #         scipy.stats.norm(loc=30, scale=20) 
+    #         ]
     prior = [
-            scipy.stats.halfnorm(loc=0, scale=0.3), 
-            scipy.stats.norm(loc=100, scale=50),
-            scipy.stats.norm(loc=30, scale=20) 
+            scipy.stats.uniform(0, 0.2), 
+            scipy.stats.uniform(50, 200),
+            scipy.stats.uniform(0, 50) 
             ]
     # Initial guess on the microburst size.
     start = [prior_i.rvs() for prior_i in prior]

@@ -13,10 +13,11 @@ import progressbar
 GRID_SIZE = 200
 OVERWRITE = False
 LIKELIHOOD_ERROR = 0.1
+PRIOR = 'uniform'
 
 # csv save data path. Will NOT overwrite if it already exists!
 SAVE_PATH = ('/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
-            '/mcmc_two_size_uniform_trace.csv')
+            f'/mcmc_two_size_{PRIOR}_trace.csv')
 CDF_DATA_PATH = ('/home/mike/research/ac6_microburst_scale_sizes'
             '/data/microburst_cdf_pdf_norm_v3.csv')
     
@@ -129,24 +130,26 @@ if __name__ == '__main__':
     # Load the CDF data to model
     cdf_data = pd.read_csv(CDF_DATA_PATH)
         
-    # Specify priors for the one fixed-sized microburst model.
+    # Specify priors for the two fixed-sized microburst model.
     # Two parameter model. First parameter is the mixing term, and second and third 
     # parameters are the two microburst sizes.
-    # prior = [scipy.stats.halfnorm(loc=0, scale=60)]
-    # prior = [
-    #         scipy.stats.halfnorm(loc=0, scale=0.3), 
-    #         scipy.stats.norm(loc=100, scale=50),
-    #         scipy.stats.norm(loc=30, scale=20) 
-    #         ]
-    prior = [
-            scipy.stats.uniform(0, 0.2), 
-            scipy.stats.uniform(50, 200),
-            scipy.stats.uniform(0, 50) 
-            ]
+    if PRIOR == 'norm':
+        prior = [
+                scipy.stats.halfnorm(loc=0, scale=0.3), 
+                scipy.stats.norm(loc=100, scale=50),
+                scipy.stats.norm(loc=30, scale=20) 
+                ]
+    elif PRIOR == 'uniform':
+        prior = [
+                scipy.stats.uniform(0, 0.2), 
+                scipy.stats.uniform(50, 200),
+                scipy.stats.uniform(0, 50) 
+                ]
     # Initial guess on the microburst size.
     start = [prior_i.rvs() for prior_i in prior]
 
-    # The target function. If probability is higher, take the new value given from proposal. Else do the Metroplis thing where you draw a random number between 
+    # The target function. If probability is higher, take the new value given from proposal. 
+    # Else do the Metroplis thing where you draw a random number between 
     # 0 and 1 and compare to the target value (which will be less than 1).
     niter = 100000
     target = lambda p: gaus_likelihood(p, cdf_data['Separation [km]'], 

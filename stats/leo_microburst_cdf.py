@@ -40,7 +40,7 @@ class Microburst_CDF:
         if offset != 0:
             self.samples = self.samples[offset:]
 
-        if sum_N > 1:
+        if sum_N > 1 and (not f'{sum_N}km_bins' in path):
             # Resample by taking the sum over sum_N elements and 
             # shift index by offset.
             self.samples = self.samples.groupby(np.arange(self.samples.shape[0])//sum_N).sum()
@@ -189,12 +189,13 @@ class Microburst_CDF:
                 ax[2].plot(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c=c[i])
             
         ax[0].legend()
-        ax[0].set_xlim(left=0)#, right=90)
+        ax[0].set_xlim(left=0, right=90)
         ax[0].set_ylim(bottom=0)
         ax[1].set_ylim(bottom=0)
-        ax[0].set_ylabel('Fraction of Microbursts Larger')
+        ax[0].set_title('AC6 microburst size distribution in low Earth orbit')
+        ax[0].set_ylabel('Fraction of Larger Microbursts')
         ax[1].set_ylabel('Microburst PD')
-        ax[2].set_xlabel('Separation [km]')
+        ax[2].set_xlabel('AC6 Separation [km]')
         ax[2].set_ylabel(r'Samples x $10^4$')
         ax[2].set_ylim(bottom=0)
         ax[2].set_xticks(np.arange(min(self.sep_bins), max(self.sep_bins)+1, 10))
@@ -220,6 +221,6 @@ if __name__ == "__main__":
                         'AC6_coincident_microbursts_sorted'
                         f'_err_v{catalog_version}.txt')
     m = Microburst_CDF(catalog_version=None, catalog_path=catalog_path)
-    m.plot_cdf_pdf(err_mode='stats', plot_L=False, sample_name='ac6_norm_all_1km_bins.csv')
+    m.plot_cdf_pdf(err_mode='stats', plot_L=True, sample_name='ac6_norm_all_1km_bins.csv')
     # m.save_data('/home/mike/research/ac6_microburst_scale_sizes/'
     #             'data/microburst_cdf_pdf_norm_v3.csv')

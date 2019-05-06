@@ -1,0 +1,46 @@
+\title{Generalized Analytic Microburst Model Report}
+\author{Mike Shumko}
+\date{\today}
+
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+\begin{document}
+\maketitle
+
+I found an elegant way to calculate the microburst CDF analytically that is generalized to any microburst PDF distributions. The geometry of the analytic model is shown in Fig. \ref{fig_diagram} and the basic idea is that given an AC6 separation $s$ and microburst radius $r$, there exists a circular area of radius $r$ around each spacecraft where these microbursts will be observed by either or both spacecraft. Furthermore as Fig. \ref{fig_diagram}b and c show, if the ratio $2r/s > 1$ the circular area around each spacecraft will overlap. The overlapping area contains all possible microburst center locations for microbursts that will be simultaneously observed. The area of the overlapping circles can be found using the circle-circle intersection formula\footnote{http://mathworld.wolfram.com/Circle-CircleIntersection.html}
+
+\begin{equation}
+A(r, s) = 2 r^2 \cos^{-1} \Bigg( \frac{s}{2r} \Bigg)- \frac{s}{2} \sqrt{4 r^2 - s^2}
+\end{equation}
+
+To compare to the AC6 data, we need to derive an expression that describes how the cumulative area changes as a function of spacecraft separation. We will need to calculate $F(s)$, the microburst CDF. $F(s)$ can be interpreted as the fraction of microbursts that was observed above a separation $s$ and is technically a complementary CDF. We will first derive $F(s)$ assuming a single size microburst population and then generalize it to a continuous distribution of microburst sizes.
+
+\begin{figure}
+\includegraphics[width=\textwidth]{analytic_microburst_model_diagram.png}
+\caption{The geometry of the analytic model showing the locations of all possible microburst centers that can be observed by one or both AC6 units as a function of microburst radius $r$ and AC6 separation $s$. The two AC6 units are shown as black dots and the enclosing black circle bounds the area where a microburst will be observed by one or both AC6 units if its center lies inside the circle. Panel (A) shows the case where microburst diamater is smaller than the AC6 separation ($2r < s$). In this scenario all microbursts will be observed by either unit A or B and never simulatenously. Panel (B) shows the intermediate case where the microburst diameter is comporable to the AC6 separation ($2r \approx s$) and some fraction of microbursts will be observed simulatenously. The area contaning the centers of microbursts observed by both spacecrraft is the circle intersection and is highlighted with gray shading. Lastly, panel (C) shows the case where the spacecraft separation is much smaller than the microburst size ($r >> s$) and nearly all microbursts observed by one unit will also be observed by the other.} \label{fig_diagram}
+\end{figure}
+
+Assuming a fixed-microburst population with a radius $r_0$ we will calculate $F(s)$ by integrating $A(r_0, s)$ over all separations above $s$ and normalize such that $F(0) = 1$. $F(s)$ is given by
+
+\begin{equation} \label{analytic_one_size}
+F(s) = \frac{\displaystyle\int\displaylimits_{s}^{\infty} A(r_0, s') ds'}{\displaystyle\int\displaylimits_{0}^{\infty	} A(r_0, s') ds'}
+\end{equation} where the primed variables are dummy integration variables. An example $F(s)$ curves are shown in Fig. \ref{fig_one_size} which compares the Monte Carlo model which is easy to implement and understand to the analytic model in Eq. \ref{analytic_one_size}.
+
+Lastly, to generalize Eq. \ref{analytic_one_size} to a continuous microburst PDF, we weight $A(r, s)$ by the PDF weighting factors, $f(r)$ for each $r$ and integrate over the microburst PDF. $F(s)$ is then given by
+\begin{equation} \label{analytic_maxwellian}
+F(s) = \frac{\displaystyle\int\displaylimits_{s}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') f(r) dr ds'}{\displaystyle\int\displaylimits_{0}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') f(r) dr ds'} .
+\end{equation} An example that compares $F(s)$ between the MC and analytic models is shown in Fig. \ref{fig_maxwellian} for a Maxwellian distribution with $a = 10$ km.
+
+While this model is elegantly expressed in integral form, it is not as transparent as the MC model.
+
+\begin{figure}
+\includegraphics[width=\textwidth]{mc_analytic_integral_comparison_one_size.png}
+\caption{The $F(s)$ curves assuming a one-fixed size microburst population. The two curves compare the Monte Carlo and analytic model defined in Eq. \ref{analytic_one_size}.} \label{fig_one_size}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{mc_analytic_integral_comparison_maxwellian.png}
+\caption{The $F(s)$ curves assuming a Maxwellian microburst size distribution. The two curves compare the Monte Carlo and analytic model defined in Eq. \ref{analytic_maxwellian}.} \label{fig_maxwellian}
+\end{figure}
+
+\end{document}

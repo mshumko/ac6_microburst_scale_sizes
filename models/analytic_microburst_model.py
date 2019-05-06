@@ -66,12 +66,18 @@ if __name__ == '__main__':
     A_array = A(diameter_km/2, s_array)
     cdf_2 = np.array([np.nansum(A_array[i:])/np.nansum(A_array) for i in range(len(s_array))])
 
-    plt.plot(s_array, cdf)
-    plt.plot(s_array, cdf_2, '--')
+    plt.plot(s_array, cdf, label='Analytic')
+    plt.plot(s_array, cdf_2, '--', label='MC')
+    plt.legend()
+    plt.title('Monte Carlo vs analytic model comparison\n'
+            f'single fixed-sized microburst diamater = {diameter_km} km')
     plt.show()
 
     if COMPARE_MODEL:
-        dist = scipy.stats.maxwell(loc=0, scale=10)
+        loc = 0
+        a = 10
+        
+        dist = scipy.stats.maxwell(loc=loc, scale=a)
         # Generalized MC model
         n_bursts = int(1E6)
         burst_diameters = dist.rvs(size=n_bursts)
@@ -81,8 +87,10 @@ if __name__ == '__main__':
         cdf_analytic = continuous_cdf(s_array, dist)
         #print(cdf_3)
 
-        plt.plot(s_array, cdf_mc, label='MC')
         plt.plot(s_array, cdf_analytic, '--', label='Analytic')
+        plt.plot(s_array, cdf_mc, label='MC')
+        plt.title('Monte Carlo vs analytic model comparison\n'
+            f'Maxwellian microburst PDF | loc = {loc} km | a = {a} km')
         plt.legend()
         plt.show()
 

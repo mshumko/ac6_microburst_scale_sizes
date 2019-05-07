@@ -292,6 +292,38 @@ Dietrich, S.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Greeley%
+, Kanekal%
+, Baker%
+, Klecker%
+\BCBL {}\ \BBA {} Schiller%
+}{%
+Greeley%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2019}}%
+}]{%
+Greeley2019}
+\APACinsertmetastar {%
+Greeley2019}%
+\begin{APACrefauthors}%
+Greeley, A.%
+, Kanekal, S.%
+, Baker, D.%
+, Klecker, B.%
+\BCBL {}\ \BBA {} Schiller, Q.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2019}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Quantifying the Contribution of Microbursts to Global
+  Electron Loss in the Radiation Belts} {Quantifying the contribution of
+  microbursts to global electron loss in the radiation belts}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space Physics}{}{}{}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 Horne%
 \ \BBA {} Thorne%
 }{%
@@ -354,79 +386,6 @@ Joy, S.%
 \newblock
 \APACjournalVolNumPages{Journal of Geophysical Research: Space
   Physics}{107}{A10}{SMP--17}.
-\PrintBackRefs{\CurrentBib}
-
-\bibitem [\protect \citeauthoryear {%
-Lee%
-\ \protect \BOthers {.}}{%
-Lee%
-\ \protect \BOthers {.}}{%
-{\protect \APACyear {2012}}%
-}]{%
-Lee2012}
-\APACinsertmetastar {%
-Lee2012}%
-\begin{APACrefauthors}%
-Lee, J\BPBI J.%
-, Parks, G\BPBI K.%
-, Lee, E.%
-, Tsurutani, B\BPBI T.%
-, Hwang, J.%
-, Cho, K\BPBI S.%
-\BDBL {}McCarthy, M\BPBI P.%
-\end{APACrefauthors}%
-\unskip\
-\newblock
-\APACrefYearMonthDay{2012}{}{}.
-\newblock
-{\BBOQ}\APACrefatitle {Anisotropic pitch angle distribution of ~100 {keV}
-  microburst electrons in the loss cone: measurements from {STSAT-1}}
-  {Anisotropic pitch angle distribution of ~100 {keV} microburst electrons in
-  the loss cone: measurements from {STSAT-1}}.{\BBCQ}
-\newblock
-\APACjournalVolNumPages{Annales Geophysicae}{30}{11}{1567--1573}.
-\newblock
-\begin{APACrefURL} \url{https://www.ann-geophys.net/30/1567/2012/}
-  \end{APACrefURL}
-\newblock
-\begin{APACrefDOI} \doi{10.5194/angeo-30-1567-2012} \end{APACrefDOI}
-\PrintBackRefs{\CurrentBib}
-
-\bibitem [\protect \citeauthoryear {%
-Lee%
-\ \protect \BOthers {.}}{%
-Lee%
-\ \protect \BOthers {.}}{%
-{\protect \APACyear {2005}}%
-}]{%
-Lee2005}
-\APACinsertmetastar {%
-Lee2005}%
-\begin{APACrefauthors}%
-Lee, J\BHBI J.%
-, Parks, G\BPBI K.%
-, Min, K\BPBI W.%
-, Kim, H\BPBI J.%
-, Park, J.%
-, Hwang, J.%
-\BDBL {}Park, H\BPBI Y.%
-\end{APACrefauthors}%
-\unskip\
-\newblock
-\APACrefYearMonthDay{2005}{}{}.
-\newblock
-{\BBOQ}\APACrefatitle {Energy spectra of 170-360 {keV} electron microbursts
-  measured by the Korean {STSAT-1}} {Energy spectra of 170-360 {keV} electron
-  microbursts measured by the korean {STSAT-1}}.{\BBCQ}
-\newblock
-\APACjournalVolNumPages{Geophysical Research Letters}{32}{13}{}.
-\newblock
-\begin{APACrefURL} \url{http://dx.doi.org/10.1029/2005GL022996}
-  \end{APACrefURL}
-\newblock
-\APACrefnote{L13106}
-\newblock
-\begin{APACrefDOI} \doi{10.1029/2005GL022996} \end{APACrefDOI}
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%

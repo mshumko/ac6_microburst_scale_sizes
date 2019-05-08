@@ -164,6 +164,8 @@ if __name__ == '__main__':
         
     print(df.quantile([0.025, 0.5, 0.975]))
 
+    df = df[df['loc'] > 0]
+
     ### PLOTTING CODE ###
     fig = plt.figure(figsize=(10, 8))
     gs = gridspec.GridSpec(3, 2)
@@ -195,7 +197,8 @@ if __name__ == '__main__':
     # Plot 100 random traces on top of the data.
     N_plot = 100
     j = 0
-    for _, row in df.loc[rand_ind, :].iterrows():
+    for _, row in df.iloc[rand_ind, :].iterrows():
+        #print(row)
         dist = scipy.stats.maxwell(loc=row[0], scale=row[1])
         burst_diameters = dist.rvs(size=niter)
         #print(burst_diameters)

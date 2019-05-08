@@ -207,14 +207,12 @@ TO-DO
 \end{itemize}
 }
 
-An analytic and Monte Carlo (MC) models were developed to account for the statistical effects of random microburst sizes and locations in the vicinity of AC6. \textcolor{red}{FINISH THIS!}
+To account for the effects due to microbursts randomly occurring in the vicinity of AC6 and an unknown distribution of microburst sizes, Monte Carlo (MC) and analytic models were developed. These models assume a distribution of microburst sizes and a microburst shape to estimate $F(d)$. Microbursts are assumed to be circular with a radius $r$. For the distribution of microburst sizes, microbursts are first assumed to be the same $r$ and then generalized to a microburst size probability density function $P(r)$.
 
- In this section we discuss the model developed to understand the relation between $F(d)$ shown in Fig. \ref{fig3}a and the true distribution of microburst sizes. This relation is not immediately clear since microbursts are randomly scattered around the spacecraft location during a radiation belt pass, and have an unknown geometry. We address these issues with a Monte Carlo (MC) and analytic models and we assume that microbursts are circular with a radius $r$. For simplicity we first assume that all microbursts are the same $r$ and then generalize their size to a microburst probability density function (PDF). 
-
-The MC model first randomly scattered $10^5$ microburst centers in a 400 x 400 km grid around the spacecraft. Spacecraft A is placed at the origin, and spacecraft B is placed along the positive y-axis at the same distances from the origin as the separation bins, $D$ used in Section \ref{microburst_distribution}. Then the number of simultaneously observed microbursts at each spacecraft B distance in $D$ was counted. The modeled fraction of microbursts is then
+The MC model is the most intuitive and it consists of randomly scattering $10^5$ microburst centers in a 400 x 400 km grid around AC6 of various $r$ that are distributed according to $P(r)$. Spacecraft A is placed at the origin, and spacecraft B is placed along the positive y-axis at predetermined distances from the origin corresponding to he AC6 separation bins used in Section \ref{microburst_distribution} Then the cumulative number of simultaneously observed microbursts at spacecraft A and each spacecraft B location was counted. The modeled fraction of microbursts is then
 \begin{equation}
-F(d) = \frac{\sum_{d > D} n_{d} }{\sum_{d \in D} n_{d}}.
-\end{equation} and an example run of the MC model with a 40 km diameter microburst population is shown in Fig. \ref{fig5}b.
+F(s) = \frac{\displaystyle\sum_{i > s}^\infty n_{i} }{ \displaystyle\sum_{i > 0}^\infty n_{i} }.
+\end{equation} where as before the number of microbursts observed by both spacecraft in ith bin is $n_{i}$. Figure \ref{fig5}b shows an example $F(s)$ from the MC model with a 40 km diameter microburst population is shown in Fig. \ref{fig5}b.
 
 The analytic model, while identical to the MC model, highlights the concepts connecting the microburst size distribution and $F(d)$. The fundamental idea is that given a spacecraft separation $d$ and microburst radius $r$, there exists an area $A$ with the property that for any microburst center inside it will be observed by both spacecraft. The geometry of this model and $A$ is shown in Fig. \ref{fig5}a. Figure \ref{fig5}a shows the two spacecraft as blue cubes and two identical microbursts of radius $r$ shown by the black circles. This extreme case shows that the microburst centers are $r$ from either spacecraft, the maximum distance away from the spacecraft and be observed by both units. Microbursts with centers closer to the spacecraft will also be observed by both spacecraft. 
 

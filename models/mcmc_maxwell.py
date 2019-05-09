@@ -10,7 +10,7 @@ import pandas as pd
 import progressbar
 
 GRID_SIZE = 200
-OVERWRITE = True
+OVERWRITE = False
 LIKELIHOOD_ERROR = 0.1
 PRIOR = 'uniform'
 
@@ -218,7 +218,7 @@ if __name__ == '__main__':
         bx.plot(cdf_data['Separation [km]'], q, c=colors[i], 
                 label=f'{quartiles[i]}')
 
-    ax[0, 1].set_title('Maxwellian microburst population MCMC model')
+    plt.suptitle('Maxwellian microburst population MCMC model')
     bx.set(xlabel='Spacecraft separation [km]', ylabel='F(d)')
     gs.tight_layout(fig)
     plt.show()

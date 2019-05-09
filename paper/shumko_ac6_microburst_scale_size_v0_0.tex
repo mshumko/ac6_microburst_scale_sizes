@@ -200,7 +200,6 @@ The results in Figs. \ref{fig3} and \ref{fig4} show the fraction of microbursts 
 \textcolor{blue}{
 TO-DO
 \begin{itemize}
-\item Talk about the brute force MC model.
 \item Show a LEO CDF model assuming a fixed-sized microburst population.
 \item Decide if I should show a two-fixed-sized microburst population or a microburst CDF.
 \item Show the residuals in the plots.
@@ -219,17 +218,22 @@ The analytic model, while identical to the MC model, highlights the concepts con
 A(r, d) = 2r^2 \cos^{-1}{\Big( \frac{d}{2r} \Big)} - \frac{d}{2} \sqrt{4r^2 - d^2}.
 \end{equation} \textcolor{red}{Cite anything? Wolfram: http://mathworld.wolfram.com/Circle-CircleIntersection.html} Example geometries with an overlapping area are shown in Fig. \ref{fig5}b and \ref{fig5}c.
 
-Lastly, the fraction of microbursts as a function of separation is given by 
-\begin{equation}
-F(r, d) = \frac{\sum_{d > D} A(r, d)}{\sum_{d \in D} A(r, d)}.
-\end{equation} Where the denominator is the normalization factor. An example of the analytic $F(r=20 \ \mathrm{km}, d)$ is shown in Fig. \ref{fig5}b with the dashed blue curve. 
+The circle intersection area is then used to encode the effects due to the random microburst locations and a hypothesized microburst size distribution $P(r)$ to derive $F(s)$. $P(r)$ can be thought of as a weighting factor on $A(r, s')$ which is then marginalized out since AC6 can not determine $r$. Lastly, a cumulative integral in $s' > s$ is applied to the normalized areas to calculate $F(s)$ and directly compare to the AC6 data. With these considerations the analytic $F(s)$ is given by
 
-%Lastly we calculate the microburst CDF. Compare the number of microbursts of size $r$ that %would be observed by both spacecraft at a spacecraft separation $d_0$ and $d_1$ with $d_0 < d_1$. The fraction of the number of microbursts observed at $d_1$ compared to $d_0$ is just the fraction of the areas since microbursts are uniformly distributed around the two spacecraft. Now we can compare these areas to the CDF derived from the data. For now assume a fixed microburst scale size, and a range of separations $D$. Then 
+\begin{equation} \label{analytic_integral}
+F(s) = \frac{\displaystyle\int\displaylimits_{s}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') P(r) dr ds'}{\displaystyle\int\displaylimits_{0}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') P(r) dr ds'} .
+\end{equation} where as before, the denominator is the normalization factor.
+
+An example of the analytic and MC $F(s)$ for a microburst with a 40 km diameter is shown in Fig. \ref{fig5}d with the dashed blue and red curves, respectively. 
+
 
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig5.png}
-\caption{Modeling a single-sized microburst distribution. Panel A shows the geometry of the analytic model. Assuming a microburst radius $r$ (microbursts shown with black circles) and spacecraft separation $d$, the area $A$ shows all possible microburst center locations where a microburst will be simultaneously observed by both spacecraft. The two black circles show the most distant microburst location that is observed by both spacecraft. The red solid and dashed curves are found by rotating either of the black circles about the top and bottom spacecraft. Panel B shows the microburst fraction, $F(d)$ as a function of separation from the AC6 data in solid black. The red and dashed blue curves show the $F(d)$ assuming all microbursts have a 40 km diameter.} 
+\caption{The geometry of the analytic model showing the locations of all possible microburst centers that can be observed by one or both AC6 units as a function of microburst radius $r$ and AC6 separation $s$. The two AC6 units are shown as black dots and the enclosing black circle bounds the area where a microburst will be observed by one or both AC6 units if its center lies inside the circle. Panel (A) shows the case where microburst diamater is smaller than the AC6 separation ($2r < s$). In this scenario all microbursts will be observed by either unit A or B and never simulatenously. Panel (B) shows the intermediate case where the microburst diameter is comporable to the AC6 separation ($2r \approx s$) and some fraction of microbursts will be observed simulatenously. The area contaning the centers of microbursts observed by both spacecrraft is the circle intersection and is highlighted with gray shading. Lastly, panel (C) shows the case where the spacecraft separation is much smaller than the microburst size ($r >> s$) and nearly all microbursts observed by one unit will also be observed by the other.
+
+
+Modeling a single-size microburst distribution. Panels A shows the geometry of the analytic model. Assuming a microburst radius $r$ (microbursts shown with black circles) and spacecraft separation $s$, the area $A$ shows all possible microburst center locations where a microburst will be simultaneously observed by both spacecraft. The two black circles show the most distant microburst location that is observed by both spacecraft. The red solid and dashed curves are found by rotating either of the black circles about the top and bottom spacecraft. Panel B shows the microburst fraction, $F(d)$ as a function of separation from the AC6 data in solid black. The red and dashed blue curves show the $F(d)$ assuming all microbursts have a 40 km diameter.} 
 \label{fig5}
 \end{figure}
 

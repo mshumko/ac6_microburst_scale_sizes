@@ -11,7 +11,7 @@ import pandas as pd
 import progressbar
 
 GRID_SIZE = 200
-OVERWRITE = False
+OVERWRITE = True
 LIKELIHOOD_ERROR = 0.1
 PRIOR = 'uniform'
 
@@ -108,7 +108,7 @@ def gaus_likelihood(p, x, y, niter):
                 for (y_i, y_model_i) in zip(y, y_model)])
     return np.exp(-0.5*args/LIKELIHOOD_ERROR**2)/C
 
-def proposal(p, proposal_jump=[1, 1, 1]):
+def proposal(p, proposal_jump=[0.2, 5, 5]):
     """ 
     Generate a new proposal, or "guess" for the MCMC to try next. 
     The new proposed value is picked from a Normal, centered on 
@@ -145,9 +145,9 @@ if __name__ == '__main__':
     elif PRIOR == 'uniform':
         print('Using uniform prior.')
         prior = [
-                scipy.stats.uniform(1, 100), 
+                scipy.stats.uniform(1, 20), 
                 scipy.stats.uniform(0, 200),
-                scipy.stats.uniform(0, 50)
+                scipy.stats.uniform(0, 100)
                 ]
     # Initial guess on the microburst size.
     start = [prior_i.rvs() for prior_i in prior]
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     # The target function. If probability is higher, take the new value given from proposal. 
     # Else do the Metroplis thing where you draw a random number between 
     # 0 and 1 and compare to the target value (which will be less than 1).
-    niter = 1000#00
+    niter = 100000
     target = lambda p: gaus_likelihood(p, cdf_data['Separation [km]'], 
                                 cdf_data['CDF'], niter)*np.prod(
                                 [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])

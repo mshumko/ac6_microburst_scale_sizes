@@ -11,7 +11,7 @@ import pandas as pd
 import progressbar
 
 GRID_SIZE = 200
-OVERWRITE = True
+OVERWRITE = False
 LIKELIHOOD_ERROR = 0.1
 PRIOR = 'uniform'
 
@@ -36,6 +36,8 @@ def mc_brute_vectorized(burst_diamaters, n_bursts=100000,
     # some PDF distribution.
     if not hasattr(burst_diamaters, '__len__'):
         burst_diamaters = burst_diamaters*np.ones(n_bursts)
+    else:
+        n_bursts = len(burst_diamaters)
     # Randomly generate n_burst microburst centers.
     burst_centers = np.random.uniform(-grid_size, grid_size, size=(n_bursts, 2))
     
@@ -143,9 +145,9 @@ if __name__ == '__main__':
     elif PRIOR == 'uniform':
         print('Using uniform prior.')
         prior = [
-                scipy.stats.uniform(1, 5), 
-                scipy.stats.uniform(0, 10),
-                scipy.stats.uniform(0, 10)
+                scipy.stats.uniform(1, 100), 
+                scipy.stats.uniform(0, 200),
+                scipy.stats.uniform(0, 50)
                 ]
     # Initial guess on the microburst size.
     start = [prior_i.rvs() for prior_i in prior]
@@ -153,7 +155,7 @@ if __name__ == '__main__':
     # The target function. If probability is higher, take the new value given from proposal. 
     # Else do the Metroplis thing where you draw a random number between 
     # 0 and 1 and compare to the target value (which will be less than 1).
-    niter = 100000
+    niter = 1000#00
     target = lambda p: gaus_likelihood(p, cdf_data['Separation [km]'], 
                                 cdf_data['CDF'], niter)*np.prod(
                                 [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])
@@ -175,59 +177,63 @@ if __name__ == '__main__':
 
     # df = df[df['loc'] > 0]
 
-    # ### PLOTTING CODE ###
-    # fig = plt.figure(figsize=(10, 8))
-    # gs = gridspec.GridSpec(3, 2)
-    # ax = np.zeros((2, 2), dtype=object)
-    # for row in range(ax.shape[0]):
-    #     for column in range(ax.shape[1]):
-    #         ax[row, column] = plt.subplot(gs[row, column])
-    # bx = plt.subplot(gs[-1, :])
+    ### PLOTTING CODE ###
+    fig = plt.figure(figsize=(10, 8))
+    gs = gridspec.GridSpec(3, 3)
+    ax = np.zeros((2, 3), dtype=object)
+    for row in range(ax.shape[0]):
+        for column in range(ax.shape[1]):
+            ax[row, column] = plt.subplot(gs[row, column])
+    bx = plt.subplot(gs[-1, :])
 
-    # N = df.shape[0]
-    # colors = ['g', 'r', 'b']
-    # ax[0,0].plot(np.arange(N)/1E4, df['loc'], c='k')
-    # ax[1,0].hist(df['loc'], density=True, bins=np.linspace(0, 100), color='k')
-    # ax[0,0].set(xlabel=r'Iteration x $10^4$', ylabel='loc trace')
-    # ax[1,0].plot(np.linspace(0, 100), prior[0].pdf(np.linspace(0, 100)))
-    # ax[1,0].set(xlabel='loc', ylabel='loc posterior PD')
+    N = df.shape[0]
+    colors = ['g', 'r', 'b']
+    ax[0,0].plot(np.arange(N)/1E4, df['k'], c='k')
+    ax[1,0].hist(df['k'], density=True, bins=np.linspace(0, 100), color='k')
+    ax[0,0].set(xlabel=r'Iteration x $10^4$', ylabel='k trace')
+    ax[1,0].plot(np.linspace(0, 100), prior[0].pdf(np.linspace(0, 100)))
+    ax[1,0].set(xlabel='k', ylabel='k posterior PD')
 
-    # ax[0,1].plot(np.arange(N)/1E4, df.a, c='k')
-    # ax[0,1].set(xlabel=r'Iteration x $10^4$', ylabel=r'a trace')
-    # ax[1,1].hist(df.a, density=True, bins=np.linspace(0, 100), color='k')
-    # ax[1,1].plot(np.linspace(0, 100), prior[1].pdf(np.linspace(0, 100)))
-    # ax[1,1].set(xlabel=r'a', ylabel=r'a posterior PD')
+    ax[0,1].plot(np.arange(N)/1E4, df['offset'], c='k')
+    ax[0,1].set(xlabel=r'Iteration x $10^4$', ylabel=r'offset trace')
+    ax[1,1].hist(df['offset'], density=True, bins=np.linspace(0, 100), color='k')
+    ax[1,1].plot(np.linspace(0, 100), prior[1].pdf(np.linspace(0, 100)))
+    ax[1,1].set(xlabel=r'offset', ylabel=r'offset posterior PD')
 
-    # # Pick 1000 traces to analyze further to make plots.
-    # rand_ind = np.random.choice(np.arange(N), size=1000)
-    # y_model = np.nan*np.zeros((len(rand_ind), 
-    #                         len(cdf_data['Separation [km]'])))
+    ax[0,2].plot(np.arange(N)/1E4, df['lambda'], c='k')
+    ax[0,2].set(xlabel=r'Iteration x $10^4$', ylabel=r'lambda trace')
+    ax[1,2].hist(df['lambda'], density=True, bins=np.linspace(0, 100), color='k')
+    ax[1,2].plot(np.linspace(0, 100), prior[2].pdf(np.linspace(0, 100)))
+    ax[1,2].set(xlabel=r'lambda', ylabel=r'lambda posterior PD')
 
-    # # Plot 100 random traces on top of the data.
-    # N_plot = 100
-    # j = 0
-    # for _, row in df.iloc[rand_ind, :].iterrows():
-    #     #print(row)
-    #     dist = scipy.stats.maxwell(loc=row[0], scale=row[1])
-    #     burst_diameters = dist.rvs(size=niter)
-    #     #print(burst_diameters)
-    #     y_model[j, :] = mc_brute_vectorized(burst_diameters, 
-    #                             bins=cdf_data['Separation [km]'])
-    #     j += 1
+    # Pick 1000 traces to analyze further to make plots.
+    rand_ind = np.random.choice(np.arange(N), size=1000)
+    y_model = np.nan*np.zeros((len(rand_ind), 
+                            len(cdf_data['Separation [km]'])))
 
-    # for i in range(N_plot):
-    #     bx.plot(cdf_data['Separation [km]'], y_model[i,:], c='grey', alpha=0.2)
-    # bx.plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k')
+    # Plot 100 random traces on top of the data.
+    N_plot = 100
+    j = 0
+    for _, row in df.iloc[rand_ind, :].iterrows():
+        dist = scipy.stats.weibull_min(c=row[0], loc=row[1], scale=row[2])
+        burst_diameters = dist.rvs(size=niter)
+        y_model[j, :] = mc_brute_vectorized(burst_diameters, 
+                                bins=cdf_data['Separation [km]'])
+        j += 1
 
-    # # Find the mean and 95% interval of the 1000 curves.
-    # quartiles = [2.5, 50, 97.5]
-    # y_quartile = np.percentile(y_model, quartiles, axis=0)
+    for i in range(N_plot):
+        bx.plot(cdf_data['Separation [km]'], y_model[i,:], c='grey', alpha=0.2)
+    bx.plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k')
 
-    # for i, q in enumerate(y_quartile):
-    #     bx.plot(cdf_data['Separation [km]'], q, c=colors[i], 
-    #             label=f'{quartiles[i]}')
+    # Find the mean and 95% interval of the 1000 curves.
+    quartiles = [2.5, 50, 97.5]
+    y_quartile = np.percentile(y_model, quartiles, axis=0)
 
-    # plt.suptitle('Maxwellian microburst population MCMC model')
-    # bx.set(xlabel='Spacecraft separation [km]', ylabel='F(d)')
-    # gs.tight_layout(fig)
-    # plt.show()
+    for i, q in enumerate(y_quartile):
+        bx.plot(cdf_data['Separation [km]'], q, c=colors[i], 
+                label=f'{quartiles[i]}')
+
+    plt.suptitle('Weibull microburst size distribution MCMC model')
+    bx.set(xlabel='Spacecraft separation [km]', ylabel='F(s)')
+    gs.tight_layout(fig)
+    plt.show()

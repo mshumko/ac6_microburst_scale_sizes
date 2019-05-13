@@ -13,7 +13,7 @@ import progressbar
 GRID_SIZE = 200
 OVERWRITE = True
 LIKELIHOOD_ERROR = 0.1
-PRIOR = 'uniform'
+PRIOR = 'norm'
 
 # csv save data path. Will NOT overwrite if it already exists!
 SAVE_PATH = ('/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
@@ -101,14 +101,21 @@ def gaus_likelihood(p, x, y, niter):
     C = (np.std(y)*np.sqrt(2*np.pi))
     # Wiki convention: c = k, scale=lambda, loc=None
     dist = scipy.stats.weibull_min(c=p[0], loc=p[1], scale=p[2])
-    burst_diameters = dist.rvs(size=niter)
+    try:
+        burst_diameters = dist.rvs(size=niter)
+    except ValueError as err:
+        if str(err) == 'Domain error in arguments.':
+            print(f'parameters = {p}')
+            raise
+        else:
+            raise
     y_model = mc_brute_vectorized(burst_diameters, 
                             bins=x, n_bursts=niter)
     args = sum([(y_i - y_model_i)**2 
                 for (y_i, y_model_i) in zip(y, y_model)])
     return np.exp(-0.5*args/LIKELIHOOD_ERROR**2)/C
 
-def proposal(p, proposal_jump=[0.2, 5, 5]):
+def proposal(p, proposal_jump=[1, 5, 5]):
     """ 
     Generate a new proposal, or "guess" for the MCMC to try next. 
     The new proposed value is picked from a Normal, centered on 
@@ -118,9 +125,9 @@ def proposal(p, proposal_jump=[0.2, 5, 5]):
     """
     new_vals = np.array([scipy.stats.norm(loc=p_i, scale=jump_i).rvs() 
                     for p_i, jump_i in zip(p, proposal_jump)]) 
-    if new_vals[0] < 1:
-        new_vals[0] = 1.1
-    new_vals[new_vals < 0] = 0 # Keep the parameters positive.
+    # if new_vals[0] < 1:
+    #     new_vals[0] = 1.1
+    new_vals[new_vals <= 0] = 0.01 # Keep the parameters positive.
     #if new_vals[0] < 0: new_vals[0] = 0
     # if new_vals[0] > 1: 
     #     new_vals[0] = 1
@@ -138,16 +145,18 @@ if __name__ == '__main__':
     # dist = scipy.stats.weibull_min(c=p[0], loc=p[1], scale=p[2])
 
     if PRIOR == 'norm':
+        print('Using norm prior.')
         prior = [
-                scipy.stats.halfnorm(loc=0, scale=40), 
-                scipy.stats.halfnorm(loc=0, scale=40)
+                scipy.stats.halfnorm(loc=0.1, scale=10), 
+                scipy.stats.halfnorm(loc=0, scale=50),
+                scipy.stats.norm(loc=25, scale=30)
                 ]
     elif PRIOR == 'uniform':
         print('Using uniform prior.')
         prior = [
                 scipy.stats.uniform(1, 20), 
-                scipy.stats.uniform(0, 200),
-                scipy.stats.uniform(0, 100)
+                scipy.stats.uniform(5, 200),
+                scipy.stats.uniform(5, 100)
                 ]
     # Initial guess on the microburst size.
     start = [prior_i.rvs() for prior_i in prior]
@@ -174,8 +183,8 @@ if __name__ == '__main__':
         df = pd.read_csv(SAVE_PATH)
         
     print(df.quantile([0.025, 0.5, 0.975]))
-
-    # df = df[df['loc'] > 0]
+    # Remove values that were artifitially bumped up to avoid crashing scipy.
+    df = df[df['offset'] > 0.01]
 
     ### PLOTTING CODE ###
     fig = plt.figure(figsize=(10, 8))
@@ -189,9 +198,9 @@ if __name__ == '__main__':
     N = df.shape[0]
     colors = ['g', 'r', 'b']
     ax[0,0].plot(np.arange(N)/1E4, df['k'], c='k')
-    ax[1,0].hist(df['k'], density=True, bins=np.linspace(0, 100), color='k')
+    ax[1,0].hist(df['k'], density=True, bins=np.linspace(0, 10, num=50), color='k')
     ax[0,0].set(xlabel=r'Iteration x $10^4$', ylabel='k trace')
-    ax[1,0].plot(np.linspace(0, 100), prior[0].pdf(np.linspace(0, 100)))
+    ax[1,0].plot(np.linspace(0, 10, num=50), prior[0].pdf(np.linspace(0, 10, num=50)))
     ax[1,0].set(xlabel='k', ylabel='k posterior PD')
 
     ax[0,1].plot(np.arange(N)/1E4, df['offset'], c='k')

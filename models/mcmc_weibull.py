@@ -13,7 +13,7 @@ import progressbar
 GRID_SIZE = 200
 OVERWRITE = True
 LIKELIHOOD_ERROR = 0.1
-PRIOR = 'norm'
+PRIOR = 'uniform'
 
 # csv save data path. Will NOT overwrite if it already exists!
 SAVE_PATH = ('/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
@@ -154,9 +154,9 @@ if __name__ == '__main__':
     elif PRIOR == 'uniform':
         print('Using uniform prior.')
         prior = [
-                scipy.stats.uniform(1, 20), 
-                scipy.stats.uniform(5, 200),
-                scipy.stats.uniform(5, 100)
+                scipy.stats.uniform(0.1, 20), 
+                scipy.stats.uniform(0, 200),
+                scipy.stats.uniform(0, 100)
                 ]
     # Initial guess on the microburst size.
     start = [prior_i.rvs() for prior_i in prior]
@@ -182,9 +182,9 @@ if __name__ == '__main__':
         print('Data already saved. Aborting MCMC.')
         df = pd.read_csv(SAVE_PATH)
         
-    print(df.quantile([0.025, 0.5, 0.975]))
     # Remove values that were artifitially bumped up to avoid crashing scipy.
     df = df[df['offset'] > 0.01]
+    print(df.quantile([0.025, 0.5, 0.975]))
 
     ### PLOTTING CODE ###
     fig = plt.figure(figsize=(10, 8))

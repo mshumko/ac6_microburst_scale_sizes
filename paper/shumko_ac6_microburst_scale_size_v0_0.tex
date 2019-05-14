@@ -223,9 +223,7 @@ The circle intersection area can be thought of as a probability that a microburs
 
 \begin{equation} \label{analytic_integral}
 F(s) = \frac{\displaystyle\int\displaylimits_{s}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') P(r) dr ds'}{\displaystyle\int\displaylimits_{0}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') P(r) dr ds'} .
-\end{equation} where as in the MC model the denominator is the normalization factor.
-
-An example of the analytic and MC $F(s)$ for a microburst with a 40 km diameter is shown in Fig. \ref{fig5}d with the dashed blue and red curves, respectively. 
+\end{equation} where as in the MC model the denominator is the normalization factor. To illustrate the effects of random microburst locations around AC6, example analytic and MC model $F(s)$ assuming a fixed-size 40 km diameter microburst population is shown in Fig. \ref{fig5}d with the dashed blue and red curves, respectively.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig5.png}
@@ -233,7 +231,8 @@ An example of the analytic and MC $F(s)$ for a microburst with a 40 km diameter 
 \label{fig5}
 \end{figure}
 
-To find the optimal model parameters given the AC6 data, a Bayesian approach was taken using a Metropolis Markov Chain Monte Carlo (MCMC) sampler. This MCMC sampler samples the model parameter space under the following assumptions. First assumption is prior knowledge of model parameters which is called a prior and mathematically expressed with a probability density function (PDF). For the MC microburst size model uniformly and normally distributed priors are assumed. The second assumption is the likelihood function that is the probability of observed data given the model parameters. With these two assumptions the MCMC sampler iterates N times, each time picking a random set prior parameters for that particular microburst PDF. For each set of prior parameters, their prior probability is weighted by the likelihood to calculate the probability that the current set of prior parameters is explained by the data. With the Metropolis sampler, the random prior parameters are sampled in a way that is weighted by the prior and likelihood and mostly explores the regions of parameter space that is more probable.
+\subsection{Estimating optimal parameters for microburst size models}
+To estimate the optimal model parameters given the AC6 data, a Bayesian approach was taken using a Metropolis Markov Chain Monte Carlo (MCMC) sampler. This MCMC sampler samples the model parameter space under the following assumptions. First assumption is prior knowledge of model parameters which is called a prior and mathematically expressed with a probability density function (PDF). For the MC microburst size model uniformly and normally distributed priors are assumed. The second assumption is the likelihood function that is the probability of observed data given the model parameters. With these two assumptions the MCMC sampler iterates N times, each time picking a random set prior parameters for that particular microburst PDF. For each set of prior parameters, their prior probability is weighted by the likelihood to calculate the probability that the current set of prior parameters is explained by the data. With the Metropolis sampler, the random prior parameters are sampled in a way that is weighted by the prior and likelihood and mostly explores the regions of parameter space that is more probable.
 
 After N trails the tested parameters as a function of trial is called a trace and the histogram of the trace is the posterior probability density of that model parameter. 
 

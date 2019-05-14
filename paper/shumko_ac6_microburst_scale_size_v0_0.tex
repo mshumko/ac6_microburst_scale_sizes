@@ -196,7 +196,8 @@ The results in Figs. \ref{fig3} and \ref{fig4} show the fraction of microbursts 
 \label{fig4}
 \end{figure}
 
-\section{Modeling the Microburst Size Distribution}
+\section{Modeling the Distribution of Microburst Sizes}
+\subsection{Monte Carlo and Analytic Models to Estimate $F(s)$}
 \textcolor{blue}{
 TO-DO
 \begin{itemize}
@@ -206,23 +207,23 @@ TO-DO
 \end{itemize}
 }
 
-To account for the effects due to microbursts randomly occurring in the vicinity of AC6 and an unknown distribution of microburst sizes, Monte Carlo (MC) and analytic models were developed. These models assume a distribution of microburst sizes and a microburst shape to estimate $F(d)$. Microbursts are assumed to be circular with a radius $r$. For the distribution of microburst sizes, microbursts are first assumed to be the same $r$ and then generalized to a microburst size probability density function $P(r)$.
+To account for the effects due to microbursts randomly occurring in the vicinity of AC6 with an unknown distribution of microburst sizes, Monte Carlo (MC) and analytic models were developed. These models assume a hypothesized distribution of microburst sizes expressed with a probability density function $P(r)$, and a microburst geometry to estimate $F(s)$. Microbursts are assumed to be circular with a radius $r$. A few distribution of microburst size hypotheses are considered: a one-size microburst population, a two-size microburst population, and \textcolor{red}{X} continuous $P(r)$.
 
-The MC model is the most intuitive and it consists of randomly scattering $10^5$ microburst centers in a 400 x 400 km grid around AC6 of various $r$ that are distributed according to $P(r)$. Spacecraft A is placed at the origin, and spacecraft B is placed along the positive y-axis at predetermined distances from the origin corresponding to he AC6 separation bins used in Section \ref{microburst_distribution} Then the cumulative number of simultaneously observed microbursts at spacecraft A and each spacecraft B location was counted. The modeled fraction of microbursts is then
+The MC model is the most intuitive to understand and it consists of randomly scattering $10^5$ microburst centers in a 400 x 400 km grid around AC6 of various $r$ that are distributed according to $P(r)$. Spacecraft A is placed at the origin, and spacecraft B is placed along the positive y-axis at predetermined distances from the origin corresponding to he AC6 separation bins used in Section \ref{microburst_distribution} Then the cumulative number of simultaneously observed microbursts at spacecraft A and each spacecraft B location was counted. The modeled fraction of microbursts observed above $s$ is then
 \begin{equation}
 F(s) = \frac{\displaystyle\sum_{i > s}^\infty n_{i} }{ \displaystyle\sum_{i > 0}^\infty n_{i} }.
 \end{equation} where as before the number of microbursts observed by both spacecraft in ith bin is $n_{i}$. 
 
-The analytic model, while identical to the MC model, highlights the concepts connecting the microburst size distribution and $F(s)$. Assuming that microbursts are circular with radius $r$ and AC6 are separated by $s$, there is an area in which a microburst will be observed by the spacecraft. Figure \ref{fig5}a shows this geometry with the two spacecraft indicated with the black dots. With the above assumptions, any microburst with a center that lies in the circular area of radius $r$ that surrounds the top spacecraft will be observed by the top spacecraft. Likewise the same argument applies to the bottom spacecraft. The intersection of these two areas defines another area, $A(r, s)$ in which a microburst will be observed by both spacecraft and is given by the circle-circle intersection area equation, 
+The analytic model, while identical to the MC model, highlights the geometrical concepts connecting the microburst size distribution and $F(s)$. Assuming that microbursts are circular with radius $r$ and AC6 are separated by $s$, there is an area where a microburst will be observed by both spacecraft. Figure \ref{fig5}a shows this geometry with the two spacecraft indicated with the black dots. All microbursts who's center lies inside the circular area of radius $r$ that surrounds the top spacecraft will be observed by the top spacecraft. Likewise the same argument applies to the bottom spacecraft. The intersection of these two areas defines another area, $A(r, s)$ where a microburst will be observed by both spacecraft and is given by the circle-circle intersection area equation, 
 \begin{equation}
 A(r, d) = 2r^2 \cos^{-1}{\Big( \frac{d}{2r} \Big)} - \frac{d}{2} \sqrt{4r^2 - d^2}.
-\end{equation} \textcolor{red}{Cite anything? Wolfram: http://mathworld.wolfram.com/Circle-CircleIntersection.html} Example geometries with an overlapping area are shown in Fig. \ref{fig5}b and \ref{fig5}c.
+\end{equation} \textcolor{red}{Cite anything? Wolfram: http://mathworld.wolfram.com/Circle-CircleIntersection.html} Example geometries with an overlapping area are shown in Fig. \ref{fig5}b, c.
 
-The circle intersection area is then used to encode the effects due to the random microburst locations and a hypothesized microburst size distribution $P(r)$ to derive $F(s)$. $P(r)$ can be thought of as a weighting factor on $A(r, s')$ which is then marginalized out since AC6 can not determine $r$. Lastly, a cumulative integral in $s' > s$ is applied to the normalized areas to calculate $F(s)$ and directly compare to the AC6 data. With these considerations the analytic $F(s)$ is given by
+The circle intersection area can be thought of as a probability that a microburst will be observed by both spacecraft, given that it was observed by one. The hypothesized $P(r)$ can be thought of as the relative occurrence of microbursts at various $r$ and is effectively a weighting factor on $A(r, s)$ which is integrated out (marginalized) since AC6 is observing the overall effect of microbursts at all $r$. Lastly, a cumulative integral over a dummy variable $s'$ is applied to the normalized areas to calculate $F(s)$. With these considerations the analytic $F(s)$ is given by
 
 \begin{equation} \label{analytic_integral}
 F(s) = \frac{\displaystyle\int\displaylimits_{s}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') P(r) dr ds'}{\displaystyle\int\displaylimits_{0}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') P(r) dr ds'} .
-\end{equation} where as before, the denominator is the normalization factor.
+\end{equation} where as in the MC model the denominator is the normalization factor.
 
 An example of the analytic and MC $F(s)$ for a microburst with a 40 km diameter is shown in Fig. \ref{fig5}d with the dashed blue and red curves, respectively. 
 

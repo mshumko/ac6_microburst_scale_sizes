@@ -11,7 +11,7 @@ import pandas as pd
 import progressbar
 
 GRID_SIZE = 200
-OVERWRITE = True
+OVERWRITE = False
 LIKELIHOOD_ERROR = 0.1
 PRIOR = 'uniform'
 
@@ -183,7 +183,8 @@ if __name__ == '__main__':
         df = pd.read_csv(SAVE_PATH)
         
     # Remove values that were artifitially bumped up to avoid crashing scipy.
-    df = df[df['offset'] > 0.01]
+    df = df[(df['offset'] > 0.01) & 
+            (df['lambda'] > 0.01)]
     print(df.quantile([0.025, 0.5, 0.975]))
 
     ### PLOTTING CODE ###

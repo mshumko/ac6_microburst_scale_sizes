@@ -204,6 +204,7 @@ TO-DO
 \item Show a LEO CDF model assuming a fixed-sized microburst population.
 \item Decide if I should show a two-fixed-sized microburst population or a microburst CDF.
 \item Show the residuals in the plots.
+\item Think about a model comparison.
 \end{itemize}
 }
 
@@ -232,7 +233,7 @@ F(s) = \frac{\displaystyle\int\displaylimits_{s}^{\infty} \displaystyle\int\disp
 \end{figure}
 
 \subsection{Estimating optimal parameters for microburst size models}
-To estimate the optimal model parameters given the AC6 data, a Bayesian approach was taken using a Metropolis Markov Chain Monte Carlo (MCMC) sampler. This MCMC sampler samples the model parameter space under the following assumptions. First assumption is prior knowledge of model parameters which is called a prior and mathematically expressed with a probability density function (PDF). For the MC microburst size model uniformly and normally distributed priors are assumed. The second assumption is the likelihood function that is the probability of observed data given the model parameters. With these two assumptions the MCMC sampler iterates N times, each time picking a random set prior parameters for that particular microburst PDF. For each set of prior parameters, their prior probability is weighted by the likelihood to calculate the probability that the current set of prior parameters is explained by the data. With the Metropolis sampler, the random prior parameters are sampled in a way that is weighted by the prior and likelihood and mostly explores the regions of parameter space that is more probable.
+At this stage the microburst models are used with a few hypothesized microburst size distributions to estimate the optimal set of distribution parameters. To estimate the optimal model parameters given the AC6 data, a Bayesian approach was taken using a Metropolis Markov Chain Monte Carlo (MCMC) sampler. This MCMC sampler samples the model parameter space under the following assumptions. First assumption is prior knowledge of model parameters which is called a prior and mathematically expressed with a probability density function (PDF). For the MC microburst size model uniformly and normally distributed priors are assumed. The second assumption is the likelihood function that is the probability of observed data given the model parameters. With these two assumptions the MCMC sampler iterates N times, each time picking a random set prior parameters for that particular microburst PDF. For each set of prior parameters, their prior probability is weighted by the likelihood to calculate the probability that the current set of prior parameters is explained by the data. With the Metropolis sampler, the random prior parameters are sampled in a way that is weighted by the prior and likelihood and mostly explores the regions of parameter space that is more probable.
 
 After N trails the tested parameters as a function of trial is called a trace and the histogram of the trace is the posterior probability density of that model parameter. 
 

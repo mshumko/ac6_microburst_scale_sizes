@@ -573,6 +573,37 @@ Meredith, N.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Metropolis%
+, Rosenbluth%
+, Rosenbluth%
+, Teller%
+\BCBL {}\ \BBA {} Teller%
+}{%
+Metropolis%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {1953}}%
+}]{%
+Metropolis1953}
+\APACinsertmetastar {%
+Metropolis1953}%
+\begin{APACrefauthors}%
+Metropolis, N.%
+, Rosenbluth, A\BPBI W.%
+, Rosenbluth, M\BPBI N.%
+, Teller, A\BPBI H.%
+\BCBL {}\ \BBA {} Teller, E.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1953}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Equation of state calculations by fast computing
+  machines} {Equation of state calculations by fast computing machines}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{The journal of chemical physics}{21}{6}{1087--1092}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 Millan%
 \ \BBA {} Thorne%
 }{%
@@ -797,6 +828,36 @@ Parks, G\BPBI K.%
   microbursts}.{\BBCQ}
 \newblock
 \APACjournalVolNumPages{Journal of Geophysical Research}{72}{1}{215--226}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Sambridge%
+, Gallagher%
+, Jackson%
+\BCBL {}\ \BBA {} Rickwood%
+}{%
+Sambridge%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2006}}%
+}]{%
+Sambridge2006}
+\APACinsertmetastar {%
+Sambridge2006}%
+\begin{APACrefauthors}%
+Sambridge, M.%
+, Gallagher, K.%
+, Jackson, A.%
+\BCBL {}\ \BBA {} Rickwood, P.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2006}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Trans-dimensional inverse problems, model comparison and
+  the evidence} {Trans-dimensional inverse problems, model comparison and the
+  evidence}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Geophysical Journal International}{167}{2}{528--542}.
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%

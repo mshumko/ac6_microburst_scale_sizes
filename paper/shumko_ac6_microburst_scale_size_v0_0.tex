@@ -218,7 +218,7 @@ F(s) = \frac{\displaystyle\sum_{i > s}^\infty n_{i} }{ \displaystyle\sum_{i > 0}
 The analytic model, while identical to the MC model, highlights the geometrical concepts connecting the microburst size distribution and $F(s)$. Assuming that microbursts are circular with radius $r$ and AC6 are separated by $s$, there is an area where a microburst will be observed by both spacecraft. Figure \ref{fig5}a shows this geometry with the two spacecraft indicated with the black dots. All microbursts who's center lies inside the circular area of radius $r$ that surrounds the top spacecraft will be observed by the top spacecraft. Likewise the same argument applies to the bottom spacecraft. The intersection of these two areas defines another area, $A(r, s)$ where a microburst will be observed by both spacecraft and is given by the circle-circle intersection area equation, 
 \begin{equation}
 A(r, d) = 2r^2 \cos^{-1}{\Big( \frac{d}{2r} \Big)} - \frac{d}{2} \sqrt{4r^2 - d^2}.
-\end{equation} \textcolor{red}{Cite anything? Wolfram: http://mathworld.wolfram.com/Circle-CircleIntersection.html} Example geometries with an overlapping area are shown in Fig. \ref{fig5}b, c.
+\end{equation} \textcolor{red}{Cite anything? Wolfram: http://mathworld.wolfram.com/Circle-CircleIntersection.html} Example geometries with an overlapping area are shown in Fig. \ref{fig5}b and c.
 
 The circle intersection area can be thought of as a probability that a microburst will be observed by both spacecraft, given that it was observed by one. The hypothesized $P(r)$ can be thought of as the relative occurrence of microbursts at various $r$ and is effectively a weighting factor on $A(r, s)$ which is integrated out (marginalized) since AC6 is observing the overall effect of microbursts at all $r$. Lastly, a cumulative integral over a dummy variable $s'$ is applied to the normalized areas to calculate $F(s)$. With these considerations the analytic $F(s)$ is given by
 
@@ -233,24 +233,23 @@ F(s) = \frac{\displaystyle\int\displaylimits_{s}^{\infty} \displaystyle\int\disp
 \end{figure}
 
 \subsection{Estimating optimal parameters for microburst size models}
-At this stage a few hypothesized microburst size distributions are tested and optimal model parameters estimated. For each hypothesized microburst size distribution, Bayesian inference is used to estimate the optimal model parameters with a Metropolis Markov Chain Monte Carlo (MCMC) sampler \cite{Metropolis1953}. Bayes theorem is central to Bayesian inference and for data $d$ and model parameters $x$ can be written as
+At this stage a few hypothesized microburst size distributions are tested and optimal model parameters estimated. For each hypothesized microburst size distribution, Bayesian inference is used to estimate the optimal model parameters with a Metropolis Markov Chain Monte Carlo (MCMC) sampler \cite{Metropolis1953}. Bayes theorem is central to Bayesian inference. For an observed $F(s)$ denoted here by $x$, and model parameters $\theta$ Bayes theorem can be written as
 
 \begin{equation}
-P(x | d) = \frac{P(d | x) P(x)}{P(d)}
-\end{equation} where $p(x | d)$ is the posterior probability of the model parameters, given the data, $P(d | x)$ is the likelihood which returns a probability of the data given the model parameters, $p(x)$ is the prior, our knowledge about the model
+P(\theta | x) = \frac{P(x | \theta) P(\theta)}{P(x)}
+\end{equation} where $P(\theta)$ is the prior that is a PDF that describes the level of knowledge, however weak, about the model parameters. The likelihood is $P(x | \theta)$ and it describes the probability of obtaining the observations given model parameters. In this analysis the MC microburst model is used in the likelihood to model $F(s)$ and estimate the probability that the modeled $F(s)$ represents $x$. The posterior is $P(\theta | x)$ that is the model parameter probability distributions given the data. The posterior is used here to make conclusions regarding the model parameters after assuming a likelihood function and prior knowledge of the model parameters. Lastly, $P(x)$ is the marginal likelihood that describes the probability of obtaining $x$ after marginalizing over all prior variables. Calculation of $P(x)$ is difficult, and often not necessary for model parameter estimation. 
 
-The MCMC sampler sam
+With all of the above terminology, the important takeaway is that the posterior distribution for each model parameter is interpreted as the range of $\theta$ consistent with $x$. A 95\% credible interval (CI) is reported here that is interpreted as: assuming the hypothesized microburst size distribution, there is a 95\% probability that the true model parameter is inside the CI. The Metropolis sampler is used to sample the posterior distribution.
 
-The MCMC sampler samples the pa
+While the Metropolis sampler is explained in detail in \citeA{Metropolis1953} and a good introduction given in \citeA{Sambridge2006}, a brief overview is warranted. The Metropolis sampler samples the posterior distribution in $N$ trials and for each trial a random set of model parameters is chosen from the prior. After the first set of model parameters, the Metropolis MCMC chooses a new set of parameters. If the prior probability of the new set of parameters multiplied by the likelihood is higher the current parameter set, the MCMC accepts the new parameter set, otherwise there is a probability that the new value will be accepted or rejected. The unique accept/reject property results with the sampler tending to more likely model parameters, while also exploring the neighboring regions. After the $N$ trials the evolution of each model parameter is histogrammed to produce the posterior distribution.
 
+The one-size microburst population model is explored first and the microburst PDF is given by 
+\begin{equation}
+P(r) = \delta(r-r_0)
+\end{equation} where $\delta$ is the Dirac Delta function and $r_0$ is the radius of all microbursts. The range of $r_0$ that is consistent with the 
 
+ a two-size microburst population
 
-
-The Metropolis sampler samples the model parameter space under the following assumptions. First assumption is prior knowledge of model parameters which is called a prior and mathematically expressed with a probability density function (PDF). For the MC microburst size model uniformly and normally distributed priors are assumed. The second assumption is the likelihood function that is the probability of observed data given the model parameters. With these two assumptions the MCMC sampler iterates N times, each time picking a random set prior parameters for that particular microburst PDF. For each set of prior parameters, their prior probability is weighted by the likelihood to calculate the probability that the current set of prior parameters is explained by the data. With the Metropolis sampler, the random prior parameters are sampled in a way that is weighted by the prior and likelihood and mostly explores the regions of parameter space that is more probable.
-
-After N trails the tested parameters as a function of trial is called a trace and the histogram of the trace is the posterior probability density of that model parameter. 
-
-A more detailed description of the Metropolis MCMC (and its generalization to trans-dimensional inverse problems) is found in \citeA{Sambridge2006}.
 
 \section{Discussion}
 \textcolor{blue}{

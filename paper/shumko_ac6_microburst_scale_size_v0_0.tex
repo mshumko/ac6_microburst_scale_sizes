@@ -246,10 +246,10 @@ While the Metropolis sampler is explained in detail in \citeA{Metropolis1953} an
 The one-size microburst population model is explored first and the microburst PDF is given by 
 \begin{equation}
 P(r) = \delta(r-r_0)
-\end{equation} where $\delta$ is the Dirac Delta function and $r_0$ is the radius of all microbursts. The range of $r_0$ that is consistent with the 
-
- a two-size microburst population
-
+\end{equation} where $\delta$ is the Dirac Delta function and $r_0$ is the radius of all microbursts. The range of $r_0$ that is consistent with the observed $F(s)$ is shown in Fig. \textcolor{red}{X}. The fit is not terribly good and the posterior reflects this by estimating that with this model, the microburst size is somewhere between \textcolor{red}{X and Y km}. A slight generalization of this model is a two-size microburst population with the microburst PDF
+\begin{equation}
+P(r) = a \delta(r-r_0) + (1-a)\delta(r-r_1)
+\end{equation} where the radii of the two microburst populations is given by $r_0$ and $r_1$ and $a$ is the parameter encoding the relative fractions of the two populations. The result of this model is shown in Fig. \textcolor{red}{X}. The fit is slightly better than the one-size model, although that is to be expected assuming the two more free model parameters. The majority (\textcolor{red}{X\%}) of microbursts have a size between \textcolor{red}{X and Y km} while a more rare population has a size between \textcolor{red}{X and Y km}. A few continuous microburst size distributions such as the Maxwellian, Weibull and log-normal were also explored with similar results and are not shown. Due to lack of prior observations and theoretical predictions, it is difficult to identify a more appropriate $P(r)$. 
 
 \section{Discussion}
 \textcolor{blue}{
@@ -262,6 +262,8 @@ TO-DO
 \item Use the wave data to interpret the equatorial scale size distribution. Is the < 200 km peak due to high amplitude waves, or is it just that waves are most common at those scales?
 \end{itemize}
 }
+
+A x-ray imager on board a high altitude balloon should determine the microburst size from the distributions of microburst x-rays in the sky.
 
 \section{Conclusions}
 

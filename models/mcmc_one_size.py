@@ -9,13 +9,14 @@ import pandas as pd
 import progressbar
 
 GRID_SIZE = 200
+PRIOR = 'uniform'
 # csv save data path. Will NOT overwrite if it already exists!
 SAVE_PATH = ('/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
-            '/mcmc_one_size_trace.csv')
+            f'/mcmc_one_size_{PRIOR}_trace.csv')
 CDF_DATA_PATH = ('/home/mike/research/ac6_microburst_scale_sizes'
             '/data/microburst_cdf_pdf_norm_v3.csv')
 PAPER_PLOT = True
-OVERWRITE = True
+OVERWRITE = False
     
 def mc_brute_vectorized(burst_diamaters, n_bursts=100000, 
                          bins=np.arange(0, 100, 5), 
@@ -106,11 +107,11 @@ if __name__ == '__main__':
     # Load the CDF data to model
     cdf_data = pd.read_csv(CDF_DATA_PATH)
         
-    # Specify priors for the one fixed-sized microburst model.
-    # Two parameter model. First parameter is the mixing term, and second and third 
-    # parameters are the two microburst sizes.
-    # prior = [scipy.stats.halfnorm(loc=0, scale=60)]
-    prior = [scipy.stats.uniform(0, 200)]
+    # Specify prior for the one fixed-sized microburst model.
+    if PRIOR == 'uniform':
+        prior = [scipy.stats.uniform(0, 200)]
+    else:
+        prior = [scipy.stats.halfnorm(loc=0, scale=60)]
     # Initial guess on the microburst size.
     start = [prior_i.rvs() for prior_i in prior]
 
@@ -170,7 +171,7 @@ if __name__ == '__main__':
                                 len(cdf_data['Separation [km]'])))
 
         for _, row in df.loc[rand_ind, :].iterrows():
-            burst_diameters = row.r # I know... r is actually a diameter!
+            burst_diameters = row.d
             y_model = mc_brute_vectorized(burst_diameters, 
                                     bins=cdf_data['Separation [km]'])
             ax[1].plot(cdf_data['Separation [km]'], y_model, c='grey', alpha=0.3)

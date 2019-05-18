@@ -131,6 +131,8 @@ if __name__ == '__main__':
     else:
         print('Data already saved. Aborting MCMC.')
         df = pd.read_csv(SAVE_PATH)
+    
+    print(df.quantile([0.025, 0.5, 0.975]))
 
     ### PLOTTING CODE ###
     if not PAPER_PLOT:
@@ -188,7 +190,7 @@ if __name__ == '__main__':
         ax[0].set_title('One microburst size MCMC model\n'
                         r'$pdf = \delta(s-d)$')
 
-        ax[0].set(xlabel='d [km]', ylabel='posterior PD', xlim=(26, 125)); 
+        ax[0].set(xlabel='d [km]', ylabel='posterior PD', xlim=(26, 140)); 
         ax[1].legend()
         ax[1].set(xlabel='AC6 separation (s) [km]', ylabel='F(s)', xlim=(0, 90))
 

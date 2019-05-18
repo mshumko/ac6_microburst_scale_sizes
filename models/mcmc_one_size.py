@@ -14,6 +14,8 @@ SAVE_PATH = ('/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
             '/mcmc_one_size_trace.csv')
 CDF_DATA_PATH = ('/home/mike/research/ac6_microburst_scale_sizes'
             '/data/microburst_cdf_pdf_norm_v3.csv')
+PAPER_PLOT = True
+OVERWRITE = True
     
 def mc_brute_vectorized(burst_diamaters, n_bursts=100000, 
                          bins=np.arange(0, 100, 5), 
@@ -119,37 +121,75 @@ if __name__ == '__main__':
                                 [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])
     niter = 100000
 
-    if not os.path.exists(SAVE_PATH):
+    if OVERWRITE or (not os.path.exists(SAVE_PATH)):
         trace = metroplis(start, target, proposal, niter, 
                                 nburn=10000, thin=1, verbose=False)
         # Save data
-        df = pd.DataFrame(data=trace, columns=['r'])
+        df = pd.DataFrame(data=trace, columns=['d'])
         df.to_csv(SAVE_PATH, index=False)
     else:
         print('Data already saved. Aborting MCMC.')
         df = pd.read_csv(SAVE_PATH)
 
     ### PLOTTING CODE ###
-    colors = ['r', 'g', 'b']
-    labels = ['2.5%', '50%', "97.5%"]
-    _, ax = plt.subplots(3, 1, figsize=(8, 9))
-    ax[0].plot(df.r, c='k')
-    ax[1].hist(df.r, density=True, bins=np.arange(0, 200), color='k', label='posterior')
-    ax[1].plot(np.linspace(0, 200), prior[0].pdf(np.linspace(0, 200)), c='c', label='prior')
-    ax[2].plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k', label='CDF data')
-    for i, size in enumerate(np.percentile(df.r, [2.5, 50, 97.5])):
-        ax[2].plot(cdf_data['Separation [km]'], 
-                    mc_brute_vectorized(size, bins=cdf_data['Separation [km]']), 
-                    c=colors[i])
-        ax[1].axvline(size, c=colors[i], label=labels[i])
+    if not PAPER_PLOT:
+        colors = ['r', 'g', 'b']
+        labels = ['2.5%', '50%', "97.5%"]
+        _, ax = plt.subplots(3, 1, figsize=(8, 9))
+        ax[0].plot(df.d, c='k')
+        ax[1].hist(df.d, density=True, bins=np.arange(0, 200), color='k', label='posterior')
+        ax[1].plot(np.linspace(0, 200), prior[0].pdf(np.linspace(0, 200)), c='c', label='prior')
+        ax[2].plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k', label='CDF data')
+        for i, size in enumerate(np.percentile(df.d, [2.5, 50, 97.5])):
+            ax[2].plot(cdf_data['Separation [km]'], 
+                        mc_brute_vectorized(size, bins=cdf_data['Separation [km]']), 
+                        c=colors[i])
+            ax[1].axvline(size, c=colors[i], label=labels[i])
 
-    ax[0].set_title('One size microburst MCMC model | prior ~ U(0, 200)')
-    ax[0].set(xlabel='Iteration', ylabel='Microburst diameter trace'); 
+        ax[0].set_title('One size microburst MCMC model | prior ~ U(0, 200)')
+        ax[0].set(xlabel='Iteration', ylabel='Microburst diameter trace'); 
 
-    ax[1].set(xlabel='microburst diameter [km]', ylabel='Probability probability'); 
-    ax[1].legend()
-    ax[2].legend()
-    ax[2].set(xlabel='microburst diameter [km]', ylabel='Microburst fraction')
+        ax[1].set(xlabel='microburst diameter [km]', ylabel='Probability probability'); 
+        ax[1].legend()
+        ax[2].legend()
+        ax[2].set(xlabel='microburst diameter [km]', ylabel='Microburst fraction')
 
-    plt.tight_layout()
-    plt.show()
+        plt.tight_layout()
+        plt.show()
+    else:
+        colors = ['r', 'g', 'b']
+        labels = ['2.5 %', '50 %', "97.5 %"]
+        _, ax = plt.subplots(2, 1, figsize=(6, 5))
+        ax[0].hist(df.d, density=True, bins=np.arange(0, 200), color='k', label='_nolegend_')
+        ax[0].plot(np.linspace(0, 200), prior[0].pdf(np.linspace(0, 200)), c='c')
+
+        # Plot 100 random traces on top of the data.
+        N_plot = 100
+        rand_ind = np.random.choice(np.arange(df.shape[0]), size=N_plot)
+        y_model = np.nan*np.zeros((len(rand_ind), 
+                                len(cdf_data['Separation [km]'])))
+
+        for _, row in df.loc[rand_ind, :].iterrows():
+            burst_diameters = row.r # I know... r is actually a diameter!
+            y_model = mc_brute_vectorized(burst_diameters, 
+                                    bins=cdf_data['Separation [km]'])
+            ax[1].plot(cdf_data['Separation [km]'], y_model, c='grey', alpha=0.3)
+
+        # plot the AC6 data
+        ax[1].plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k', label='AC6 F(s)')
+        # Plot the quantiles
+        for i, size in enumerate(np.percentile(df.d, [2.5, 50, 97.5])):
+            ax[1].plot(cdf_data['Separation [km]'], 
+                        mc_brute_vectorized(size, bins=cdf_data['Separation [km]']), 
+                        c=colors[i], label=labels[i])
+            ax[0].axvline(size, c=colors[i])
+
+        ax[0].set_title('One microburst size MCMC model\n'
+                        r'$pdf = \delta(s-d)$')
+
+        ax[0].set(xlabel='d [km]', ylabel='posterior PD', xlim=(26, 125)); 
+        ax[1].legend()
+        ax[1].set(xlabel='AC6 separation (s) [km]', ylabel='F(s)', xlim=(0, 90))
+
+        plt.tight_layout()
+        plt.show()

@@ -181,7 +181,9 @@ if __name__ == '__main__':
         bx = plt.subplot(gs[2, :])
 
         N = df.shape[0]
-        colors = ['g', 'r', 'b']
+        colors = ['r', 'g', 'b']
+        quartiles = [2.5, 50, 97.5]
+
         ax[0,0].plot(np.arange(N)/1E4, df.a, c='k')
         ax[1,0].hist(df.a, density=True, bins=np.linspace(0, 1, num=100), color='k')
         ax[0,0].set(xlabel=r'Iteration x $10^4$', ylabel='a trace')
@@ -224,7 +226,6 @@ if __name__ == '__main__':
         bx.plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k')
 
         # Find the mean and 95% interval of the 1000 curves.
-        quartiles = [2.5, 50, 97.5]
         y_quartile = np.percentile(y_model, quartiles, axis=0)
 
         for i, q in enumerate(y_quartile):
@@ -248,7 +249,9 @@ if __name__ == '__main__':
         bx = plt.subplot(gs[1, :])
 
         N = df.shape[0]
-        colors = ['g', 'r', 'b']
+        colors = ['r', 'g', 'b']
+        quartiles = [2.5, 50, 97.5]
+
         ax[0,0].hist(df.a, density=True, bins=np.linspace(0, 1, num=100), color='k')
         ax[0,0].plot(np.linspace(0, 1), prior[0].pdf(np.linspace(0, 1)))
         ax[0,0].set(xlabel='a', ylabel='a posterior PD', xlim=(0, 0.1))
@@ -286,7 +289,6 @@ if __name__ == '__main__':
         bx.plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k', label='AC6 F(s)')
 
         # Find the mean and 95% interval of the 1000 curves.
-        quartiles = [2.5, 50, 97.5]
         y_quartile = np.percentile(y_model, quartiles, axis=0)
 
         for i, q in enumerate(y_quartile):

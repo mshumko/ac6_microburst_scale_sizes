@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import scipy.stats
+import math
 import os
 
 import pandas as pd 
@@ -153,6 +154,7 @@ if __name__ == '__main__':
     # Else do the Metroplis thing where you draw a random number between 
     # 0 and 1 and compare to the target value (which will be less than 1).
     niter = 100000
+    niter_power = int(math.log10(niter))
     target = lambda p: gaus_likelihood(p, cdf_data['Separation [km]'], 
                                 cdf_data['CDF'], niter)*np.prod(
                                 [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])
@@ -184,20 +186,20 @@ if __name__ == '__main__':
         colors = ['r', 'g', 'b']
         quartiles = [2.5, 50, 97.5]
 
-        ax[0,0].plot(np.arange(N)/1E4, df.a, c='k')
+        ax[0,0].plot(np.arange(N)/niter*10, df.a, c='k')
         ax[1,0].hist(df.a, density=True, bins=np.linspace(0, 1, num=100), color='k')
-        ax[0,0].set(xlabel=r'Iteration x $10^4$', ylabel='a trace')
+        ax[0,0].set(xlabel=f'Iteration x 10E{niter_power-1}', ylabel='a trace')
         ax[1,0].plot(np.linspace(0, 1), prior[0].pdf(np.linspace(0, 1)))
         ax[1,0].set(xlabel='a', ylabel='a posterior PD')
 
-        ax[0,1].plot(np.arange(N)/1E4, df.d0, c='k')
-        ax[0,1].set(xlabel=r'Iteration x $10^4$', ylabel=r'$d_0$ trace')
+        ax[0,1].plot(np.arange(N)/niter*10, df.d0, c='k')
+        ax[0,1].set(xlabel=f'Iteration x 10E{niter_power-1}', ylabel=r'$d_0$ trace')
         ax[1,1].hist(df.d0, density=True, bins=np.linspace(0, 200), color='k')
         ax[1,1].plot(np.linspace(0, 200), prior[1].pdf(np.linspace(0, 200)))
         ax[1,1].set(xlabel=r'$d_0$ [km]', ylabel=r'$d_0$ posterior PD')
 
-        ax[0,2].plot(np.arange(N)/1E4, df.d1, c='k')
-        ax[0,2].set(xlabel=r'Iteration x $10^4$', ylabel=r'$d_1$ trace')
+        ax[0,2].plot(np.arange(N)/niter*10, df.d1, c='k')
+        ax[0,2].set(xlabel=f'Iteration x 10E{niter_power-1}', ylabel=r'$d_1$ trace')
         ax[1,2].hist(df.d1, density=True, bins=np.linspace(0, 200), color='k')
         ax[1,2].plot(np.linspace(0, 200), prior[2].pdf(np.linspace(0, 200)))
         ax[1,2].set(xlabel=r'$d_1$ [km]', ylabel=r'$d_1$ posterior PD')
@@ -281,7 +283,8 @@ if __name__ == '__main__':
                 ))
             #print(burst_diameters)
             y_model[j, :] = mc_brute_vectorized(burst_diameters, 
-                                    bins=cdf_data['Separation [km]'])
+                                    bins=cdf_data['Separation [km]'],
+                                    n_bursts=niter)
             j += 1
 
         for i in range(N_plot):

@@ -29,6 +29,150 @@ Abel, B.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Agapitov%
+, Blum%
+, Mozer%
+, Bonnell%
+\BCBL {}\ \BBA {} Wygant%
+}{%
+Agapitov%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2017}}%
+}]{%
+Agapitov2017a}
+\APACinsertmetastar {%
+Agapitov2017a}%
+\begin{APACrefauthors}%
+Agapitov, O.%
+, Blum, L\BPBI W.%
+, Mozer, F\BPBI S.%
+, Bonnell, J\BPBI W.%
+\BCBL {}\ \BBA {} Wygant, J.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2017}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Chorus whistler wave source scales as determined from
+  multipoint Van Allen Probe measurements} {Chorus whistler wave source scales
+  as determined from multipoint van allen probe measurements}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Geophysical Research Letters}{}{}{n/a--n/a}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1002/2017GL072701}
+  \end{APACrefURL}
+\newblock
+\APACrefnote{2017GL072701}
+\newblock
+\begin{APACrefDOI} \doi{10.1002/2017GL072701} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Agapitov%
+\ \protect \BOthers {.}}{%
+Agapitov%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2011}}%
+}]{%
+Agapitov2011b}
+\APACinsertmetastar {%
+Agapitov2011b}%
+\begin{APACrefauthors}%
+Agapitov, O.%
+, Krasnoselskikh, V.%
+, Dudok~de Wit, T.%
+, Khotyaintsev, Y.%
+, Pickett, J\BPBI S.%
+, Santolik, O.%
+\BCBL {}\ \BBA {} Rolland, G.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2011}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Multispacecraft observations of chorus emissions as a
+  tool for the plasma density fluctuations' remote sensing} {Multispacecraft
+  observations of chorus emissions as a tool for the plasma density
+  fluctuations' remote sensing}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{116}{A9}{n/a--n/a}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1029/2011JA016540}
+  \end{APACrefURL}
+\newblock
+\APACrefnote{A09222}
+\newblock
+\begin{APACrefDOI} \doi{10.1029/2011JA016540} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Agapitov%
+\ \protect \BOthers {.}}{%
+Agapitov%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2010}}%
+}]{%
+Agapitov2010}
+\APACinsertmetastar {%
+Agapitov2010}%
+\begin{APACrefauthors}%
+Agapitov, O.%
+, Krasnoselskikh, V.%
+, Zaliznyak, Y.%
+, Angelopoulos, V.%
+, Le~Contel, O.%
+\BCBL {}\ \BBA {} Rolland, G.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2010}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Chorus source region localization in the Earth's outer
+  magnetosphere using THEMIS measurements} {Chorus source region localization
+  in the earth's outer magnetosphere using themis measurements}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Annales Geophysicae}{28}{6}{1377--1386}.
+\newblock
+\begin{APACrefURL} \url{http://www.ann-geophys.net/28/1377/2010/}
+  \end{APACrefURL}
+\newblock
+\begin{APACrefDOI} \doi{10.5194/angeo-28-1377-2010} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Agapitov%
+\ \protect \BOthers {.}}{%
+Agapitov%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2018}}%
+}]{%
+Agapitov2018}
+\APACinsertmetastar {%
+Agapitov2018}%
+\begin{APACrefauthors}%
+Agapitov, O.%
+, Mourenas, D.%
+, Artemyev, A.%
+, Mozer, F.%
+, Bonnell, J.%
+, Angelopoulos, V.%
+\BDBL {}Krasnoselskikh, V.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2018}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Spatial extent and temporal correlation of chorus and
+  hiss: Statistical results from multipoint THEMIS observations} {Spatial
+  extent and temporal correlation of chorus and hiss: Statistical results from
+  multipoint themis observations}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{123}{10}{8317--8330}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 Anderson%
 \ \BBA {} Milton%
 }{%
@@ -321,6 +465,38 @@ Greeley, A.%
   microbursts to global electron loss in the radiation belts}.{\BBCQ}
 \newblock
 \APACjournalVolNumPages{Journal of Geophysical Research: Space Physics}{}{}{}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Gurnett%
+, Anderson%
+, Scarf%
+, Fredricks%
+\BCBL {}\ \BBA {} Smith%
+}{%
+Gurnett%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {1979}}%
+}]{%
+Gurnett1979}
+\APACinsertmetastar {%
+Gurnett1979}%
+\begin{APACrefauthors}%
+Gurnett, D.%
+, Anderson, R.%
+, Scarf, F.%
+, Fredricks, R.%
+\BCBL {}\ \BBA {} Smith, E.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1979}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Initial results from the ISEE-1 and-2 plasma wave
+  investigation} {Initial results from the isee-1 and-2 plasma wave
+  investigation}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Space Science Reviews}{23}{1}{103--122}.
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
@@ -858,6 +1034,38 @@ Sambridge, M.%
   evidence}.{\BBCQ}
 \newblock
 \APACjournalVolNumPages{Geophysical Journal International}{167}{2}{528--542}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Santolik%
+, Gurnett%
+, Pickett%
+, Parrot%
+\BCBL {}\ \BBA {} Cornilleau-Wehrlin%
+}{%
+Santolik%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2003}}%
+}]{%
+Santolik2003}
+\APACinsertmetastar {%
+Santolik2003}%
+\begin{APACrefauthors}%
+Santolik, O.%
+, Gurnett, D.%
+, Pickett, J.%
+, Parrot, M.%
+\BCBL {}\ \BBA {} Cornilleau-Wehrlin, N.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2003}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Spatio-temporal structure of storm-time chorus}
+  {Spatio-temporal structure of storm-time chorus}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{108}{A7}{}.
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%

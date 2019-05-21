@@ -196,7 +196,7 @@ The results in Figs. \ref{fig3} and \ref{fig4} show the fraction of microbursts 
 \label{fig4}
 \end{figure}
 
-\section{Modeling the Distribution of Microburst Sizes}
+\section{Modeling the Distribution of Microburst Sizes} \label{model_section}
 \subsection{Monte Carlo and Analytic Models to Estimate $F(s)$}
 \textcolor{blue}{
 TO-DO
@@ -278,17 +278,30 @@ TO-DO
 \end{itemize}
 }
 
-The equatorial microburst $F(s)$ estimated in section \ref{microburst_distribution} can be compared to prior multi-point measurements of chorus source scales made near the magnetic equator. The International Sun-Earth Explorers (ISEE 1 and 2) were used by \citeA{Gurnett1979} to make one of the first direct chorus source scale measurements. \citeA{Gurnett1979} estimated that the wave power correlation scale was on the order of a few hundred kilometers across the background magnetic field. Using the Cluster Wide Band Data measurements \citeA{Santolik2003} found the correlation scale of whistler mode chorus waves to be around 100 km near the source region at $L \approx 4$ and midnight MLT sector. Recently \citeA{Agapitov2010, Agapitov2011b, Agapitov2017a, Agapitov2018} used a large set of spacecraft with wave measurements near the chorus source region to statistically show that the extent of chorus source region can extend from 600 km in the outer radiation belt to greater than 1,000 km in the outer magnetosphere. 
+The LEO microburst $F(s)$ estimated in section \ref{microburst_distribution} shows that a majority of coincident microburst were observed by AC6 when they were separated by less than a few tens of km. \textcolor{red}{Mention prior studies}
 
-With the prior wave scale measurements and $F(s)$ from Fig. \ref{fig4} in mind, it appears that the majority of microbursts have an equatorial size less than $\approx 200$ km. If we assume that chorus waves scatter electrons as in prior literature e.g. \cite{Lorentzen2001a, Breneman2017}, then the chorus waves that scatter electrons on those scales must have homogeneous wave properties i.e. the wave properties critical to microburst creation must be similar on scales corresponding to the equatorial microburst size.
+******************* COPY ********************** \\
+We presented the first observation of a large microburst with multiple bounces made possible by the twin FIREBIRD-II CubeSats. The microburst's lower bound LEO latitudinal and longitudinal scale sizes of $29 \pm 1$ km and $ 51 \pm 1$ km make it one of the largest observed. The microburst's LEO scale size was larger than the latitudinal scale sizes of typical > 1 MeV microbursts reported in \citeA{Blake1996}, approximately $10$ times larger than reported in \citeA{Dietrich2010}, and approximately $2.6$ times larger than other simultaneous microbursts observed by FIREBIRD-II \cite{Crew2016}. Lastly, the scale sizes derived here were similar to the scale sizes of > 15 keV microbursts observed with a high altitude balloon \cite{Parks1967}. No energy dependence on the minimum latitudinal scale size was observed, while the observed energy dependence of the minimum longitudinal scale size is an artifact of the technique we used to estimate their drift motion. \\
+*************************************************
+
+The model results from section \ref{model_section} emphasizes that care must be taken to interpret the $F(s)$ curves observed by AC6 and the true microburst size distribution due to the compounding effects of an unknown microburst size distribution, unknown microburst shape, and random microburst locations near AC6. 
+
+\textcolor{red}{Address the 40 km size plot, one and two population size plots.}
+
+\textcolor{red}{Two populations may be different energies. Reference Blake}
+
 
 \textcolor{red}{Discuss the LEO sizes and compare them to prior literature. Mention how to interpret fig3 with the random microbursts and $s$ in mind.}
 
 \textcolor{red}{Discuss how to see the microburst shape.}
 A x-ray imager on board a high altitude balloon should determine the microburst size from the distributions of microburst x-rays in the sky.
 
-\section{Conclusions}
+The equatorial microburst $F(s)$ estimated in section \ref{microburst_distribution} can be compared to prior multi-point measurements of chorus source sizes made near the magnetic equator. The International Sun-Earth Explorers (ISEE 1 and 2) were used by \citeA{Gurnett1979} to make one of the first direct chorus source scale measurements. \citeA{Gurnett1979} estimated that the wave power correlation scale was on the order of a few hundred kilometers across the background magnetic field. Using the Cluster Wide Band Data measurements \citeA{Santolik2003} found the correlation scale of whistler mode chorus waves to be around 100 km near the source region at $L \approx 4$ and midnight MLT sector. Recently \citeA{Agapitov2010, Agapitov2011b, Agapitov2017a, Agapitov2018} used a few sets of spacecraft with wave measurements near the chorus source region to statistically show that the extent of chorus source region can extend from 600 km in the outer radiation belt to greater than 1,000 km in the outer magnetosphere. 
 
+With the prior wave size estimates and microburst probability density from Fig. \ref{fig4}b in mind, it appears that the majority of microbursts have an equatorial size less than $\approx 200$ km when compared to the two-point measurements made at high altitude insude the outer radiation belt. Assuming that chorus waves scatter electrons as in prior literature e.g. \cite{Lorentzen2001a, Breneman2017}, then the chorus waves that scatter microburst electrons on those scales must have particular wave properties i.e. the wave properties critical to microburst scattering must be similar on scales corresponding to the equatorial microburst size. The wave properties necessary for scattering microburst electrons e.g. coherence, polarization, wave normal angle, can be identified by studying waves that are only observed for small spacecraft separations. These properties can then aid wave-particle scattering model development by constraining the wave properties and scattering modes responsible for scattering microburst electrons. Optimistically, these models may then be capable of predicting the distribution of microburst sizes that should be observed in LEO.
+
+\section{Conclusions}
+In conclusion, 
 %%
 
 %  Numbered lines in equations:
@@ -465,8 +478,7 @@ A x-ray imager on board a high altitude balloon should determine the microburst 
 
 
 \acknowledgments
-Enter acknowledgments, including your data availability statement, here.
-
+This work was supported by NASA Headquarters under the NASA Earth and Space Science Fellowship Program - Grant 80NSSC18K1204. The AC6 data is available at \\ \noindent http://rbspgway.jhuapl.edu/ac6 and IRBEM-Lib version used for this analysis can be downloaded from https://sourceforge.net/p/irbem/code/616/tree/.
 
 %% ------------------------------------------------------------------------ %%
 %% References and Citations

@@ -198,16 +198,6 @@ The results in Figs. \ref{fig3} and \ref{fig4} show the fraction of microbursts 
 
 \section{Modeling the Distribution of Microburst Sizes} \label{model_section}
 \subsection{Monte Carlo and Analytic Models to Estimate $F(s)$}
-\textcolor{blue}{
-TO-DO
-\begin{itemize}
-\item Show a LEO CDF model assuming a fixed-sized microburst population.
-\item Decide if I should show a two-fixed-sized microburst population or a microburst CDF.
-\item Show the residuals in the plots.
-\item Think about a model comparison.
-\end{itemize}
-}
-
 To account for the effects due to microbursts randomly occurring in the vicinity of AC6 with an unknown distribution of microburst sizes, Monte Carlo (MC) and analytic models were developed. These models assume a hypothesized distribution of microburst sizes expressed with a probability density function $P(r)$, and a microburst geometry to estimate $F(s)$. Microbursts are assumed to be circular with a radius $r$. A few distribution of microburst size hypotheses are considered: a one-size microburst population, a two-size microburst population, and \textcolor{red}{X} continuous $P(r)$.
 
 The MC model is the most intuitive to understand and it consists of randomly scattering $10^5$ microburst centers in a 400 x 400 km grid around AC6 of various $r$ that are distributed according to $P(r)$. Spacecraft A is placed at the origin, and spacecraft B is placed along the positive y-axis at predetermined distances from the origin corresponding to he AC6 separation bins used in Section \ref{microburst_distribution} Then the cumulative number of simultaneously observed microbursts at spacecraft A and each spacecraft B location was counted. The modeled fraction of microbursts observed above $s$ is then
@@ -267,17 +257,6 @@ P(d) = a \delta(s-d_0) + (1-a)\delta(s-d_1)
 \end{figure}
 
 \section{Discussion}
-\textcolor{blue}{
-TO-DO
-\begin{itemize}
-\item Discuss the significance of the peaks in the LEO CDF \& PDF.
-\item Discuss the secondary peak.
-\item Talk about how these sizes fit in with prior work and how they can be used to estimate microburst loss rates.
-\item Maybe add a plot with Oleksiy's data?
-\item Use the wave data to interpret the equatorial scale size distribution. Is the < 200 km peak due to high amplitude waves, or is it just that waves are most common at those scales?
-\end{itemize}
-}
-
 The LEO microburst $F(s)$ estimated in section \ref{microburst_distribution} shows that a majority of coincident microburst were observed by AC6 when they were separated by less than a few tens of km. When taken in context with prior literature, the LEO microburst size distribution calculated here is consistent with prior microburst size estimates. These results are most similar to citeA{Parks1967} who reported that $> 15$ keV microbursts are $40 \pm 14$ km and the bouncing packet example shown in \citeA{Blake1996} with a size of ``at least a few tens of kilometers". The AC6 microburst size distribution is much larger than the sizes reported in \citeA{Dietrich2010} who used very low (VLF) frequency transmission paths and SAMPEX and concluded that microbursts must be smaller than 4 km from a small number of microbursts observed during one SAMPEX pass. Furthermore, \citeA{Dietrich2010} used the coincidence of microbursts and FAST events, subsecond VLF transmission perturbations, to make their conclusions while the connection between FAST events and microbursts is not well understood. Lastly, these results are consistent with FIREBIRD-II observations of a $> 11$ km microburst reported by \citeA{Crew2016}. 
 
 The microbursts observed by AC6 up to $s \approx 70$ km are consistent with the $> 51$ km bouncing packet microburst reported in \citeA{Shumko2018a}. The microburst probability density shown in Fig. \ref{fig3}b shows that there is evidence of two microburst populations. The quality of the AC6 data is insufficient to definitively conclude that there are two distinct microburst populations. Assuming these two populations are real, the different microburst sizes may be distinguished by their energies as suggested by \citeA{Blake1996} who noted that the $> 150$ keV and $> 1 MeV$ microbursts are not always well correlated e.g. Fig. 10 in \citeA{Blake1996}.
@@ -291,10 +270,17 @@ The equatorial microburst $F(s)$ estimated in section \ref{microburst_distributi
 With the prior wave size estimates and microburst probability density from Fig. \ref{fig4}b in mind, it appears that the majority of microbursts have an equatorial size less than $\approx 200$ km when compared to the two-point measurements made at high altitude insude the outer radiation belt. Assuming that chorus waves scatter electrons as in prior literature e.g. \cite{Lorentzen2001a, Breneman2017}, then the chorus waves that scatter microburst electrons on those scales must have particular wave properties i.e. the wave properties critical to microburst scattering must be similar on scales corresponding to the equatorial microburst size. The wave properties necessary for scattering microburst electrons e.g. coherence, polarization, wave normal angle, can be identified by studying waves that are only observed for small spacecraft separations. These properties can then aid wave-particle scattering model development by constraining the wave properties and scattering modes responsible for scattering microburst electrons. Optimistically, these models may then be capable of predicting the distribution of microburst sizes that should be observed in LEO.
 
 \section{Conclusions}
-In conclusion, 
+In conclusion, the twin AC6 CubeSats enabled the detailed statistical study of microburst sizes from a two point measurement platform. Roughly 60 \% of the $> 30$ keV microbursts were simultaneously observed while AC6 was separated by less than 20 km and the rest were observed up to $\approx 80$ km separation. The microburst cumulative distribution function normalized for separation is essential to understand and model the microburst size distribution. The AC6 microburst data together with modeling has hinted at the existence of two microburst populations with the majority of microbursts smaller than 40 km, and another rare microburst population around $\approx 100$ km. 
 
+
+
+modeling results by the  and the one size microburst
+
+
+\textcolor{red}{Talk about how these sizes fit in with prior work and how they can be used to estimate microburst loss rates.}
 
 To disentangle these compounding effects, a x-ray imager on board a high altitude balloon can determine the microburst size and shape without ambiguity from the distributions of x-rays created when microburst electrons scatter in the atmosphere.
+
 %%
 
 %  Numbered lines in equations:

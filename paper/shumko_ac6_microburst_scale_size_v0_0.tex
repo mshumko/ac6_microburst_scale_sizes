@@ -246,12 +246,12 @@ While the Metropolis sampler is explained in detail in \citeA{Metropolis1953} an
 The one-size microburst population model is explored first and the microburst PDF is given by 
 \begin{equation}
 P(d) = \delta(s-d)
-\end{equation} where $\delta$ is the Dirac Delta function and $d$ is the diameter of all microbursts. The range of $d$ that is consistent with the observed $F(s)$ is shown in Fig. \ref{fig6}. With this model, the microburst size is between 38 and 129 km. 
+\end{equation} where $\delta$ is the Dirac Delta function and $d$ is the diameter of all microbursts. The range of $d$ that is consistent with the observed $F(s)$ is shown in Fig. \ref{fig6}. With this model, the microburst size is between 38 and 129 km with the optimal size of 73 km, estimated from the minimum least squares. 
 
 A generalization of the one-size model is a two-size microburst population model that assumes the following microburst PDF
 \begin{equation}
 P(d) = a \delta(s-d_0) + (1-a)\delta(s-d_1)
-\end{equation} where the diameters of the two microburst populations is given by $d_0$ and $d_1$ and $a$ is the parameter encoding the relative fractions of the two populations. The result of this model is shown in Fig. \ref{fig7}. The fit is slightly better than the one-size model, although that is to be expected assuming the two more free model parameters. A majority, $98$ \% of microbursts have a size between 12 and 47 km with a rare population with a size between 76 and 234 km. A few continuous microburst size distributions such as the Maxwellian, Weibull and log-normal were also explored with similar results and are not shown. Due to lack of prior observations and theoretical predictions, it is difficult to identify a more appropriate microburst size distribution hypothesis. \textcolor{red}{Add the best least squares values.}
+\end{equation} where the diameters of the two microburst populations is given by $d_0$ and $d_1$ and $a$ is the parameter encoding the relative fractions of the two populations. The result of this model is shown in Fig. \ref{fig7}. The fit is slightly better than the one-size model, although that is to be expected assuming the two more free model parameters. A majority, $98$ \% of microbursts have a size between $12$ and $47$ km with a rare population with a size between 76 and 234 km. The parameter set that minimizes the least squares penalty function is $99.5$ \% of microbursts are small with a size of $21$ km and the $0.5$ \% of microbursts with a size of 140 km.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig6.png}
@@ -282,7 +282,9 @@ The LEO microburst $F(s)$ estimated in section \ref{microburst_distribution} sho
 
 The microbursts observed by AC6 up to $s \approx 70$ km are consistent with the $> 51$ km bouncing packet microburst reported in \citeA{Shumko2018a}. The microburst probability density shown in Fig. \ref{fig3}b shows that there is evidence of two microburst populations. The quality of the AC6 data is insufficient to definitively conclude that there are two distinct microburst populations. Assuming these two populations are real, the different microburst sizes may be distinguished by their energies as suggested by \citeA{Blake1996} who noted that the $> 150$ keV and $> 1 MeV$ microbursts are not always well correlated e.g. Fig. 10 in \citeA{Blake1996}.
 
-The model results from section \ref{model_section} emphasizes that care must be taken to interpret the $F(s)$ curves observed by AC6 and the true microburst size distribution due to the compounding effects of an unknown microburst size distribution, unknown microburst shape, and random microburst locations near AC6. \textcolor{red}{Address the 40 km size plot, one and two population size plots.} To disentangle these compounding effects, a x-ray imager on board a high altitude balloon can determine the microburst size and shape without ambiguity from the distributions of x-rays created when microburst electrons scatter in the atmosphere.
+The model results from section \ref{model_section} emphasizes that care must be taken to interpret the $F(s)$ curves observed by AC6 and the true microburst size distribution due to the compounding effects of an unknown microburst size distribution, unknown microburst shape, and random microburst locations near AC6. The one-size model results in Fig. \ref{fig6} show that there is a 95\% probability that the microburst size is somewhere between 38 and 129 km, a relatively wide range of values. The two-size model shown in Fig. \ref{fig7} does better at encompassing the AC6 $F(s)$, which is expected with the addition of two more free parameters. The two size model is interpreted as 98\% of microbursts sizes are between 12 and 47 km and larger microbursts being very uncommon. A variety of continuous microburst size distributions such as the Maxwellian, Weibull and log-normal were also explored with similar results and are not shown. Due to lack of prior observations and theoretical predictions, it is difficult to identify an appropriate microburst size distribution hypothesis.
+
+\textcolor{red}{Show the optimal values.}
 
 The equatorial microburst $F(s)$ estimated in section \ref{microburst_distribution} can be compared to prior multi-point measurements of chorus source sizes made near the magnetic equator. The International Sun-Earth Explorers (ISEE 1 and 2) were used by \citeA{Gurnett1979} to make one of the first direct chorus source scale measurements. \citeA{Gurnett1979} estimated that the wave power correlation scale was on the order of a few hundred kilometers across the background magnetic field. Using the Cluster Wide Band Data measurements \citeA{Santolik2003} found the correlation scale of whistler mode chorus waves to be around 100 km near the source region at $L \approx 4$ and midnight MLT sector. Recently \citeA{Agapitov2010, Agapitov2011b, Agapitov2017a, Agapitov2018} used a few sets of spacecraft with wave measurements near the chorus source region to statistically show that the extent of chorus source region can extend from 600 km in the outer radiation belt to greater than 1,000 km in the outer magnetosphere. 
 
@@ -290,6 +292,9 @@ With the prior wave size estimates and microburst probability density from Fig. 
 
 \section{Conclusions}
 In conclusion, 
+
+
+To disentangle these compounding effects, a x-ray imager on board a high altitude balloon can determine the microburst size and shape without ambiguity from the distributions of x-rays created when microburst electrons scatter in the atmosphere.
 %%
 
 %  Numbered lines in equations:

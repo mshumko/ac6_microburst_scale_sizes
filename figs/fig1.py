@@ -1,14 +1,12 @@
-# This script calls the 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 import csv
+import dateutil.parser
 
-import ac6_microburst_scale_sizes.microburst_detection.replace_error_sep_lags as replace_error_sep_lags
-
-r = replace_error_sep_lags.ReplaceErrorVals('/home/mike/research/ac6/AC6_Separation.csv', None)
-r.loadSeprationFile()
+separation = pd.read_csv('/home/mike/research/ac6/AC6_Separation.csv', 
+                        converters={0:dateutil.parser.parse})
 
 # Now load the L-MLT normalization files.
 with open('/home/mike/research/ac6_microburst_scale_sizes/data/norm/ac6_L_MLT_bins.csv') as f:
@@ -29,12 +27,13 @@ earth_circ = (np.linspace(0, 2*np.pi, earth_resolution), np.ones(earth_resolutio
 earth_shadow = (np.linspace(-np.pi/2, np.pi/2, earth_resolution), 0, np.ones(earth_resolution))
 
 # Plot the lifetime AC-6 separation
-#fig, ax = plt.subplots(2)
+sep_downsample = 100
 fig = plt.figure(figsize=(11, 5))
 ax = 2*[None]
 ax[0] = plt.subplot(121)
 ax[1] = plt.subplot(122, projection='polar')
-ax[0].plot(r.sepDict['Date/Time'], np.abs(r.sepDict['In-Track Separation [km]']))
+ax[0].plot(separation['Date/Time'][::sep_downsample], 
+        np.abs(separation['In-Track Separation [km]'][::sep_downsample]))
 ax[0].set_xlabel('Date [YYYY-MM]')
 ax[0].set_ylabel('Separation [km]')
 ax[0].set_title('AC-6 In-Track Separation')
@@ -48,8 +47,16 @@ L_lower = 0
 idL = np.where(np.array(bins['Lm_OPQ']) >= L_lower)[0][0]
 p = ax[1].pcolormesh(np.array(bins['MLT_OPQ'])*np.pi/12, 
                     bins['Lm_OPQ'][idL:], norm[idL:, :]/1E5, cmap='Reds')
+# Draw Earth and shadow
 ax[1].plot(*earth_circ, c='k')
 ax[1].fill_between(*earth_shadow, color='k')
+
+# Draw azimuthal lines for a subset of L shells.
+L_labels = [2, 4, 6, 8]
+for L in L_labels:
+    ax[1].plot(np.linspace(0, 2*np.pi, earth_resolution), 
+                L*np.ones(earth_resolution), ls=':', c='k')
+
 plt.colorbar(p, ax=ax[1], label=r'10 Hz Samples x $10^5$')
 ax[1].set_xlabel('MLT')
 ax[1].set_title('AC-6 simultaneous data avaliability')
@@ -57,11 +64,11 @@ ax[1].set_title('AC-6 simultaneous data avaliability')
 ax[1].set_theta_zero_location("S") # Midnight at bottom
 mlt_labels = (ax[1].get_xticks()*12/np.pi).astype(int)
 ax[1].set_xticklabels(mlt_labels) # Transform back from 0->2pi to 0->24.
-ax[1].set_yticks([4, 6, 8])
+ax[1].set_yticks(L_labels)
 
 # A and B labels
 ax[0].text(-0.1, 1, '(a)', transform=ax[0].transAxes, fontsize=20)
-ax[1].text(-0.1, 1.02, '(b)', transform=ax[1].transAxes, fontsize=20)
+ax[1].text(-0.1, 1.03, '(b)', transform=ax[1].transAxes, fontsize=20)
 
 plt.tight_layout()
 plt.show()

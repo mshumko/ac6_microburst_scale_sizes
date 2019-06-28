@@ -22,6 +22,12 @@ with open('/home/mike/research/ac6_microburst_scale_sizes/data/norm/ac6_L_MLT_no
     next(reader) # skip header
     norm = 10*np.array(list(reader)).astype(float) # Convert to number of samples.
 
+earth_resolution = 50
+# Just x,y coords for a line (to map to polar coords)
+earth_circ = (np.linspace(0, 2*np.pi, earth_resolution), np.ones(earth_resolution)) 
+# x, y_lower, y_upper coords for Earth's shadow (also to map to polar).
+earth_shadow = (np.linspace(-np.pi/2, np.pi/2, earth_resolution), 0, np.ones(earth_resolution))
+
 # Plot the lifetime AC-6 separation
 #fig, ax = plt.subplots(2)
 fig = plt.figure(figsize=(11, 5))
@@ -42,6 +48,8 @@ L_lower = 4
 idL = np.where(np.array(bins['Lm_OPQ']) >= L_lower)[0][0]
 p = ax[1].pcolormesh(np.array(bins['MLT_OPQ'])*np.pi/12, 
                     bins['Lm_OPQ'][idL:], norm[idL:, :]/1E5, cmap='Reds')
+ax[1].plot(*earth_circ, c='k')
+ax[1].fill_between(*earth_shadow, color='k')
 plt.colorbar(p, ax=ax[1], label=r'10 Hz Samples x $10^5$')
 ax[1].set_xlabel('MLT')
 ax[1].set_title('AC-6 simultaneous data avaliability')

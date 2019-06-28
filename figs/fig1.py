@@ -44,7 +44,7 @@ ax[0].set_xticks(pd.date_range(start='6/1/2014', end='9/1/2017', freq='2Q'))
 ax[0].xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
 
 # L shell filter for the L-MLT plot
-L_lower = 4
+L_lower = 0
 idL = np.where(np.array(bins['Lm_OPQ']) >= L_lower)[0][0]
 p = ax[1].pcolormesh(np.array(bins['MLT_OPQ'])*np.pi/12, 
                     bins['Lm_OPQ'][idL:], norm[idL:, :]/1E5, cmap='Reds')
@@ -60,8 +60,8 @@ ax[1].set_xticklabels(mlt_labels) # Transform back from 0->2pi to 0->24.
 ax[1].set_yticks([4, 6, 8])
 
 # A and B labels
-ax[0].text(-0.2, 1, '(a)', transform=ax[0].transAxes, fontsize=20)
-ax[1].text(-0.2, 1.05, '(b)', transform=ax[1].transAxes, fontsize=20)
+ax[0].text(-0.1, 1, '(a)', transform=ax[0].transAxes, fontsize=20)
+ax[1].text(-0.1, 1.02, '(b)', transform=ax[1].transAxes, fontsize=20)
 
 plt.tight_layout()
 plt.show()

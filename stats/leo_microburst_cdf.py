@@ -157,17 +157,17 @@ class Microburst_CDF:
                 ax[0].fill_between(self.sep_bins[:-1], C-C_err, C+C_err, facecolor='k', 
                                     alpha=0.5)
                 ax[1].fill_between(self.sep_bins[:-2], P-P_err, P+P_err, facecolor='k',
-                        label=f'4 < L < 8', lw=3, alpha=0.5)
+                        label=f'all', lw=3, alpha=0.5)
             else:
                 ax[0].fill_between(self.sep_bins[:-1], C_err[0], C_err[1], facecolor='k', 
                                     alpha=0.5)
                 ax[1].fill_between(self.sep_bins[:-2], P_err[0], P_err[1], facecolor='k',
-                        label=f'4 < L < 8', lw=3, alpha=0.5)
+                        label=f'all', lw=3, alpha=0.5)
 
             ax[0].plot(self.sep_bins[:-1], C, c='k', 
-                        label=f'4 < L < 8 | N = {N}', lw=3, alpha=0.5)
+                        label=f'all', lw=3, alpha=0.5)
             ax[1].plot(self.sep_bins[:-2], P, c='k', lw=3)
-            ax[2].plot(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c='k')
+            ax[2].step(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c='k')
             
         if plot_L:
             for i, (lower_L, upper_L) in enumerate(zip(L_array[:-1], L_array[1:])):
@@ -183,20 +183,19 @@ class Microburst_CDF:
                 # Running average on the PDF
                 P = np.convolve(np.ones(n)/n, P, mode='same')
                 ax[0].errorbar(self.sep_bins[:-1], C, c=c[i],
-                            label=f'{lower_L} < L < {upper_L} | N = {N}', capsize=5)
-                ax[1].errorbar(self.sep_bins[:-2], P, c=c[i], 
-                            label=f'{lower_L} < L < {upper_L}')
-                ax[2].plot(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c=c[i])
+                            label=f'{lower_L} < L < {upper_L}', capsize=5)
+                ax[1].errorbar(self.sep_bins[:-2], P, c=c[i])
+                ax[2].step(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c=c[i])
             
         ax[0].legend()
         ax[0].set_xlim(left=0, right=90)
         ax[0].set_ylim(bottom=0)
         ax[1].set_ylim(bottom=0)
         ax[0].set_title('AC6 microburst size distribution in low Earth orbit')
-        ax[0].set_ylabel('Fraction of Larger Microbursts')
-        ax[1].set_ylabel('Microburst PD')
+        ax[0].set_ylabel('Percent of Microbursts Larger')
+        ax[1].set_ylabel('Microburst Size Histogram')
         ax[2].set_xlabel('AC6 Separation [km]')
-        ax[2].set_ylabel(r'Samples x $10^4$')
+        ax[2].set_ylabel(r'Samples Per Bin x $10^4$')
         ax[2].set_ylim(bottom=0)
         ax[2].set_xticks(np.arange(min(self.sep_bins), max(self.sep_bins)+1, 10))
         plt.tight_layout()

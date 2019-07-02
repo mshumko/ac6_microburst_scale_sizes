@@ -79,19 +79,7 @@ class Microburst_Equatorial_CDF:
         _, ax = plt.subplots(3, figsize=(8, 8), sharex=True)
         c=['r', 'b', 'g', 'm']
         # sample_file_dir = ('/home/mike/research/ac6_microburst'
-        #                     '_scale_sizes/data/norm')            
-
-        for i, (lower_L, upper_L) in enumerate(zip(L_array[:-1], L_array[1:])):
-            cdf, pdf, cdf_error, pdf_error, N = self.calc_cdf_pdf(
-                                                    self.microburst_catalog, 
-                                                    lower_L, upper_L)
-            # Plot just the line
-            ax[0].errorbar(self.norm.index[:-1], cdf, c=c[i],
-                        label=f'{lower_L} < L < {upper_L} | N = {N}', capsize=5)
-            ax[1].errorbar(self.norm.index[:-2], pdf, c=c[i], 
-                        label=f'{lower_L} < L < {upper_L}')
-            ax[2].plot(self.norm.index, self.norm[str(float(lower_L))]/1E5, c[i])
-
+        #                     '_scale_sizes/data/norm') 
         if plot_all:
             # Plot the CDF over all L shells in the belts.
             cdf, pdf, cdf_error, pdf_error, N = self.calc_cdf_pdf(
@@ -99,9 +87,8 @@ class Microburst_Equatorial_CDF:
                                                     4, 8)
             # Plot just the line
             ax[0].errorbar(self.norm.index[:-1], cdf, c='k',
-                        label=f'4 < L < 8 | N = {N}', lw=2, capsize=2)
-            ax[1].errorbar(self.norm.index[:-2], pdf, c='k', 
-                        label=f'4 < L < 8', lw=2)
+                        label=f'all', lw=2, capsize=2)
+            ax[1].errorbar(self.norm.index[:-2], pdf, c='k', lw=2)
             # Try using fill_between
             ax[0].fill_between(self.norm.index[:-1:1], cdf[::1]-cdf_error[::1], 
                         cdf[::1]+cdf_error[::1], facecolor='k', alpha=0.5)
@@ -111,18 +98,28 @@ class Microburst_Equatorial_CDF:
             all_samples = np.zeros_like(self.norm.index)
             for L_col in L_array[:-1]:
                 all_samples += self.norm.loc[:, str(float(L_col))]
-            ax[2].plot(self.norm.index, all_samples/1E5, 'k')
+            ax[2].step(self.norm.index, all_samples/1E5, 'k')           
+
+        for i, (lower_L, upper_L) in enumerate(zip(L_array[:-1], L_array[1:])):
+            cdf, pdf, cdf_error, pdf_error, N = self.calc_cdf_pdf(
+                                                    self.microburst_catalog, 
+                                                    lower_L, upper_L)
+            # Plot just the line
+            ax[0].errorbar(self.norm.index[:-1], cdf, c=c[i],
+                        label=f'{lower_L} < L < {upper_L}', capsize=5)
+            ax[1].errorbar(self.norm.index[:-2], pdf, c=c[i], 
+                        label=f'{lower_L} < L < {upper_L}')
+            ax[2].step(self.norm.index, self.norm[str(float(lower_L))]/1E5, c[i])
             
         ax[0].legend()
         ax[0].set_xlim(left=1, right=self.norm.index[-3])
         ax[0].set_ylim(bottom=0)
         ax[1].set_ylim(bottom=0)
         ax[0].set_title('AC6 Equatorial Microburst Size Distribution')
-        ax[0].set_ylabel('Microburst fraction')
-        ax[1].set_ylabel('Microburst PD')
-        ax[-1].set_xlabel('Equatorial Separation [km]')
-        ax[-1].set_ylabel(r'Samples x$10^5$')
-        #ax[2].set_xticks(np.arange(min(self.sep_bins), max(self.sep_bins)+1, 10))
+        ax[0].set_ylabel('Percent of Microbursts Larger')
+        ax[1].set_ylabel('Microburst Size Histogram')
+        ax[-1].set_xlabel('AC6 Equatorial Separation [km]')
+        ax[-1].set_ylabel(r'Samples Per Bin x $10^5$')
         plt.tight_layout()
         plt.show()
         return

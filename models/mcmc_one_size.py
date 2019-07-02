@@ -2,11 +2,14 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import scipy.stats
 import os
 
 import pandas as pd 
 import progressbar
+
+# plt.rcParams.update({'font.size':13})
 
 GRID_SIZE = 200
 PRIOR = 'uniform'
@@ -162,7 +165,13 @@ if __name__ == '__main__':
     else:
         colors = ['r', 'g', 'b']
         labels = ['2.5 %', '50 %', "97.5 %"]
-        _, ax = plt.subplots(2, 1, figsize=(7, 7))
+        fig = plt.figure(figsize=(7, 6))
+        gs = gridspec.GridSpec(2, 1, height_ratios=[1, 2])
+        ax = np.zeros(2, dtype=object)
+        ax[0] = plt.subplot(gs[0, 0])
+        ax[1] = plt.subplot(gs[1, 0])
+
+        #_, ax = plt.subplots(2, 1, figsize=(7, 5))
         ax[0].hist(df.d, density=True, bins=np.arange(0, 200), color='k', label='_nolegend_')
         ax[0].plot(np.linspace(0, 200), prior[0].pdf(np.linspace(0, 200)), c='c')
 
@@ -187,10 +196,17 @@ if __name__ == '__main__':
                         c=colors[i], label=labels[i])
             ax[0].axvline(size, c=colors[i])
 
-        ax[0].set_title('Single microburst size model | prior ~ U(0, 200)')
+        ax[0].set_title('Single microburst size model')
+        #ax[0].get_yaxis().set_ticks([])
         ax[0].set(xlabel='Microburst diameter [km]', ylabel='Posterior PDF', xlim=(26, 140)); 
         ax[1].legend()
-        ax[1].set(xlabel='AC6 separation (s) [km]', ylabel=r'Percent of Microbursts Above Separation', xlim=(0, 90))
+        ax[1].set(xlabel='AC6 separation (s) [km]', 
+                    ylabel=r'Percent of Microbursts Above Separation', xlim=(0, 90))
+
+        ax[0].text(0.01, 0.95, '(a)', transform=ax[0].transAxes, 
+                    va='top', fontsize=15)
+        ax[1].text(0.01, 0.98, '(b)', transform=ax[1].transAxes, 
+                    va='top', fontsize=15)
 
         plt.tight_layout()
         plt.show()

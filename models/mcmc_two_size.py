@@ -257,17 +257,17 @@ if __name__ == '__main__':
         ax[0,0].get_yaxis().set_ticks([])
         ax[0,0].hist(df.a, density=True, bins=np.linspace(0, 1, num=100), color='k')
         ax[0,0].plot(np.linspace(0, 1), prior[0].pdf(np.linspace(0, 1)))
-        ax[0,0].set(xlabel='a', xlim=(0, 0.1), ylabel='Posterior PDF')
+        ax[0,0].set(xlabel=r'$d_0/d_1$ mixing ratio, a', xlim=(0, 0.1), ylabel='Posterior PDF')
 
         ax[0,1].get_yaxis().set_ticks([])
         ax[0,1].hist(df.d0, density=True, bins=np.linspace(0, 200), color='k')
         ax[0,1].plot(np.linspace(0, 200), prior[1].pdf(np.linspace(0, 200)))
-        ax[0,1].set(xlabel=r'$d_0$ [km]', xlim=(63, 168))
+        ax[0,1].set(xlabel=r'microburst diamater, $d_0$ [km]', xlim=(63, 168))
 
         ax[0,2].get_yaxis().set_ticks([])
         ax[0,2].hist(df.d1, density=True, bins=np.linspace(0, 200), color='k')
         ax[0,2].plot(np.linspace(0, 200), prior[2].pdf(np.linspace(0, 200)))
-        ax[0,2].set(xlabel=r'$d_1$ [km]', xlim=(9, 48))
+        ax[0,2].set(xlabel=r'microburst diamater, $d_1$ [km]', xlim=(9, 48))
 
 
         # Pick 1000 traces to analyze further to make plots.
@@ -304,7 +304,7 @@ if __name__ == '__main__':
         # ax[0, 1].set_title('Two microburst sizes MCMC model\n'
         #                 r'$pdf = a \delta(s-d_0) + (1-a) \delta(s-d_1)$')
         ax[0, 1].set_title('Two microburst sizes model')
-        bx.set(xlabel='AC6 separation (s) [km]', ylabel='Fraction of Microbursts Above Separation', xlim=(0, 90))
+        bx.set(xlabel='AC6 separation (s) [km]', ylabel='Fraction of Microbursts Above AC6 Separation', xlim=(0, 90))
         bx.legend()
         gs.update(wspace=0.025, hspace=0.2, 
                 left=0.07, right=0.99, 

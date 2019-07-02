@@ -175,12 +175,12 @@ if __name__ == '__main__':
     ### PLOTTING CODE ###
     if not PAPER_PLOT:
         fig = plt.figure(figsize=(10, 8))
-        gs = gridspec.GridSpec(3, 3)
-        ax = np.zeros((2, 3), dtype=object)
+        gs = gridspec.GridSpec(5, 3)
+        ax = np.zeros((1, 3), dtype=object)
         for row in range(ax.shape[0]):
             for column in range(ax.shape[1]):
                 ax[row, column] = plt.subplot(gs[row, column])
-        bx = plt.subplot(gs[2, :])
+        bx = plt.subplot(gs[2:, :])
 
         N = df.shape[0]
         colors = ['r', 'g', 'b']
@@ -242,8 +242,8 @@ if __name__ == '__main__':
 
     else:
         # Paper plot format
-        fig = plt.figure(figsize=(7, 5))
-        gs = gridspec.GridSpec(2, 3)
+        fig = plt.figure(figsize=(9, 7))
+        gs = gridspec.GridSpec(2, 3, height_ratios=[1, 2])
         ax = np.zeros((1, 3), dtype=object)
         for row in range(ax.shape[0]):
             for column in range(ax.shape[1]):
@@ -254,17 +254,20 @@ if __name__ == '__main__':
         colors = ['r', 'g', 'b']
         quartiles = [2.5, 50, 97.5]
 
+        ax[0,0].get_yaxis().set_ticks([])
         ax[0,0].hist(df.a, density=True, bins=np.linspace(0, 1, num=100), color='k')
         ax[0,0].plot(np.linspace(0, 1), prior[0].pdf(np.linspace(0, 1)))
-        ax[0,0].set(xlabel='a', ylabel='a posterior PD', xlim=(0, 0.1))
+        ax[0,0].set(xlabel='a', xlim=(0, 0.1), ylabel='Posterior PDF')
 
+        ax[0,1].get_yaxis().set_ticks([])
         ax[0,1].hist(df.d0, density=True, bins=np.linspace(0, 200), color='k')
         ax[0,1].plot(np.linspace(0, 200), prior[1].pdf(np.linspace(0, 200)))
-        ax[0,1].set(xlabel=r'$d_0$ [km]', ylabel=r'$d_0$ posterior PD', xlim=(63, 168))
+        ax[0,1].set(xlabel=r'$d_0$ [km]', xlim=(63, 168))
 
+        ax[0,2].get_yaxis().set_ticks([])
         ax[0,2].hist(df.d1, density=True, bins=np.linspace(0, 200), color='k')
         ax[0,2].plot(np.linspace(0, 200), prior[2].pdf(np.linspace(0, 200)))
-        ax[0,2].set(xlabel=r'$d_1$ [km]', ylabel=r'$d_1$ posterior PD', xlim=(9, 48))
+        ax[0,2].set(xlabel=r'$d_1$ [km]', xlim=(9, 48))
 
 
         # Pick 1000 traces to analyze further to make plots.
@@ -289,7 +292,7 @@ if __name__ == '__main__':
 
         for i in range(N_plot):
             bx.plot(cdf_data['Separation [km]'], y_model[i,:], c='grey', alpha=0.3)
-        bx.plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k', label='AC6 F(s)')
+        bx.plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k', label='AC6')
 
         # Find the mean and 95% interval of the 1000 curves.
         y_quartile = np.percentile(y_model, quartiles, axis=0)
@@ -298,10 +301,12 @@ if __name__ == '__main__':
             bx.plot(cdf_data['Separation [km]'], q, c=colors[i], 
                     label=f'{quartiles[i]} %')
 
-        ax[0, 1].set_title('Two microburst sizes MCMC model\n'
-                        r'$pdf = a \delta(s-d_0) + (1-a) \delta(s-d_1)$')
-        bx.set(xlabel='AC6 separation (s) [km]', ylabel='F(s)', xlim=(0, 90))
+        # ax[0, 1].set_title('Two microburst sizes MCMC model\n'
+        #                 r'$pdf = a \delta(s-d_0) + (1-a) \delta(s-d_1)$')
+        ax[0, 1].set_title('Two microburst sizes model')
+        bx.set(xlabel='AC6 separation (s) [km]', ylabel='Fraction of Microbursts Above Separation', xlim=(0, 90))
         bx.legend()
-        gs.tight_layout(fig, pad=0.1, w_pad=-3)
-        #gs.update(wspace=0.025, hspace=0.05)
+        gs.update(wspace=0.025, hspace=0.2, 
+                left=0.07, right=0.99, 
+                top=0.95, bottom=0.1)
         plt.show()

@@ -162,7 +162,7 @@ if __name__ == '__main__':
     else:
         colors = ['r', 'g', 'b']
         labels = ['2.5 %', '50 %', "97.5 %"]
-        _, ax = plt.subplots(2, 1, figsize=(6, 5))
+        _, ax = plt.subplots(2, 1, figsize=(7, 7))
         ax[0].hist(df.d, density=True, bins=np.arange(0, 200), color='k', label='_nolegend_')
         ax[0].plot(np.linspace(0, 200), prior[0].pdf(np.linspace(0, 200)), c='c')
 
@@ -179,7 +179,7 @@ if __name__ == '__main__':
             ax[1].plot(cdf_data['Separation [km]'], y_model, c='grey', alpha=0.3)
 
         # plot the AC6 data
-        ax[1].plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k', label='AC6 F(s)')
+        ax[1].plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k', label='AC6')
         # Plot the quantiles
         for i, size in enumerate(np.percentile(df.d, [2.5, 50, 97.5])):
             ax[1].plot(cdf_data['Separation [km]'], 
@@ -187,12 +187,10 @@ if __name__ == '__main__':
                         c=colors[i], label=labels[i])
             ax[0].axvline(size, c=colors[i])
 
-        ax[0].set_title('One microburst size MCMC model\n'
-                        r'$pdf = \delta(s-d)$')
-
-        ax[0].set(xlabel='d [km]', ylabel='posterior PD', xlim=(26, 140)); 
+        ax[0].set_title('Single microburst size model | prior ~ U(0, 200)')
+        ax[0].set(xlabel='Microburst diameter [km]', ylabel='Posterior PDF', xlim=(26, 140)); 
         ax[1].legend()
-        ax[1].set(xlabel='AC6 separation (s) [km]', ylabel='F(s)', xlim=(0, 90))
+        ax[1].set(xlabel='AC6 separation (s) [km]', ylabel=r'Percent of Microbursts Above Separation', xlim=(0, 90))
 
         plt.tight_layout()
         plt.show()

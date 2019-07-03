@@ -181,11 +181,11 @@ if __name__ == '__main__':
         y_model = np.nan*np.zeros((len(rand_ind), 
                                 len(cdf_data['Separation [km]'])))
 
-        for _, row in df.loc[rand_ind, :].iterrows():
-            burst_diameters = row.d
-            y_model = mc_brute_vectorized(burst_diameters, 
-                                    bins=cdf_data['Separation [km]'])
-            ax[1].plot(cdf_data['Separation [km]'], y_model, c='grey', alpha=0.3)
+        # for _, row in df.loc[rand_ind, :].iterrows():
+        #     burst_diameters = row.d
+        #     y_model = mc_brute_vectorized(burst_diameters, 
+        #                             bins=cdf_data['Separation [km]'])
+        #     ax[1].plot(cdf_data['Separation [km]'], y_model, c='grey', alpha=0.3)
 
         # plot the AC6 data
         ax[1].plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k', label='AC6')

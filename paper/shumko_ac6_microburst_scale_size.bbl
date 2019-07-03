@@ -1146,6 +1146,38 @@ Thorne, R\BPBI M.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Turner%
+\ \protect \BOthers {.}}{%
+Turner%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2017}}%
+}]{%
+Turner2017}
+\APACinsertmetastar {%
+Turner2017}%
+\begin{APACrefauthors}%
+Turner, D.%
+, Lee, J.%
+, Claudepierre, S.%
+, Fennell, J.%
+, Blake, J.%
+, Jaynes, A.%
+\BDBL {}others%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2017}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Examining coherency scales, substructure, and
+  propagation of whistler mode chorus elements with Magnetospheric Multiscale
+  (MMS)} {Examining coherency scales, substructure, and propagation of whistler
+  mode chorus elements with magnetospheric multiscale (mms)}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{122}{11}{}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 Van~Allen%
 }{%
 Van~Allen%

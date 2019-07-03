@@ -1,6 +1,6 @@
 This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
 Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
-The top-level auxiliary file: shumko_ac6_microburst_scale_size_v0_0.aux
+The top-level auxiliary file: shumko_ac6_microburst_scale_size.aux
 The style file: apacite.bst
 Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
 Reallocated global_strs (elt_size=20001) to 20 items from 10.
@@ -14,45 +14,45 @@ Reallocated singl_function (elt_size=4) to 100 items from 50.
 Database file #1: /home/mike/Dropbox/0_firebird_research/A_presentations/refs.bib
 apacite.bst [2013/07/21 v6.03 APA bibliography style]
 Warning--No address in O'brien2016
-You've used 37 entries,
+You've used 38 entries,
             6951 wiz_defined-function locations,
-            1565 strings with 19996 characters,
-and the built_in function-call counts, 88527 in all, are:
-= -- 10492
-> -- 854
-< -- 4612
-+ -- 5107
-- -- 76
-* -- 6168
-:= -- 16525
-add.period$ -- 145
-call.type$ -- 37
-change.case$ -- 633
+            1570 strings with 20293 characters,
+and the built_in function-call counts, 91346 in all, are:
+= -- 10805
+> -- 881
+< -- 4783
++ -- 5287
+- -- 80
+* -- 6378
+:= -- 17108
+add.period$ -- 148
+call.type$ -- 38
+change.case$ -- 650
 chr.to.int$ -- 0
-cite$ -- 75
-duplicate$ -- 2753
-empty$ -- 3186
-format.name$ -- 1612
-if$ -- 16003
+cite$ -- 77
+duplicate$ -- 2841
+empty$ -- 3278
+format.name$ -- 1670
+if$ -- 16474
 int.to.chr$ -- 0
-int.to.str$ -- 111
+int.to.str$ -- 114
 missing$ -- 0
-newline$ -- 1116
-num.names$ -- 296
-pop$ -- 1257
+newline$ -- 1144
+num.names$ -- 304
+pop$ -- 1292
 preamble$ -- 1
-purify$ -- 150
+purify$ -- 154
 quote$ -- 0
-skip$ -- 5055
+skip$ -- 5200
 stack$ -- 0
-substring$ -- 5521
-swap$ -- 1527
-text.length$ -- 105
+substring$ -- 5709
+swap$ -- 1575
+text.length$ -- 108
 text.prefix$ -- 0
 top$ -- 1
-type$ -- 3088
+type$ -- 3168
 warning$ -- 1
-while$ -- 539
+while$ -- 558
 width$ -- 0
-write$ -- 1481
+write$ -- 1519
 (There was 1 warning)

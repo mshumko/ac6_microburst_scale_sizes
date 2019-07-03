@@ -306,6 +306,14 @@ if __name__ == '__main__':
         ax[0, 1].set_title('Two microburst sizes model')
         bx.set(xlabel='AC6 separation (s) [km]', ylabel='Fraction of Microbursts Above AC6 Separation', xlim=(0, 90))
         bx.legend()
+        ax[0, 0].text(0.0, 0.95, '(a)', transform=ax[0, 0].transAxes, 
+                    va='top', fontsize=15, color='w')
+        ax[0, 1].text(0.01, 0.95, '(b)', transform=ax[0, 1].transAxes, 
+                    va='top', fontsize=15)
+        ax[0, 2].text(0.01, 0.95, '(c)', transform=ax[0, 2].transAxes, 
+                    va='top', fontsize=15)
+        bx.text(0.01, 0.95, '(d)', transform=bx.transAxes, 
+                    va='top', fontsize=15)
         gs.update(wspace=0.025, hspace=0.2, 
                 left=0.07, right=0.99, 
                 top=0.95, bottom=0.1)

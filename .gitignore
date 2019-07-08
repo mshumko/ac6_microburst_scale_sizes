@@ -14,3 +14,4 @@ data/binned_counts_old/
 *.pyc
 .vscode/ipch/*
 *.tex.bak
+*~lock.*

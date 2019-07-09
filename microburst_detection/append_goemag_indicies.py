@@ -15,7 +15,7 @@ class AppendGeoMagIdx:
     """
 
     """
-    def __init__(self, iType, dataPath, indexDir):
+    def __init__(self, iType, dataPath, indexDir, timeKey='dateTime'):
         """
         This class will read in the microburst catalogues, 
         and append a geomagnetic index to the end of it.
@@ -23,6 +23,9 @@ class AppendGeoMagIdx:
         self.iType = iType
         self.indexDir = indexDir
         self.dataPath = dataPath
+        # The time key from the microburst catalog to append to. The Index 
+        # time key is burried further in this class.
+        self.timeKey = timeKey 
 
         self._loadData() # Load microburst catalog
 
@@ -32,14 +35,14 @@ class AppendGeoMagIdx:
             self._loadAe()
         return
 
-    def appendIndex(self, timeKey='dateTime'):
+    def appendIndex(self):
         """
         This function will loop over the microburst data set and look for
         matching geomagnetic indicies.
         """
-        # lat is a random key that I know will be in the catalog.
-        self.matchingIndex = np.nan*np.ones(len(self.dataDict['lat']), dtype=float)
-        nDetTimes = date2num(self.dataDict[timeKey])
+        # self.timeKey is a random key that I know will be in the catalog.
+        self.matchingIndex = np.nan*np.ones(len(self.dataDict[self.timeKey]), dtype=float)
+        nDetTimes = date2num(self.dataDict[self.timeKey])
         nIndexTimes = date2num(self.indexTimes)
         # Loop over microburst times
         for (i, t) in enumerate(nDetTimes):
@@ -91,7 +94,7 @@ class AppendGeoMagIdx:
 
         self.dataDict = {}
         for i, key in enumerate(self.keys):
-            if 'dateTime' in key:
+            if self.timeKey in key:
                 self.dataDict[key] = np.array([dateutil.parser.parse(t) 
                                             for t in self.rawData[:, i]])
             else:
@@ -142,12 +145,12 @@ class AppendGeoMagIdx:
         self.index = np.nan*np.ones((0, 1), dtype=int)
 
         # Loop over years in the data and load in that index.
-        dataYears = sorted(set([i.year for i in self.dataDict['dateTime']]))
+        dataYears = sorted(set([i.year for i in self.dataDict[self.timeKey]]))
         for year in [2014]:
             fName = '{}_{}.txt'.format(year, self.iType.lower())
             indexData = spacepy.datamodel.readJSONheadedASCII(
                 os.path.join(self.indexDir, fName))
-            self.indexTimes = np.append(self.indexTimes, indexData['dateTime'])
+            self.indexTimes = np.append(self.indexTimes, indexData[self.timeKey])
             self.index = np.append(self.index, indexData[self.iType.lower()])
         # Convert dateTimes
         self.indexTimes = np.array([dateutil.parser.parse(t) for t in self.indexTimes])
@@ -163,7 +166,7 @@ class AppendGeoMagIdx:
         dTypes = ['AE', 'AU', 'AL', 'A0']
         idx = 3 + dTypes.index(aeType)
         
-        dataYears = sorted(set([i.year for i in self.dataDict['dateTime']]))
+        dataYears = sorted(set([i.year for i in self.dataDict[self.timeKey]]))
         for year in dataYears:
             fName = '{}_{}.txt'.format(year, self.iType.lower())
             with open(os.path.join(self.indexDir, fName), 'r') as f:

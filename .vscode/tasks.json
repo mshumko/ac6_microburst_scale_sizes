@@ -8,6 +8,7 @@
     "command": "python3",
     "showOutput": "always",
     "args": [
+        "-i",
         "${file}"
     ],
     "problemMatchers": []

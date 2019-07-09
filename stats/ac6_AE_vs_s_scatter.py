@@ -17,7 +17,16 @@ class AppendIndexToSeparation(AppendGeoMagIdx):
         """ Overwrite method """
         self.dataDict = pd.read_csv(self.dataPath, 
                     converters={0:dateutil.parser.parse})
+        self.keys = self.dataDict.keys() # For the parent class.
         return
+
+    def saveData(self):
+        """ Saves data using pandas """
+        df = pd.concat(
+                [self.dataDict, pd.DataFrame(self.matchingIndex, columns=['AE'])], 
+                axis=1, names=self.iType)
+        df.to_csv(self.dataPath, index=False)
+        return 
 
 if __name__ == '__main__':
     iType = 'ae'

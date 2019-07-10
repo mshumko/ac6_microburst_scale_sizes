@@ -146,7 +146,7 @@ The results in Figs. \ref{fig3} and \ref{fig4} show the fraction of microbursts 
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig3.pdf}
-\caption{Microburst size distribution in low Earth orbit. Panel (a) shows the percent of microbursts observed above that separation after accounting for the uneven separation sampling. Panel (b) shows the microburst probability density (size histogram) as a function of separation. Lastly, panel (c) shows the number of simultaneous samples AC6 observed as a function of separation. The colored lines show the distributions binned by L, and the thick black curve for the entire radiation belt ($4 < L < 8$). The gray shading around the black curve shows the uncertainty due to counting statistics.}
+\caption{Microburst size distribution in low Earth orbit. Panel (a) shows the percent of microbursts observed above that separation after normalizing for the uneven AC6 sampling in separation. Panel (b) shows the microburst probability density (size histogram) as a function of separation. Lastly, panel (c) shows the normalization, i.e. number of simultaneous samples AC6 observed as a function of separation. The colored lines show the distributions binned by L, and the thick black curve for the entire radiation belt ($4 < L < 8$). The gray shading around the black curve shows the uncertainty due to counting statistics.}
 \label{fig3}
 \end{figure}
 
@@ -158,35 +158,17 @@ The results in Figs. \ref{fig3} and \ref{fig4} show the fraction of microbursts 
 
 \section{Modeling the Distribution of Microburst Sizes} \label{model_section}
 \subsection{Monte Carlo and Analytic Models to Estimate $\bar{F}(s)$}
-To account for the effects due to microbursts randomly occurring in the vicinity of AC6 with an unknown distribution of microburst sizes, Monte Carlo (MC) and analytic models were developed. These models assume a hypothesized distribution of microburst sizes expressed with a probability density function $p(r)$, and a microburst footprint shape to estimate $\bar{F}(s)$. The microburst footprint is assumed to be circular with a radius $r$. Various microburst size distribution hypotheses were considered: a one-size microburst population, a two-size microburst population, and continuous $p(r)$ such as Maxwell, Weibull, and log-Normal.
+To account for the effects due to microbursts randomly occurring around AC6 with an unknown distribution of microburst sizes, Monte Carlo (MC) and analytic models were developed. These models assume a hypothesized distribution of microburst sizes expressed with a probability density function $p(r)$, and a microburst footprint shape to estimate $\bar{F}(s)$. The microburst footprint is assumed to be circular with radius $r$. Various microburst size distributions were considered: a one-size microburst population, a two-size microburst population, and continuous $p(r)$ such as Maxwell, Weibull, and log-Normal.
 
-The Monte Carlo model is the most intuitive and it consists of randomly scattering $10^5$ microburst centers in a 400 x 400 km grid around AC6 with random $r$ distributed according to a hypothesized $p(r)$. Spacecraft A is placed at the origin, and spacecraft B is placed along the positive y-axis at distances from spacecraft A corresponding to the AC6 separation bins used in Section \ref{microburst_distribution}. Then for each spacecraft B location, the number of circular microbursts that encompass both spacecraft was counted. The modeled fraction of microbursts observed above $s$ is then
+The Monte Carlo model is the most intuitive and it first randomly scatters $10^5$ microburst centers in a 400 x 400 km grid around AC6. Then each microburst center was assigned a radius, randomly picked from the $p(r)$ distribution. Spacecraft A is placed at the origin, and spacecraft B is placed along the positive y-axis at distances from spacecraft A corresponding to the AC6 separation bins used in Section \ref{microburst_distribution}. Then for each spacecraft B location, the number of microbursts that encompass both spacecraft was counted. The modeled fraction of microbursts observed above $s$ is then
 \begin{equation}
 \bar{F}(s) = \frac{\displaystyle\sum_{i > s}^\infty n_{i} }{ \displaystyle\sum_{i > 0}^\infty n_{i} }.
 \end{equation} where as before the number of microbursts observed by both spacecraft in the ith bin is $n_{i}$.
 
-The analytic model, while identical to the MC model, highlights the geometrical concepts connecting $p(r)$ and $\bar{F}(s)$. For a microburst with a diameter $d \geq s$ there is an area between AC6 where that microburst will be observed by both spacecraft. Figure \ref{fig5}a-c shows the geometry with the two spacecraft indicated with black dots under varying relations between $r$ and $s$. All microbursts who's center lies inside the circular area of radius $r$ that surrounds the top spacecraft will be observed by the top spacecraft. Likewise the same argument applies to the bottom spacecraft. If it exists, the intersection of these two circular areas defines another area, $A(r, s)$ where a microburst will be observed by both spacecraft and is given by the circle-circle intersection area equation, 
+The analytic model, while identical to the MC model, highlights the geometrical concepts connecting $p(r)$ and $\bar{F}(s)$. For a microburst with $2r \geq s$, there is an area between AC6 where that microburst will be observed by both spacecraft if the microburst's center lands there. Figure \ref{fig5}a-c shows this geometry with the two spacecraft indicated with black dots with varying relations between $r$ and $s$. All microbursts who's center lies inside the circular area of radius $r$ surrounding either spacecraft will be observed by that spacecraft. If it exists, the intersection of the two circular areas around both spacecraft defines another area, $A(r, s)$ where a microburst will be observed by both spacecraft if the microburst center lands there. This area can be calculated using the circle-circle intersection area equation, 
 \begin{equation}
 A(r, s) = 2r^2 \cos^{-1}{\Big( \frac{s}{2r} \Big)} - \frac{s}{2} \sqrt{4r^2 - s^2}.
-\end{equation} Example geometries where $A(r, s) > 0$ are shown in Fig. \ref{fig5}b and c.
-
-\textcolor{red}{Quarantine this section}
-Now we develop the analytic $\bar{F}(s)$ given $p(r)$. For now we assume a one-sized $p(r)$ i.e., a delta function in $r$. Then the ratio of the circle intersection areas at two distinct AC6 separations $s_1$ and $s_2$ is the ratio of the number of microbursts observed at those two separations 
-
-\begin{equation}
-\frac{n_1}{n_2} = \frac{A(r, s_1)}{A(r, s_2)}.
-\end{equation} Similar to the MC model \textcolor{red}{Move derivation to SI}
-
-Then the analytic $\bar{F}(s)$ represents how quickly the fraction of microbursts observed by AC6 decreases as a function of $s$. 
-
-
- Furthermore the hypothesized $p(r)$ is the relative occurrence of microbursts at various $r$ and is effectively a weighting factor on $A(r, s)$ which must integrated out (marginalized) since AC6 is observing the cumulative effect of microbursts of all $r$. Lastly, a cumulative integral over a dummy variable $s'$ is applied to the normalized areas to calculate $\bar{F}(s)$. With these considerations the analytic $\bar{F}(s)$ is given by
-
-\begin{equation} \label{analytic_integral}
-\bar{F}(s) = \frac{\displaystyle\int\displaylimits_{s}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') p(r) dr ds'}{\displaystyle\int\displaylimits_{0}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') p(r) dr ds'}
-\end{equation} where as in the Monte Carlo model the denominator normalizes $\bar{F}(s)$ to unity. \textcolor{red}{End of quarantine}
-
-To illustrate the effects of random microburst locations near AC6, an example analytic and Monte Carlo model of $\bar{F}(s)$ is shown in Fig. \ref{fig5}d for a fixed-size $r=20$ km microburst population.
+\end{equation} Example geometries where $A(r, s) > 0$ are shown in Fig. \ref{fig5}b and c. With this conceptual model and $A(r, s)$, the analytic form of $\bar{F}(s)$ can be found and is derived in the Supporting Information (SI) Text S1. To demonstrate the effects of random microburst locations near AC6, examples of the analytic and Monte Carlo $\bar{F}(s)$ curves are shown in Fig. \ref{fig5}d for a fixed-size $r=20$ km microburst population.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig5.png}
@@ -196,7 +178,9 @@ To illustrate the effects of random microburst locations near AC6, an example an
 
 \subsection{Estimating optimal parameters for microburst size models}
 \textcolor{red}{Work on this.}
-At this stage a few hypothesized $p(r)$ are tested and optimal model parameters estimated. For each hypothesized $p(r)$, Bayesian inference is used to estimate the optimal model parameters with a Metropolis Markov Chain Monte Carlo (MCMC) sampler \cite{Metropolis1953}. Bayes theorem is central to Bayesian inference. Given the observed $\bar{F}(s)$ designated here with $x$, and $p(r)$ model parameters with $\theta$, Bayes theorem can be written as
+At this stage we have all of the ingredients to calculate $\bar{F}(s)$ given a $p(r, \theta)$. \textcolor{red}{I know this notation is not consistent at the moment, but to be more clear should I use $p(r)$, or explicitly state that the microburst PDF has dependent parameters $\theta$ and use $p(r, \theta)$?}
+
+ a few hypothesized $p(r)$ are tested and optimal model parameters estimated. For each hypothesized $p(r)$, Bayesian inference is used to estimate the optimal model parameters with a Metropolis Markov Chain Monte Carlo (MCMC) sampler \cite{Metropolis1953}. Bayes theorem is central to Bayesian inference. Given the observed $\bar{F}(s)$ designated here with $x$, and $p(r)$ model parameters with $\theta$, Bayes theorem can be written as
 
 \begin{equation}
 p(\theta | x) = \frac{p(x | \theta) p(\theta)}{p(x)}

@@ -72,7 +72,7 @@ class Microburst_Equatorial_CDF:
         cdf_error = cdf*np.sqrt([1/len(np.where(self.filtered_catalog.d_equator > d)[0]) +
                                 1/total_detections for d in self.norm.index[:-1]])
         pdf_error = np.sqrt(cdf_error[1:]**2 + cdf_error[:-1]**2)/self.bin_width
-        return cdf, pdf, cdf_error, pdf_error, total_detections
+        return 100*cdf, pdf, 100*cdf_error, pdf_error, total_detections
 
     def plot_cdf_pdf(self, L_array=[4, 5, 6, 7, 8], plot_all=True):
         """ Plots the CDF and PDF values. """

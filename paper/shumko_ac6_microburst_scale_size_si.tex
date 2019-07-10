@@ -83,6 +83,7 @@
 % DO NOT USE \psfrag or \subfigure commands.
 %
  \usepackage{graphicx}
+ \usepackage{color}
 %
 %  Uncomment the following command to allow illustrations to print
 %   when using Draft:
@@ -166,6 +167,23 @@ Here we derive the integral form of the $\bar{F}(s)$ under the assumptions that 
 \begin{equation}
 A(r, s) = 2r^2 \cos^{-1}{\Big( \frac{s}{2r} \Big)} - \frac{s}{2} \sqrt{4r^2 - s^2}.
 \end{equation}  
+
+
+\textcolor{red}{Quarantine this section}
+Now we develop the analytic $\bar{F}(s)$ given $p(r)$. For now we assume a one-sized $p(r)$ i.e., a delta function in $r$. Then the ratio of the circle intersection areas at two distinct AC6 separations $s_1$ and $s_2$ is the ratio of the number of microbursts observed at those two separations 
+
+\begin{equation}
+\frac{n_1}{n_2} = \frac{A(r, s_1)}{A(r, s_2)}.
+\end{equation} Similar to the MC model \textcolor{red}{Move derivation to SI}
+
+Then the analytic $\bar{F}(s)$ represents how quickly the fraction of microbursts observed by AC6 decreases as a function of $s$. 
+
+
+ Furthermore the hypothesized $p(r)$ is the relative occurrence of microbursts at various $r$ and is effectively a weighting factor on $A(r, s)$ which must integrated out (marginalized) since AC6 is observing the cumulative effect of microbursts of all $r$. Lastly, a cumulative integral over a dummy variable $s'$ is applied to the normalized areas to calculate $\bar{F}(s)$. With these considerations the analytic $\bar{F}(s)$ is given by
+
+\begin{equation} \label{analytic_integral}
+\bar{F}(s, \theta) = \frac{\displaystyle\int\displaylimits_{s}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') p(r, \theta) dr ds'}{\displaystyle\int\displaylimits_{0}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') p(r, \theta) dr ds'}
+\end{equation} where as in the Monte Carlo model the denominator normalizes $\bar{F}(s)$ to unity. \textcolor{red}{End of quarantine}
 
 \textbf{Mention rain bucket analogy}
 

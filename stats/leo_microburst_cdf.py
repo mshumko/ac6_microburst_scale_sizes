@@ -85,7 +85,7 @@ class Microburst_CDF:
         cdf_std = cdf*np.sqrt((n_prime_std/sum(n_weighted))**2 + 
                             (n_prime_std[0]/sum(n_weighted))**2)
         pdf_std = np.sqrt(cdf_std[1:]**2 + cdf_std[:-1]**2)/self.bin_width
-        return cdf, pdf, cdf_std, pdf_std, filtered_catalog.shape[0]
+        return 100*cdf, pdf, 100*cdf_std, pdf_std, filtered_catalog.shape[0]
 
     def calc_cdf_pdf_resample(self, df, L_lower, L_upper, N_resample=int(100)):
         """
@@ -126,7 +126,7 @@ class Microburst_CDF:
         cdf_err = np.percentile(cdf_array, [2.5, 97.5], axis=1)
         pdf_err = np.percentile(pdf_array, [2.5, 97.5], axis=1)
         print(cdf_err[1] - cdf_err[0])
-        return cdf, pdf, cdf_err, pdf_err, filtered_catalog.shape[0]
+        return 100*cdf, pdf, 100*cdf_err, pdf_err, filtered_catalog.shape[0]
 
     def plot_cdf_pdf(self, L_array=[4, 5, 6, 7, 8], plot_all=True, 
                      err_mode='stats', plot_L=False, 

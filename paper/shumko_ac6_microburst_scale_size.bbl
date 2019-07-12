@@ -277,6 +277,43 @@ Blake, J\BPBI B.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Blum%
+, Li%
+\BCBL {}\ \BBA {} Denton%
+}{%
+Blum%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2015}}%
+}]{%
+Blum2015}
+\APACinsertmetastar {%
+Blum2015}%
+\begin{APACrefauthors}%
+Blum, L.%
+, Li, X.%
+\BCBL {}\ \BBA {} Denton, M.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2015}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Rapid {MeV} electron precipitation as observed by
+  {SAMPEX/HILT} during high-speed stream-driven storms} {Rapid {MeV} electron
+  precipitation as observed by {SAMPEX/HILT} during high-speed stream-driven
+  storms}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{120}{5}{3783--3794}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1002/2014JA020633}
+  \end{APACrefURL}
+\newblock
+\APACrefnote{2014JA020633}
+\newblock
+\begin{APACrefDOI} \doi{10.1002/2014JA020633} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 Bortnik%
 , Thorne%
 \BCBL {}\ \BBA {} Inan%
@@ -436,6 +473,44 @@ Dietrich, S.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Douma%
+, Rodger%
+, Blum%
+\BCBL {}\ \BBA {} Clilverd%
+}{%
+Douma%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2017}}%
+}]{%
+Douma2017}
+\APACinsertmetastar {%
+Douma2017}%
+\begin{APACrefauthors}%
+Douma, E.%
+, Rodger, C\BPBI J.%
+, Blum, L\BPBI W.%
+\BCBL {}\ \BBA {} Clilverd, M\BPBI A.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2017}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Occurrence characteristics of relativistic electron
+  microbursts from {SAMPEX} observations} {Occurrence characteristics of
+  relativistic electron microbursts from {SAMPEX} observations}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{122}{8}{8096--8107}.
+\newblock
+\begin{APACrefURL} \url{http://dx.doi.org/10.1002/2017JA024067}
+  \end{APACrefURL}
+\newblock
+\APACrefnote{2017JA024067}
+\newblock
+\begin{APACrefDOI} \doi{10.1002/2017JA024067} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 Greeley%
 , Kanekal%
 , Baker%
@@ -497,6 +572,30 @@ Gurnett, D.%
   investigation}.{\BBCQ}
 \newblock
 \APACjournalVolNumPages{Space Science Reviews}{23}{1}{103--122}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Hastings%
+}{%
+Hastings%
+}{%
+{\protect \APACyear {1970}}%
+}]{%
+Hastings1970}
+\APACinsertmetastar {%
+Hastings1970}%
+\begin{APACrefauthors}%
+Hastings, W\BPBI K.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1970}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Monte Carlo sampling methods using Markov chains and
+  their applications} {Monte carlo sampling methods using markov chains and
+  their applications}.{\BBCQ}
+\newblock
+
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%

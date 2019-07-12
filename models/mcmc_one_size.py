@@ -188,11 +188,11 @@ if __name__ == '__main__':
         #     ax[1].plot(cdf_data['Separation [km]'], y_model, c='grey', alpha=0.3)
 
         # plot the AC6 data
-        ax[1].plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k', label='AC6')
+        ax[1].plot(cdf_data['Separation [km]'], 100*cdf_data['CDF'], c='k', label='AC6')
         # Plot the quantiles
         for i, size in enumerate(np.percentile(df.d, [2.5, 50, 97.5])):
             ax[1].plot(cdf_data['Separation [km]'], 
-                        mc_brute_vectorized(size, bins=cdf_data['Separation [km]']), 
+                        100*mc_brute_vectorized(size, bins=cdf_data['Separation [km]']), 
                         c=colors[i], label=labels[i])
             ax[0].axvline(size, c=colors[i])
 
@@ -200,7 +200,7 @@ if __name__ == '__main__':
         #ax[0].get_yaxis().set_ticks([])
         ax[0].set(xlabel='Microburst diameter [km]', ylabel='Posterior PDF', xlim=(26, 140)); 
         ax[1].legend()
-        ax[1].set(xlabel='AC6 separation (s) [km]', 
+        ax[1].set(xlabel='AC6 separation [km]', 
                     ylabel=r'Percent of Microbursts Above Separation', xlim=(0, 90))
 
         ax[0].text(0.01, 0.95, '(a)', transform=ax[0].transAxes, 

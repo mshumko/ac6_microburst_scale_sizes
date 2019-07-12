@@ -292,19 +292,19 @@ if __name__ == '__main__':
 
         # for i in range(N_plot):
         #     bx.plot(cdf_data['Separation [km]'], y_model[i,:], c='grey', alpha=0.3)
-        bx.plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k', label='AC6')
+        bx.plot(cdf_data['Separation [km]'], 100*cdf_data['CDF'], c='k', label='AC6')
 
         # Find the mean and 95% interval of the 1000 curves.
         y_quartile = np.percentile(y_model, quartiles, axis=0)
 
         for i, q in enumerate(y_quartile):
-            bx.plot(cdf_data['Separation [km]'], q, c=colors[i], 
+            bx.plot(cdf_data['Separation [km]'], 100*q, c=colors[i], 
                     label=f'{quartiles[i]} %')
 
         # ax[0, 1].set_title('Two microburst sizes MCMC model\n'
         #                 r'$pdf = a \delta(s-d_0) + (1-a) \delta(s-d_1)$')
         ax[0, 1].set_title('Two microburst sizes model')
-        bx.set(xlabel='AC6 separation (s) [km]', ylabel='Percent of Microbursts Above AC6 Separation', xlim=(0, 90))
+        bx.set(xlabel='AC6 separation [km]', ylabel='Percent of Microbursts Above AC6 Separation', xlim=(0, 90))
         bx.legend()
         ax[0, 0].text(0.0, 0.95, '(a)', transform=ax[0, 0].transAxes, 
                     va='top', fontsize=15, color='w')

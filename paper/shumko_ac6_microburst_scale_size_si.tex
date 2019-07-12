@@ -162,58 +162,55 @@
 
 %Delete all unused file types below. Copy/paste for multiples of each file type as needed.
 \noindent\textbf{Text S1: Analytic Derivation of $\bar{F}(s)$}
-Here we derive the integral form of the $\bar{F}(s)$ under the following assumptions:
+Here we derive the integral form of $\bar{F}(s)$ under the following assumptions:
 
 \begin{enumerate}
 \item microbursts are circular with radius $r$
 \item microbursts are randomly and uniformly distributed around AC6.
 \end{enumerate}
 
-First recall the area $A(r, s)$ given in Eq. 4 in the main text and copied here for convenience
+First recall the area $A(r, s)$, given in Eq. 4 in the main text and copied here for convenience
 \begin{equation}
 A(r, s) = 2r^2 \cos^{-1}{\Big( \frac{s}{2r} \Big)} - \frac{s}{2} \sqrt{4r^2 - s^2}.
-\end{equation} A circular microburst who's center lies in $A(r, s)$ will be observed by both AC6 units and is counted in $\bar{F}(s)$. For a given microburst radius $r$ and reference spacecraft separation, $s_0$ chosen such that $A(r, s_0) > 0$, there will be $n_0$ microbursts simultaneously observed. Now for example if the spacecraft separation is changed such that the area doubles, the second assumption implies that the number of microbursts observed during the same time interval is doubled as well. This can be written as 
+\end{equation} A circular microburst who's center lies in $A(r, s)$ will be observed by both AC6 units and is counted in $\bar{F}(s)$. Now we derive the integral form of $\bar{F}(s)$ that accounts for the different spacecraft separations and microburst sizes that are distributed by a hypothesized PDF $p(r, \theta)$.
+
+First we will account for the effects of various spacecraft separation, assuming all microbursts are one size. For reference choose of radius, $r_0$ and spacecraft separation, $s_0$ such that $A(r_0, s_0) > 0$ which implies that some number of microbursts, $n_0$ will be simultaneously observed. Now, if for example the spacecraft separation (or microburst radius) is changed such that the area doubles, the second assumption implies that the number of microbursts observed during the same time interval must double as well. This can be expressed as 
 
 \begin{equation} \label{density_eq}
-\frac{n_0}{A(r, s_0)} = \frac{n}{A(r, s)}
-\end{equation} and can be interprted as the microburst density. Equation \ref{density_eq} which can then be rewritten as 
+\frac{n_0}{A(r_0, s_0)} = \frac{n}{A(r, s)}
+\end{equation} and interpreted as the conservation of the microburst area density. By rewriting Eq. \ref{density_eq} as
 
 \begin{equation}
-n(r, s) = \bigg( \frac{n_0}{A(r, s_0)} \bigg) A(r, s)
-\end{equation} so if $s$ is changed such that e.g. $A(r, s)$ doubles, then $n$ must also double.
-
-To calculate the cumulative number of microbursts observed above $s$, we define 
+n(r, s) = \bigg( \frac{n_0}{A(r_0, s_0)} \bigg) A(r, s)
+\end{equation} it is more clear that the number of microbursts of size $r$ observed at separation $s$ is just $A(r, s)$ scaled by the reference microburst area density. The cumulative number of microbursts observed above $s$ is then
 
 \begin{equation}
-N(r, s) = \int_{s}^\infty n(r, s') ds' = \bigg( \frac{n_0}{A(r, s_0)} \bigg) \int_{s}^\infty A(r, s') ds'
-\end{equation} which works for a one-size microburst distribution of radius $r$. $\bar{F}(s)$ for a single $r$ is then
+N(r, s) = \int_{s}^\infty n(r, s') ds' = \bigg( \frac{n_0}{A(r_0, s_0)} \bigg) \int_{s}^\infty A(r, s') ds'.
+\end{equation} Lastly, $\bar{F}(s)$ for a single $r$ is then
 
 \begin{equation}
-\bar{F}(s) = \frac{\int_{s}^\infty A(r, s') ds'}{\int_{0}^\infty A(r, s') ds'}
+\bar{F}(s) = \frac{N(s)}{N(0)} = \frac{\int_{s}^\infty A(r, s') ds'}{\int_{0}^\infty A(r, s') ds'}
 \end{equation}
 
-Now how
-
-
-\textcolor{red}{Quarantine this section}
-Now we develop the analytic $\bar{F}(s)$ given $p(r)$. For now we assume a one-sized $p(r)$ i.e., a delta function in $r$. Then the ratio of the circle intersection areas at two distinct AC6 separations $s_1$ and $s_2$ is the ratio of the number of microbursts observed at those two separations 
+To incorporate a continuous microburst PDF such as $p(r) = p_1 \delta (r-r_1) + p_2 \delta (r-r_2) + ...$ we sum up the weighted number of microbursts that each size contributes to $N(s)$ i.e.
 
 \begin{equation}
-\frac{n_1}{n_2} = \frac{A(r, s_1)}{A(r, s_2)}.
-\end{equation} Similar to the MC model \textcolor{red}{Move derivation to SI}
+N(s) = \bigg( \frac{n_0}{A(r_0, s_0)} \bigg) \bigg( \int_{s}^\infty p_1 A(r_1, s') ds' + \int_{s}^\infty p_2 A(r_2, s') ds' + ...\bigg)
+\end{equation}
 
-Then the analytic $\bar{F}(s)$ represents how quickly the fraction of microbursts observed by AC6 decreases as a function of $s$. 
+The last step is to convert the sum of Dirac Delta functions into a continuous PDF $p(r)$ after which 
 
-
- Furthermore the hypothesized $p(r)$ is the relative occurrence of microbursts at various $r$ and is effectively a weighting factor on $A(r, s)$ which must integrated out (marginalized) since AC6 is observing the cumulative effect of microbursts of all $r$. Lastly, a cumulative integral over a dummy variable $s'$ is applied to the normalized areas to calculate $\bar{F}(s)$. With these considerations the analytic $\bar{F}(s)$ is given by
+\begin{equation}
+N(s) = \bigg( \frac{n_0}{A(r_0, s_0)} \bigg) \displaystyle\int\displaylimits_{s}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') p(r) dr ds'.
+\end{equation} With these considerations, $\bar{F}(s)$ is then given by 
 
 \begin{equation} \label{analytic_integral}
 \bar{F}(s, \theta) = \frac{\displaystyle\int\displaylimits_{s}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') p(r, \theta) dr ds'}{\displaystyle\int\displaylimits_{0}^{\infty} \displaystyle\int\displaylimits_0^{\infty} A(r, s') p(r, \theta) dr ds'}
-\end{equation} where as in the Monte Carlo model the denominator normalizes $\bar{F}(s)$ to unity. \textcolor{red}{End of quarantine}
-
-\textbf{Mention rain bucket analogy}
+\end{equation}
 
 \noindent\textbf{Text S2: Comparison of microburst to whistler mode chorus $\bar{F}(s)$}
+
+\textcolor{red}{TBD}
 
 %% ------------------------------------------------------------------------ %%
 %%  REFERENCE LIST AND TEXT CITATIONS

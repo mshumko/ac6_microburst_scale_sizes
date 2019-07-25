@@ -1,8 +1,3 @@
-# This program calculates and plots the fraction of simulatenous to 
-# all microburst detections as a function of separation. Uncertanity 
-# is first assumed due to Poisson noise and will be then expanded to
-# a systematic uncertanity due to transmitter noise.
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -11,6 +6,12 @@ import os
 class MicroburstFraction:
     def __init__(self, microburst_catalog_name, c_microburst_catalog_name,
                 microburst_catalog_dir=None, c_microburst_catalog_dir=None):
+        """
+        This class calculates and plots the fraction of simulatenous to 
+        all microburst detections as a function of separation. Uncertanity 
+        is first assumed due to Poisson noise and will be then expanded to
+        a systematic uncertanity due to transmitter noise.
+        """
         # Specify the coincident catalog directory
         if c_microburst_catalog_dir is None:
             self.c_microburst_catalog_dir = ('/home/mike/research/'
@@ -63,6 +64,7 @@ class MicroburstFraction:
             n_c[i] = np.sum((self.c_microburst_catalog.Dist_Total > bin_i) &
                           (self.c_microburst_catalog.Dist_Total < bin_f))
         self.f = n_c/n
+        # Need to check how the uncertanity is calculated.
         if systematic_error is None:
             self.f_err = self.f*(1-self.f)/np.sqrt(n_c)
         else:

@@ -59,14 +59,22 @@ class MicroburstFraction:
         # Loop over the separation bins and calculate the number of total 
         # and coincident microburst events.
         for i, (bin_i, bin_f) in enumerate(zip(self.bins[:-1], self.bins[1:])):
-            n[i] = np.sum((self.microburst_catalog.Dist_Total > bin_i) &
-                          (self.microburst_catalog.Dist_Total < bin_f))
-            n_c[i] = np.sum((self.c_microburst_catalog.Dist_Total > bin_i) &
-                          (self.c_microburst_catalog.Dist_Total < bin_f))
+            n[i] = np.sum(
+                        (self.microburst_catalog.Dist_Total > bin_i) &
+                        (self.microburst_catalog.Dist_Total < bin_f) &
+                        (self.microburst_catalog.AE < 1000)  
+                          )
+            n_c[i] = np.sum(
+                        (self.c_microburst_catalog.Dist_Total > bin_i) &
+                        (self.c_microburst_catalog.Dist_Total < bin_f) &
+                        (self.c_microburst_catalog.AE < 1000)
+                        )
         self.f = n_c/n
         # Need to check how the uncertanity is calculated.
         if systematic_error is None:
-            self.f_err = self.f*(1-self.f)/np.sqrt(n_c)
+            # Fraction error propagation eq. from wiki 
+            # https://en.wikipedia.org/wiki/Propagation_of_uncertainty
+            self.f_err = self.f*np.sqrt( 1/n_c + 1/n )
         else:
             self.f_err = np.sqrt(
                 (self.f*(1-self.f)/np.sqrt(n))**2 + systematic_error**2
@@ -81,7 +89,8 @@ class MicroburstFraction:
 
 if __name__ == '__main__':
     microburst_name = 'AC6B_microbursts_v5.txt'
-    coincident_catalog_name = 'AC6_coincident_microbursts_sorted_Brady_v6.txt'
+    # coincident_catalog_name = 'AC6_coincident_microbursts_sorted_Brady_v6.txt'
+    coincident_catalog_name = 'AC6_coincident_microbursts_sorted_v6.txt'
 
     mf = MicroburstFraction(microburst_name, coincident_catalog_name)
     mf.make_microburst_fraction()

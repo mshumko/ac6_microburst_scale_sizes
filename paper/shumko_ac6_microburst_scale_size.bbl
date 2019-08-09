@@ -205,6 +205,34 @@ Anderson, K\BPBI A.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Barcus%
+, Brown%
+\BCBL {}\ \BBA {} Rosenberg%
+}{%
+Barcus%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {1966}}%
+}]{%
+Barcus1966}
+\APACinsertmetastar {%
+Barcus1966}%
+\begin{APACrefauthors}%
+Barcus, J.%
+, Brown, R.%
+\BCBL {}\ \BBA {} Rosenberg, T.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1966}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Spatial and temporal character of fast variations in
+  auroral-zone X rays} {Spatial and temporal character of fast variations in
+  auroral-zone x rays}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research}{71}{1}{125--141}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 J.~Blake%
 \ \protect \BOthers {.}}{%
 J.~Blake%
@@ -398,6 +426,36 @@ Breneman, A.%
   mode chorus: Van allen probes and {FIREBIRD II}}.{\BBCQ}
 \newblock
 \APACjournalVolNumPages{Geophysical Research Letters}{}{}{}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Brown%
+, Barcus%
+\BCBL {}\ \BBA {} Parsons%
+}{%
+Brown%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {1965}}%
+}]{%
+Brown1965_2}
+\APACinsertmetastar {%
+Brown1965_2}%
+\begin{APACrefauthors}%
+Brown, R.%
+, Barcus, J.%
+\BCBL {}\ \BBA {} Parsons, N.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1965}{6}{}.
+\newblock
+{\BBOQ}\APACrefatitle {BALLOON OBSERVATIONS OF AURORAL ZONE X RAYS IN CONJUGATE
+  REGIONS. 2. MICROBURSTS AND PULSATIONS} {Balloon observations of auroral zone
+  x rays in conjugate regions. 2. microbursts and pulsations}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research (U.S.)}{70}{}{}.
+\newblock
+\begin{APACrefDOI} \doi{10.1029/JZ070i011p02599} \end{APACrefDOI}
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
@@ -1242,6 +1300,36 @@ Thorne, R\BPBI M.%
 \APACrefnote{A09202}
 \newblock
 \begin{APACrefDOI} \doi{10.1029/2004JA010882} \end{APACrefDOI}
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Trefall%
+, Bjordal%
+, Ullaland%
+\BCBL {}\ \BBA {} Stadsnes%
+}{%
+Trefall%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {1966}}%
+}]{%
+Trefall1966}
+\APACinsertmetastar {%
+Trefall1966}%
+\begin{APACrefauthors}%
+Trefall, H.%
+, Bjordal, J.%
+, Ullaland, S.%
+\BCBL {}\ \BBA {} Stadsnes, J.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{1966}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {On the extension of auroral-zone X-ray microbursts} {On
+  the extension of auroral-zone x-ray microbursts}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Atmospheric and Terrestrial
+  Physics}{28}{2}{225--233}.
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%

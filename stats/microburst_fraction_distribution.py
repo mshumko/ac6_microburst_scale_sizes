@@ -59,6 +59,9 @@ class MicroburstFraction:
         # Loop over the separation bins and calculate the number of total 
         # and coincident microburst events.
         for i, (bin_i, bin_f) in enumerate(zip(self.bins[:-1], self.bins[1:])):
+            # NEED TO ADD LOOP FOR n[i] to only count microbursts observed by
+            # one spacecraft AND the other spacecraft did not see anything 
+            # (but had data!) 
             n[i] = np.sum(
                         (self.microburst_catalog.Dist_Total > bin_i) &
                         (self.microburst_catalog.Dist_Total < bin_f) &

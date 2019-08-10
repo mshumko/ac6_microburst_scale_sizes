@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates
-plt.rcParams.update({'font.size': 16})
+plt.rcParams.update({'font.size': 15})
 import numpy as np
 
 from mission_tools.ac6.read_ac_data import read_ac_data_wrapper
@@ -45,7 +45,12 @@ class PlotExamples(PlotMicrobursts):
                             mean_subtracted=False, plot_dos2_and_dos3=False)
             self.ax[1, i].xaxis.set_major_locator(matplotlib.dates.SecondLocator(interval=2))
             self.ax[1, i].xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%H:%M:%S'))
-        #plt.tight_layout(pad=0.6)
+
+            # Add text to each subplot
+            self.ax[0, i].text(0.99, 0.99, f'separation = {abs(int(round(row.Dist_In_Track)))} km', 
+                            transform=self.ax[0, i].transAxes, va='top', ha='right', fontsize=12)
+            self.ax[1, i].text(0.99, 0.99, f'time shift = {abs(int(round(row.Lag_In_Track)))} s',
+                            transform=self.ax[1, i].transAxes, va='top', ha='right', fontsize=12)
         plt.show()
         return
 
@@ -60,14 +65,14 @@ class PlotExamples(PlotMicrobursts):
 
         # Set up plot labels.
         self.fig.text(0.5, 0.04, 'UTC', ha='center', va='center')
-        self.fig.text(0.06, 0.5, 'dos1rate [counts/s]', ha='center', 
+        self.fig.text(0.015, 0.5, 'dos1rate [counts/s]', ha='center', 
                     va='center', rotation='vertical')
 
         # subplot titles
         for i in range(len(self.t0_times)):
             self.ax[0, i].set_title(f'{self.t0_times[i].date()}')
 
-        plt.subplots_adjust(left=0.2)
+        plt.subplots_adjust(left=0.07, right=0.99, hspace=0.1)
         return
 
 if __name__ == '__main__':

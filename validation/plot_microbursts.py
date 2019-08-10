@@ -149,6 +149,7 @@ class PlotMicrobursts:
         savefig = kwargs.get('savefig', True)
         log_scale = kwargs.get('log_scale', False)
         plot_dos2_and_dos3 = kwargs.get('plot_dos2_and_dos3', True)
+        ax = kwargs.get('ax', self.ax)
 
         df_time_a, df_time_b, df_space_a, df_space_b = self._get_filtered_plot_data(row)
         if mean_subtracted:
@@ -164,28 +165,28 @@ class PlotMicrobursts:
                 df_time_a.loc[:, 'dos3rate'] -= df_time_a.loc[:, 'dos3rate'].mean()
                 #df_space_a.loc[:, 'dos3rate'] -= df_space_a.loc[:, 'dos3rate'].mean()
                 
-        self.ax[0].plot(df_time_a['dateTime'], df_time_a['dos1rate'], 'r', label='AC6-A dos1')
+        ax[0].plot(df_time_a['dateTime'], df_time_a['dos1rate'], 'r', label='AC6-A dos1')
         if plot_dos2_and_dos3:
-            self.ax[0].plot(df_time_a['dateTime'], df_time_a['dos2rate'], 'r:', label='AC6-A dos2')
-            self.ax[0].plot(df_time_a['dateTime'], df_time_a['dos3rate'], 'r--', label='AC6-A dos3')
+            ax[0].plot(df_time_a['dateTime'], df_time_a['dos2rate'], 'r:', label='AC6-A dos2')
+            ax[0].plot(df_time_a['dateTime'], df_time_a['dos3rate'], 'r--', label='AC6-A dos3')
             
-        self.ax[0].plot(df_time_b['dateTime'], df_time_b['dos1rate'], 'b', label='AC6-B')
+        ax[0].plot(df_time_b['dateTime'], df_time_b['dos1rate'], 'b', label='AC6-B')
         if plot_dos2_and_dos3:
-            self.ax[0].plot(df_time_b['dateTime'], df_time_b['dos2rate'], 'b:', label='AC6-B dos2')
-        self.ax[0].axvline(row.at['dateTime'])
-        self.ax[0].legend(loc=1)
-        self.ax[1].plot(df_space_a['dateTime'], df_space_a['dos1rate'], 'r', label='AC6-A')
-        self.ax[1].plot(df_space_b['dateTime'], df_space_b['dos1rate'], 'b', label='AC6-B')
+            ax[0].plot(df_time_b['dateTime'], df_time_b['dos2rate'], 'b:', label='AC6-B dos2')
+        ax[0].axvline(row.at['dateTime'])
+        ax[0].legend(loc=1)
+        ax[1].plot(df_space_a['dateTime'], df_space_a['dos1rate'], 'r', label='AC6-A')
+        ax[1].plot(df_space_b['dateTime'], df_space_b['dos1rate'], 'b', label='AC6-B')
 
         if log_scale:
-            self.ax[0].set_yscale('log')
-            self.ax[1].set_yscale('log')
+            ax[0].set_yscale('log')
+            ax[1].set_yscale('log')
 
         # Print peak width if it exists in the catalog.
         if set(['peak_width_A', 'peak_width_B']).issubset(row.index) and self.plot_width_flag:
             s = 'peak_width_A = {} s\npeak_width_B = {} s'.format(
                     round(row['peak_width_A'], 2), round(row['peak_width_B'], 2))
-            self.ax[0].text(0, 1, s, transform=self.ax[0].transAxes, va='top')
+            ax[0].text(0, 1, s, transform=ax[0].transAxes, va='top')
         if savefig:
             save_name = '{0:%Y%m%d_%H%M%S}_ac6_validation_dist_total_{1}.png'.format(
                         row['dateTime'], round(row['Dist_Total']))

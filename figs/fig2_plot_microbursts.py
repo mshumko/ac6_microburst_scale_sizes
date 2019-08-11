@@ -3,11 +3,13 @@
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import matplotlib.dates
-plt.rcParams.update({'font.size': 15})
 import numpy as np
+import string
 
 from mission_tools.ac6.read_ac_data import read_ac_data_wrapper
 from ac6_microburst_scale_sizes.validation.plot_microbursts import PlotMicrobursts
+
+plt.rcParams.update({'font.size': 15})
 
 class PlotExamples(PlotMicrobursts):
     def __init__(self, catalog_version, plot_width, t0_times):
@@ -47,10 +49,12 @@ class PlotExamples(PlotMicrobursts):
             self.ax[1, i].xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%H:%M:%S'))
 
             # Add text to each subplot
-            self.ax[0, i].text(0.99, 0.99, f'separation = {abs(int(round(row.Dist_In_Track)))} km', 
-                            transform=self.ax[0, i].transAxes, va='top', ha='right', fontsize=12)
-            self.ax[1, i].text(0.99, 0.99, f'time shift = {abs(int(round(row.Lag_In_Track)))} s',
-                            transform=self.ax[1, i].transAxes, va='top', ha='right', fontsize=12)
+            # Separation info
+            self.ax[0, i].text(0.99, 0.99, f's = {abs(int(round(row.Dist_In_Track)))} km', 
+                            transform=self.ax[0, i].transAxes, va='top', ha='right', fontsize=15)
+            self.ax[1, i].text(0.99, 0.99, f'dt = {abs(int(round(row.Lag_In_Track)))} s',
+                            transform=self.ax[1, i].transAxes, va='top', ha='right', fontsize=15)
+            
         plt.show()
         return
 
@@ -64,8 +68,8 @@ class PlotExamples(PlotMicrobursts):
             self.ax[0, i].get_xaxis().set_visible(False)
 
         # Set up plot labels.
-        self.fig.text(0.5, 0.04, 'UTC', ha='center', va='center')
-        self.fig.text(0.015, 0.5, 'dos1rate [counts/s]', ha='center', 
+        self.fig.text(0.5, 0.01, 'UTC', ha='center', va='center')
+        self.fig.text(0.015, 0.5, 'dos1 [counts/s]', ha='center', 
                     va='center', rotation='vertical')
 
         # subplot titles
@@ -73,6 +77,13 @@ class PlotExamples(PlotMicrobursts):
             self.ax[0, i].set_title(f'{self.t0_times[i].date()}')
 
         plt.subplots_adjust(left=0.07, right=0.99, hspace=0.1)
+
+        # subplot labels
+        for i in range(len(self.t0_times)):
+            self.ax[0, i].text(0, 0.99, f'({string.ascii_letters[2*i]})', va='top',
+                                transform=self.ax[0, i].transAxes, fontsize=20)
+            self.ax[1, i].text(0, 0.99, f'({string.ascii_letters[2*i+1]})', va='top',
+                                transform=self.ax[1, i].transAxes, fontsize=20)
         return
 
 if __name__ == '__main__':

@@ -151,6 +151,7 @@ class PlotMicrobursts:
         plot_dos2_and_dos3 = kwargs.get('plot_dos2_and_dos3', True)
         plot_legend = kwargs.get('plot_legend', True)
         ax = kwargs.get('ax', self.ax)
+        time_guide_flag = kwargs.get('time_guide_flag', False)
 
         df_time_a, df_time_b, df_space_a, df_space_b = self._get_filtered_plot_data(row)
         if mean_subtracted:
@@ -174,7 +175,8 @@ class PlotMicrobursts:
         ax[0].plot(df_time_b['dateTime'], df_time_b['dos1rate'], 'b', label='AC6-B')
         if plot_dos2_and_dos3:
             ax[0].plot(df_time_b['dateTime'], df_time_b['dos2rate'], 'b:', label='AC6-B dos2')
-        ax[0].axvline(row.at['dateTime'])
+        if time_guide_flag:
+            ax[0].axvline(row.at['dateTime'])
         if plot_legend:
             ax[0].legend(loc=1)
         ax[1].plot(df_space_a['dateTime'], df_space_a['dos1rate'], 'r', label='AC6-A')

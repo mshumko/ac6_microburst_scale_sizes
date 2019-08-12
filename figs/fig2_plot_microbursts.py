@@ -62,7 +62,7 @@ class PlotExamples(PlotMicrobursts):
         """
         Helper method to set up the plotting environment.
         """
-        self.fig, self.ax = plt.subplots(2, len(self.t0_times), figsize=(12, 6))
+        self.fig, self.ax = plt.subplots(2, len(self.t0_times), figsize=(14, 6))
 
         for i in range(len(self.t0_times)):
             self.ax[0, i].get_xaxis().set_visible(False)
@@ -91,6 +91,8 @@ if __name__ == '__main__':
     t0_times = [
                 datetime(2016, 9, 30, 1, 56, 29, 800000),
                 datetime(2016, 11, 23, 4, 46, 46, 600000),
+                datetime(2015, 8, 12, 6, 23, 9, 99999),
+                # datetime(2017, 4, 25, 11, 58, 6, 400000),
                 datetime(2017, 4, 23, 13, 44, 43, 600000)
                 ]
     p = PlotExamples(6, plot_width_s, t0_times)

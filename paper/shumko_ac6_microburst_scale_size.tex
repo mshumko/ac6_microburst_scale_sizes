@@ -198,27 +198,15 @@ The first and one of the most popular MCMC is the Metropolis-Hastings sampler \c
 \subsection{Estimating optimal parameters for various microburst size models}
 The MCMC sampler is first used to test the simplest microburst size model where all microbursts are one size and the MCMC will estimate that size. The microburst size PDF for this model can be expressed as
 \begin{equation}
-p(r, r_0) = \delta(r-r_0)
+p(r | r_0) = \delta(r-r_0)
 \end{equation} where $\delta$ is the Dirac Delta function and $r_0$ is the radius of all microbursts. The range of $r$ (technically diameter) that are consistent with the observed $\bar{F}(s)$ is shown in Fig. \ref{fig6}. Assuming this model, there is a $95 \%$ probability that the microburst diameter is between 38 and 129 km. As a sanity check the optimal size that minimizes least squares is 73 km.
 
 A slight generalization of the one-size model is a two-size microburst population model that assumes the following microburst PDF
 \begin{equation}
-p(r, r_0, r_1, a) = a \delta(r-r_0) + (1-a)\delta(r-r_1)
+p(r | r_0, r_1, a) = a \delta(r-r_0) + (1-a)\delta(r-r_1)
 \end{equation} where the radii of the two microburst populations is given by $r_0$ and $r_1$ and $a$ is the parameter that quantifies the relative fractions of the two populations. The result of this model is shown in Fig. \ref{fig7}. The fit is slightly better than the one-size model, although that is to be expected assuming two more free model parameters. A majority, $98$ \%, of microbursts, have a diameter between $12$ and $47$ km with a rare population with a diameter between 76 and 234 km. The set of parameters that minimize least squares is $99.5$ \% of microbursts are small with a size of $21$ km and the remaining $0.5$ \% of microbursts have a 140 km size.
 
-Other, continious PDFs were tested including: Maxwellian (Maxwell–Boltzmann), log-normal, and Weibull. For a Maxwellian of the form
-
-\begin{equation}
-p(r, a) = \sqrt{\frac{2}{\pi}} \frac{r^2 e^{-r^2/(2a^2)}}{a^3},
-\end{equation} the range of $a$ consistent with the observed data is between 0 and 35 km. For a log-normal distribution of the form
-\begin{equation}
-test
-\end{equation}
-
-Lastly the Weibull distribution of the following form was tested
-\begin{equation}
-p(r, r_0, \lambda, c) = c r^{c-1} e^{-r^c}
-\end{equation}
+Other, continuous PDFs were tested including: Maxwellian (Maxwell–Boltzmann), log-normal, and Weibull. The range of model parameters that are consistent with the observed $\bar{F}(s)$ are shown in the SI text S2. These distributions were chosen because they have the following properties that are most realistic: they are continuous, approach 0 in the limit as $r \rightarrow 0$, and can be symmetrical or asymmetrical.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig6.pdf}
@@ -240,7 +228,9 @@ The AC6 microburst size distribution is much larger than the sizes reported in \
 
 The microburst PDF shown in Fig. \ref{fig3}b suggests that the microburst size distribution is bimodal. The quality of the AC6 data is insufficient to definitively conclude that there are two distinct microburst populations. This has been suggested before by \citeA{Blake1996} who noted that the $> 150$ keV and $> 1$ MeV microbursts are not always well correlated e.g. Fig. 10 in \citeA{Blake1996}. The different microburst population hypothesis can be better tested with an AC6-like mission with better energy resolution and homogeneous MLT coverage.
 
-The model results from section \ref{model_section} emphasize that care must be taken when comparing the $\bar{F}(s)$ curves observed by AC6 and the true microburst size distribution due to the compounding effect of an unknown microburst size distribution, unknown microburst shape, and random microburst locations near AC6. By assuming there is only one microburst size, the results in Fig. \ref{fig6} suggest that there is a 95\% probability that the microburst diameter is somewhere between 38 and 129 km, a relatively wide range of values. On the other hand, the two-size model has a smaller variance around the AC6 $\bar{F}(s)$, which is expected with the addition of two more free parameters. The two size model is interpreted as 98\% of microbursts diameters are between 12 and 47 km and larger microbursts are very uncommon. A variety of continuous $p(r)$ such as the Maxwellian, Weibull and log-normal were also tested with similar fits and are not shown. While the two-size model quantitatively fits the observations the best out of all $p(r)$ tested, nature surely does not only have two microburst sizes. Rather the most realistic PDF hypothesis would be bimodal and continuous. Due to lack of prior observations and theoretical predictions, it is difficult to identify and test a more appropriate $p(r)$ hypothesis at this time.
+The model results from section \ref{model_section} emphasize that care must be taken when comparing the $\bar{F}(s)$ curves observed by AC6 and the true microburst size distribution due to the compounding effect of an unknown microburst size distribution, unknown microburst shape, and random microburst locations near AC6. By assuming there is only one microburst size, the results in Fig. \ref{fig6} suggest that there is a 95\% probability that the microburst diameter is somewhere between 38 and 129 km, a relatively wide range of values. On the other hand, the two-size model has a smaller variance around the AC6 $\bar{F}(s)$, which is expected with the addition of two more free parameters. The two size model is interpreted as 98\% of microbursts diameters are between 12 and 47 km and larger microbursts are very uncommon. 
+
+A variety of continuous $p(r)$ such as the Maxwellian, Weibull and log-normal were also tested. While the continuous microburst PDFs are more realistic, there is no clear choice of which microburst PDF nature prefers. The one and two-size model are simple to interpret, and the two-size model qualitatively fits the observations the best out of all $p(r)$ tested. Surely nature does not only have two discrete microburst sizes. Rather, the current evidence supports a bimodal and continuous PDF hypothesis. Due to lack of prior observations and theoretical predictions, it is difficult to identify and test a more appropriate $p(r)$ hypothesis at this time.
 
 The equatorial microburst $\bar{F}(s)$ estimated in section \ref{microburst_distribution} can be compared to prior multi-point measurements of chorus source sizes made near the magnetic equator. The International Sun-Earth Explorers (ISEE 1 and 2) were used by \citeA{Gurnett1979} to make one of the first direct chorus source scale measurements. \citeA{Gurnett1979} estimated that the wave power correlation scale was on the order of a few hundred km across the background magnetic field. Using the Cluster Wide Band Data measurements \citeA{Santolik2003} found the correlation scale of whistler mode chorus waves to be around 100 km near the source region at $L \approx 4$ and midnight MLT sector. Furthermore, \citeA{Turner2017} used the four satellites comprising the Magnetospheric Multiscale Mission and found that rising tone whistler mode chorus elements were phase coherent up to 70 km at $L \approx 8$. Lastly, \citeA{Agapitov2010, Agapitov2011b, Agapitov2017a, Agapitov2018} used multiple sets of spacecraft missions with wave measurements near the chorus source region to statistically show that the extent of chorus source region can extend from 600 km in the outer radiation belt to greater than 1,000 km in the outer magnetosphere. \textcolor{red}{I feel that I am missing a discussion to connect my results to the wave size literature. Maybe highlight the range of chorus sizes in prior studies and how it is difficult to relate the $< 200$ km microburst sizes to waves due to the different wave size analysis methods used, and the mixed properties of waves?} 
 

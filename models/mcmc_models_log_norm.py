@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import scipy.stats
 import os
 
@@ -7,6 +8,8 @@ import pandas as pd
 import progressbar
 
 import mcmc_models
+
+OVERWRITE = False
 
 # csv save data path. Will NOT overwrite if it already exists!
 SAVE_PATH = ('/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
@@ -52,8 +55,61 @@ target = lambda p: Likelihood(p, cdf_data['Separation [km]'],
                             cdf_data['CDF'])*np.prod(
                             [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])
 niter = 10000
-trace = mcmc_models.metroplis(start, target, proposal, niter, 
-                        nburn=100, thin=1, verbose=False)
-# Save data
-df = pd.DataFrame(data=trace, columns=['mu', 'sigma'])
-df.to_csv(SAVE_PATH, index=False)
+
+if OVERWRITE or (not os.path.exists(SAVE_PATH)):
+    trace = mcmc_models.metroplis(start, target, proposal, niter, 
+                            nburn=100, thin=1, verbose=False)
+    # Save data
+    df = pd.DataFrame(data=trace, columns=['mu', 'sigma'])
+    df.to_csv(SAVE_PATH, index=False)
+else:
+    print('Data already saved. Aborting MCMC.')
+    df = pd.read_csv(SAVE_PATH)
+
+print(df.quantile([0.025, 0.5, 0.975]))
+
+### PLOTTING CODE ###
+fig = plt.figure(figsize=(10, 8))
+gs = gridspec.GridSpec(3, 2)
+ax = np.zeros((2, 2), dtype=object)
+for row in range(ax.shape[0]):
+    for column in range(ax.shape[1]):
+        ax[row, column] = plt.subplot(gs[row, column])
+bx = plt.subplot(gs[-1, :])
+
+N = df.shape[0]
+colors = ['g', 'r', 'b']
+ax[0,0].plot(np.arange(N)/1E4, df.mu, c='k')
+ax[1,0].hist(df.mu, density=True, bins=np.linspace(0, 100), color='k')
+ax[0,0].set(xlabel=r'Iteration x $10^4$', ylabel='mu trace')
+ax[1,0].plot(np.linspace(0, 100), prior[0].pdf(np.linspace(0, 100)))
+ax[1,0].set(xlabel='mu', ylabel='mu posterior PD')
+
+ax[0,1].plot(np.arange(N)/1E4, df.sigma, c='k')
+ax[0,1].set(xlabel=r'Iteration x $10^4$', ylabel=r'sigma trace')
+ax[1,1].hist(df.sigma, density=True, bins=np.linspace(0, 5), color='k')
+ax[1,1].plot(np.linspace(0, 5), prior[1].pdf(np.linspace(0, 5)))
+ax[1,1].set(xlabel=r'sigma', ylabel=r'sigma posterior PD')
+
+# Pick 1000 traces to analyze further to make plots.
+rand_ind = np.random.choice(np.arange(N), size=1000)
+y_model = np.nan*np.zeros((len(rand_ind), 
+                        len(cdf_data['Separation [km]'])))
+
+N_plot = 100
+j = 0
+for _, row in df.iloc[rand_ind, :].iterrows():
+    #print(row)
+    burst_diameters = np.random.lognormal(mean=row.mu, sigma=row.sigma, size=100000)
+    y_model[j, :] = mcmc_models.mc_brute_vectorized(burst_diameters, 
+                            bins=cdf_data['Separation [km]'])
+    j += 1
+
+for i in range(N_plot):
+    bx.plot(cdf_data['Separation [km]'], y_model[i,:], c='grey', alpha=0.2)
+    bx.plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k')
+
+plt.suptitle('log-normal microburst population MCMC model')
+bx.set(xlabel='Spacecraft separation [km]', ylabel='F(d)')
+gs.tight_layout(fig)
+plt.show()

@@ -9,7 +9,7 @@ import progressbar
 
 import mcmc_models
 
-OVERWRITE = False
+OVERWRITE = True
 
 # csv save data path. Will NOT overwrite if it already exists!
 SAVE_PATH = ('/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
@@ -44,7 +44,7 @@ def Likelihood(p, x, y):
     """ Gaussian likelihood. """
     r = np.random.lognormal(mean=np.log(p[0]), sigma=p[1], size=int(1E5))
     C = (np.std(y)*np.sqrt(2*np.pi))
-    y_model = mcmc_models.mc_brute_force(2*r, bins=x)
+    y_model = mcmc_models.mc_brute_vectorized(2*r, bins=x)
     args = sum([(y_i - y_model_i)**2 
                 for (y_i, y_model_i) in zip(y, y_model)])
     return np.exp(-0.5*args/np.var(y))/C
@@ -54,7 +54,7 @@ def Likelihood(p, x, y):
 target = lambda p: Likelihood(p, cdf_data['Separation [km]'], 
                             cdf_data['CDF'])*np.prod(
                             [prior_i.pdf(p_i) for prior_i, p_i in zip(prior, p)])
-niter = 10000
+niter = 100000
 
 if OVERWRITE or (not os.path.exists(SAVE_PATH)):
     trace = mcmc_models.metroplis(start, target, proposal, niter, 

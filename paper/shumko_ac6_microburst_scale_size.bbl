@@ -1226,6 +1226,31 @@ Santolik, O.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Sharma%
+}{%
+Sharma%
+}{%
+{\protect \APACyear {2017}}%
+}]{%
+Sharma2017}
+\APACinsertmetastar {%
+Sharma2017}%
+\begin{APACrefauthors}%
+Sharma, S.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2017}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Markov Chain Monte Carlo methods for Bayesian data
+  analysis in astronomy} {Markov chain monte carlo methods for bayesian data
+  analysis in astronomy}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Annual Review of Astronomy and
+  Astrophysics}{55}{}{213--259}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 Shumko%
 \ \protect \BOthers {.}}{%
 Shumko%

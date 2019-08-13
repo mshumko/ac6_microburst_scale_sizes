@@ -192,7 +192,7 @@ p(\theta | x) = \frac{p(x | \theta) p(\theta)}{p(x)}.
 
 With all of the above terminology, the important takeaway is that the posterior distribution for each model parameter is interpreted as the range of our model's dependent parameters that are consistent with the observations. A 95\% credible interval (CI) for each model parameter is reported here that is interpreted as: assuming a hypothesized $p(r, \theta)$, there is a 95\% probability that the true $\theta$ is inside the CI. To sample the posterior distribution, the $\theta$ parameter space is explored with a Markov Chain Monte Carlo (MCMC) sampler. In a nutshell a Markov Chain is a process that generates random variables that depend on only the previous state of those random variables. Hence a MCMC sampler is a Monte Carlo sampler that samples the $\theta$ parameter space by picking random $\theta$ values based on the previous state of $\theta$. 
 
-The first and one of the most popular MCMC is the Metropolis-Hastings sampler \cite{Metropolis1953, Hastings1970}. While the Metropolis-Hastings sampler is explained in detail in \citeA{Metropolis1953} and \citeA{Hastings1970} and a good introduction given in \citeA{Sambridge2006}, a brief overview is warranted. The Metropolis sampler samples the posterior distribution in $N$ trials. Once an initial set of $\theta$ is randomly picked from the prior, the i$^{th}$ trial involves the following steps. First calculate the posterior probability for $\theta_i$. Then pick a proposal $\theta_{i+1}$ to jump to, randomly picked near $\theta_i$ in parameter space. If the $\theta_{i+1}$ posterior probability is higher than $\theta_i$, the MCMC accepts and moves to $\theta_{i+1}$, otherwise there is a random chance that $\theta_{i+1}$ will be accepted to jump to $\theta_{i+1}$ or rejected and $\theta_i$ is used to generate another proposal. This accept/reject criteria allows the sampler to trend to more probable $\theta$ while also exploring the neighboring regions. After the $N$ trials, a histogram is made using the accepted $\theta$s to produce the posterior distribution for each model parameter.
+The first and one of the most popular MCMC is the Metropolis-Hastings sampler \cite{Metropolis1953, Hastings1970}. While the Metropolis-Hastings sampler is explained in detail in \citeA{Metropolis1953} and \citeA{Hastings1970} and a good introduction given in \citeA{Sambridge2006} as well as \citeA{Sharma2017}, a brief overview is warranted. The Metropolis sampler samples the posterior distribution in $N$ trials. Once an initial set of $\theta$ is randomly picked from the prior, the i$^{th}$ trial involves the following steps. First calculate the posterior probability for $\theta_i$. Then pick a proposal $\theta_{i+1}$ to jump to, randomly picked near $\theta_i$ in parameter space. If the $\theta_{i+1}$ posterior probability is higher than $\theta_i$, the MCMC accepts and moves to $\theta_{i+1}$, otherwise there is a random chance that $\theta_{i+1}$ will be accepted to jump to $\theta_{i+1}$ or rejected and $\theta_i$ is used to generate another proposal. This accept/reject criteria allows the sampler to trend to more probable $\theta$ while also exploring the neighboring regions. After the $N$ trials, a histogram is made using the accepted $\theta$s to produce the posterior distribution for each model parameter.
 
 
 \subsection{Estimating optimal parameters for various microburst size models}
@@ -205,6 +205,20 @@ A slight generalization of the one-size model is a two-size microburst populatio
 \begin{equation}
 p(r, r_0, r_1, a) = a \delta(r-r_0) + (1-a)\delta(r-r_1)
 \end{equation} where the radii of the two microburst populations is given by $r_0$ and $r_1$ and $a$ is the parameter that quantifies the relative fractions of the two populations. The result of this model is shown in Fig. \ref{fig7}. The fit is slightly better than the one-size model, although that is to be expected assuming two more free model parameters. A majority, $98$ \%, of microbursts, have a diameter between $12$ and $47$ km with a rare population with a diameter between 76 and 234 km. The set of parameters that minimize least squares is $99.5$ \% of microbursts are small with a size of $21$ km and the remaining $0.5$ \% of microbursts have a 140 km size.
+
+Other, continious PDFs were tested including: Maxwellian (Maxwell–Boltzmann), log-normal, and Weibull. For a Maxwellian of the form
+
+\begin{equation}
+p(r, a) = \sqrt{\frac{2}{\pi}} \frac{r^2 e^{-r^2/(2a^2)}}{a^3},
+\end{equation} the range of $a$ consistent with the observed data is between 0 and 35 km. For a log-normal distribution of the form
+\begin{equation}
+test
+\end{equation}
+
+Lastly the Weibull distribution of the following form was tested
+\begin{equation}
+p(r, r_0, \lambda, c) = c r^{c-1} e^{-r^c}
+\end{equation}
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig6.pdf}

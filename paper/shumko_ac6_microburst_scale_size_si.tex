@@ -209,28 +209,42 @@ N(s) = \bigg( \frac{n_0}{A(r_0, s_0)} \bigg) \displaystyle\int\displaylimits_{s}
 
 \noindent\textbf{Text S2: Most probable parameter values for continuous microburst PDFs}
 
-Besides the one, and two-size microburst models described in the main text, continuous PDFs such as the log-normal, Weibull, and Maxwellian were fit and their optimal parameters presented here.
+Besides the one and two-size microburst models described in the main text, continuous PDFs such as the log-normal, Weibull, and Maxwellian were fit and their optimal parameters presented here.
 
 For the Maxwellian PDF, we assumed the following form
 
 \begin{equation}
-p(r, a) = \sqrt{\frac{2}{\pi}} \frac{r^2 e^{-r^2/(2a^2)}}{a^3}.
-\end{equation} The range of $a$ consistent with the observed data was found to be between 0 and 35 km. 
-
-For a log-normal distribution of the form
+p(r | a) = \sqrt{\frac{2}{\pi}} \frac{r^2 e^{-r^2/(2a^2)}}{a^3}.
+\end{equation} The range of $a$ consistent with the observed data was found to be between 0 and 35 km. Next, the log-normal distribution of the following form was used
 \begin{equation}
-test
-\end{equation}
-
-Lastly the Weibull distribution of the following form was tested
+p(r | \mu, \sigma) = \frac{1}{\sigma r \sqrt{2 \pi}} e^{\Big( -\big( ln(r) - ln(\mu) \big)^2/(2 \sigma^2) \Big)}
+\end{equation} and the results are summarized in \ref{table_s1}. Lastly the Weibull distribution of the following form was tested
 \begin{equation}
-p(r, c, r_0, \lambda) = c \bigg(\frac{r-r_0}{\lambda}\bigg)^{c-1} exp \Bigg(- \bigg(\frac{r-r_0}{\lambda}\bigg)^{c} \Bigg).
-\end{equation} for which the range of model parameters is shown in Table \ref{table_s1}
+p(r | c, r_0, \lambda) = c \bigg(\frac{r-r_0}{\lambda}\bigg)^{c-1} exp \Bigg(- \bigg(\frac{r-r_0}{\lambda}\bigg)^{c} \Bigg).
+\end{equation} for which the model parameters are summarized in Table \ref{table_s2}.
 
 \begin{table}[h]
 \settablenum{S1} %%Change number for each table
-\caption{Range of Weibull model parameters consistent with the observed AC6  $\bar{F}(s)$}
+\caption{Range of log-normal model parameters consistent with the observed AC6  $\bar{F}(s)$}
 \label{table_s1}
+\centering
+\begin{tabular}{|c|c|c|}
+\hline 
+percentile (\%) & $\mu$ & $\sigma$ \\ 
+\hline 
+2.5 & 1.8 & 0 \\ 
+\hline 
+50 & 21.8 & 0.4 \\ 
+\hline 
+97.5 & 52.0 & 1.1 \\ 
+\hline 
+\end{tabular} 
+\end{table}
+
+\begin{table}[h]
+\settablenum{S2} %%Change number for each table
+\caption{Range of Weibull model parameters consistent with the observed AC6  $\bar{F}(s)$}
+\label{table_s2}
 \centering
 \begin{tabular}{|c|c|c|c|}
 \hline 

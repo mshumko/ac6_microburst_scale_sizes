@@ -9,7 +9,7 @@ import progressbar
 
 import mcmc_models
 
-OVERWRITE = True
+OVERWRITE = False
 
 # csv save data path. Will NOT overwrite if it already exists!
 SAVE_PATH = ('/home/mike/research/ac6_microburst_scale_sizes/models/mcmc_traces'
@@ -26,7 +26,7 @@ cdf_data = pd.read_csv(CDF_DATA_PATH)
 # Specify priors for the log-normal distribution. First parameter is the mean and second
 #  is the standard deviation
 prior = [scipy.stats.uniform(0, 100), 
-        scipy.stats.uniform(0, 10)]
+        scipy.stats.uniform(0.1, 10)]
 # Initial guess on the microburst size.
 start = [prior_i.rvs() for prior_i in prior]
 # How much to jump. Assuming a N(mu, sigma) proposal, ~60% of the time the 
@@ -49,7 +49,8 @@ def Likelihood(p, x, y):
                 for (y_i, y_model_i) in zip(y, y_model)])
     return np.exp(-0.5*args/np.var(y))/C
 
-# The target function. If probability is higher, take the new value given from proposal. Else do the Metroplis thing where you draw a random number between 
+# The target function. If probability is higher, take the new value given from proposal. 
+# Else do the Metroplis thing where you draw a random number between 
 # 0 and 1 and compare to the target value (which will be less than 1).
 target = lambda p: Likelihood(p, cdf_data['Separation [km]'], 
                             cdf_data['CDF'])*np.prod(
@@ -66,7 +67,8 @@ else:
     print('Data already saved. Aborting MCMC.')
     df = pd.read_csv(SAVE_PATH)
 
-print(df.quantile([0.025, 0.5, 0.975]))
+quantiles = [2.5, 50, 97.5]
+print(df.quantile([0.025, 0.50, 0.975]))
 
 ### PLOTTING CODE ###
 fig = plt.figure(figsize=(10, 8))
@@ -78,7 +80,6 @@ for row in range(ax.shape[0]):
 bx = plt.subplot(gs[-1, :])
 
 N = df.shape[0]
-colors = ['g', 'r', 'b']
 ax[0,0].plot(np.arange(N)/1E4, df.mu, c='k')
 ax[1,0].hist(df.mu, density=True, bins=np.linspace(0, 100), color='k')
 ax[0,0].set(xlabel=r'Iteration x $10^4$', ylabel='mu trace')
@@ -100,7 +101,8 @@ N_plot = 100
 j = 0
 for _, row in df.iloc[rand_ind, :].iterrows():
     #print(row)
-    burst_diameters = np.random.lognormal(mean=row.mu, sigma=row.sigma, size=100000)
+    burst_diameters = np.random.lognormal(mean=np.log(row.mu), 
+                                        sigma=row.sigma, size=100000)
     y_model[j, :] = mcmc_models.mc_brute_vectorized(burst_diameters, 
                             bins=cdf_data['Separation [km]'])
     j += 1
@@ -108,6 +110,14 @@ for _, row in df.iloc[rand_ind, :].iterrows():
 for i in range(N_plot):
     bx.plot(cdf_data['Separation [km]'], y_model[i,:], c='grey', alpha=0.2)
     bx.plot(cdf_data['Separation [km]'], cdf_data['CDF'], c='k')
+
+quantiles = [2.5, 50, 97.5]
+y_quartile = np.nanpercentile(y_model, quantiles, axis=0)
+
+colors = ['g', 'r', 'b']
+for i, q in enumerate(y_quartile):
+    bx.plot(cdf_data['Separation [km]'], q, c=colors[i], 
+            label=f'{quantiles[i]}')
 
 plt.suptitle('log-normal microburst population MCMC model')
 bx.set(xlabel='Spacecraft separation [km]', ylabel='F(d)')

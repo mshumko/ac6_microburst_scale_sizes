@@ -65,9 +65,8 @@ class MicroburstFraction:
         # Loop over the separation bins and calculate the number of total 
         # and coincident microburst events.
         for i, (bin_i, bin_f) in enumerate(zip(self.bins[:-1], self.bins[1:])):
-            # NEED TO ADD LOOP FOR n[i] to only count microbursts observed by
-            # one spacecraft AND the other spacecraft did not see anything 
-            # (but had data!) 
+            print(f'Progress {round(i/(self.bins.shape[0]-1), 2)}%') 
+            # Filter the full catalog in separation and L shell.
             filtered_catalog = self.microburst_catalog[
                 (self.microburst_catalog.Dist_Total > bin_i) &
                 (self.microburst_catalog.Dist_Total < bin_f) &
@@ -120,7 +119,7 @@ class MicroburstFraction:
                 # Move on if there is something wrong with the file (does not 
                 # exist, or empty)
                 except AssertionError as err:
-                    if str(err) == 'File is empty!':
+                    if (str(err) == 'File is empty!') or ('None or > 1 AC6 files found' in str(err)):
                         continue
                     else:
                         raise

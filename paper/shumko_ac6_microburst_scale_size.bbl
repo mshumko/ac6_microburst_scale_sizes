@@ -1358,6 +1358,37 @@ Trefall, H.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Tsurutani%
+, Lakhina%
+\BCBL {}\ \BBA {} Verkhoglyadova%
+}{%
+Tsurutani%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2013}}%
+}]{%
+Tsurutani2013}
+\APACinsertmetastar {%
+Tsurutani2013}%
+\begin{APACrefauthors}%
+Tsurutani, B\BPBI T.%
+, Lakhina, G\BPBI S.%
+\BCBL {}\ \BBA {} Verkhoglyadova, O\BPBI P.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2013}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Energetic electron (> 10 keV) microburst
+  precipitation,\~{} 5--15 s X-ray pulsations, chorus, and wave-particle
+  interactions: A review} {Energetic electron (> 10 kev) microburst
+  precipitation,\~{} 5--15 s x-ray pulsations, chorus, and wave-particle
+  interactions: A review}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space
+  Physics}{118}{5}{2296--2312}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 Turner%
 \ \protect \BOthers {.}}{%
 Turner%

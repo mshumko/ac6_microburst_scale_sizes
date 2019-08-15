@@ -1,10 +1,14 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
+import dateutil.parser
 import os
 
+import mission_tools.ac6.read_ac_data as read_ac_data
+
 class MicroburstFraction:
-    def __init__(self, microburst_catalog_name, c_microburst_catalog_name,
+    def __init__(self, sc_id, microburst_catalog_name, c_microburst_catalog_name,
                 microburst_catalog_dir=None, c_microburst_catalog_dir=None):
         """
         This class calculates and plots the fraction of simulatenous to 
@@ -12,6 +16,8 @@ class MicroburstFraction:
         is first assumed due to Poisson noise and will be then expanded to
         a systematic uncertanity due to transmitter noise.
         """
+        self.sc_id = sc_id
+
         # Specify the coincident catalog directory
         if c_microburst_catalog_dir is None:
             self.c_microburst_catalog_dir = ('/home/mike/research/'
@@ -62,15 +68,18 @@ class MicroburstFraction:
             # NEED TO ADD LOOP FOR n[i] to only count microbursts observed by
             # one spacecraft AND the other spacecraft did not see anything 
             # (but had data!) 
-            n[i] = np.sum(
-                        (self.microburst_catalog.Dist_Total > bin_i) &
-                        (self.microburst_catalog.Dist_Total < bin_f) &
-                        (self.microburst_catalog.AE < 1000)  
-                          )
+            filtered_catalog = self.microburst_catalog[
+                (self.microburst_catalog.Dist_Total > bin_i) &
+                (self.microburst_catalog.Dist_Total < bin_f) &
+                (self.microburst_catalog.Lm_OPQ > 4) &
+                (self.microburst_catalog.Lm_OPQ < 8) 
+                ]
+            # Now find the number of detections made by one AC6 unit and NOT
+            # the other.
+            n[i] = self.mutually_exclusive_detections(filtered_catalog)
             n_c[i] = np.sum(
                         (self.c_microburst_catalog.Dist_Total > bin_i) &
-                        (self.c_microburst_catalog.Dist_Total < bin_f) &
-                        (self.c_microburst_catalog.AE < 1000)
+                        (self.c_microburst_catalog.Dist_Total < bin_f)
                         )
         self.f = n_c/n
         # Need to check how the uncertanity is calculated.
@@ -84,6 +93,46 @@ class MicroburstFraction:
                                 )
         return
 
+    def mutually_exclusive_detections(self, catalog):
+        """ 
+        For each detection, check if the other spacecraft had data. Returns
+        the number of microburst detections in the catalog AND other sc had
+        data at that time.
+        """
+        n = 0
+        current_date = datetime.min
+        dt = timedelta(seconds=0.5)
+        # Determine the other spacecraft
+        if self.sc_id.upper() == 'AC6A':
+            other_sc_id = 'B'
+        else:
+            other_sc_id = 'A'
+
+        for _, row in catalog.iterrows():
+            t0 = dateutil.parser.parse(row.dateTime)
+            # If the current date is not loaded, load it in and set current_date
+            if t0.date != current_date:
+                try:
+                    self.ac6_10hz = read_ac_data.read_ac_data_wrapper(other_sc_id, 
+                                    t0, dType='10Hz')
+                    current_date = t0.date()
+                
+                # Move on if there is something wrong with the file (does not 
+                # exist, or empty)
+                except AssertionError as err:
+                    if str(err) == 'File is empty!':
+                        continue
+                    else:
+                        raise
+
+            ac6_data_flt = self.ac6_10hz[
+                                        (self.ac6_10hz.dateTime > t0-dt) & 
+                                        (self.ac6_10hz.dateTime < t0+dt)
+                                        ]
+            if ac6_data_flt.shape[0]:
+                n += 1
+        return n
+
     def plot_fraction(self):
         """ Plot fraction of microbursts with steps and vertical bars for error bars."""
         plt.step(mf.bins[:-1], mf.f, where='post')
@@ -91,11 +140,12 @@ class MicroburstFraction:
         return
 
 if __name__ == '__main__':
+    sc_id = 'AC6B'
     microburst_name = 'AC6B_microbursts_v5.txt'
     # coincident_catalog_name = 'AC6_coincident_microbursts_sorted_Brady_v6.txt'
     coincident_catalog_name = 'AC6_coincident_microbursts_sorted_v6.txt'
 
-    mf = MicroburstFraction(microburst_name, coincident_catalog_name)
+    mf = MicroburstFraction(sc_id, microburst_name, coincident_catalog_name)
     mf.make_microburst_fraction()
     mf.plot_fraction()
     plt.show()

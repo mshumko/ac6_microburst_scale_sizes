@@ -71,11 +71,14 @@ class MicroburstFraction:
                 (self.microburst_catalog.Dist_Total > bin_i) &
                 (self.microburst_catalog.Dist_Total < bin_f) &
                 (self.microburst_catalog.Lm_OPQ > 4) &
-                (self.microburst_catalog.Lm_OPQ < 8) 
+                (self.microburst_catalog.Lm_OPQ < 8) &
+                # There is a valid temporal CC value (data exists for both spacecraft)
+                (~np.isnan(self.microburst_catalog.time_cc)) 
                 ]
             # Now find the number of detections made by one AC6 unit and NOT
             # the other.
-            n[i] = self.mutually_exclusive_detections(filtered_catalog)
+            n[i] = filtered_catalog.shape[0]
+            #n[i] = self.mutually_exclusive_detections(filtered_catalog)
             n_c[i] = np.sum(
                         (self.c_microburst_catalog.Dist_Total > bin_i) &
                         (self.c_microburst_catalog.Dist_Total < bin_f)
@@ -135,16 +138,22 @@ class MicroburstFraction:
     def plot_fraction(self):
         """ Plot fraction of microbursts with steps and vertical bars for error bars."""
         plt.step(mf.bins[:-1], mf.f, where='post')
-        plt.errorbar(mf.bins[:-1]+self.bin_width/2, mf.f, ls='', yerr=self.f_err)
+        plt.errorbar(mf.bins[:-2]+self.bin_width/2, mf.f[:-1], ls='', yerr=self.f_err[:-1])
+        plt.xlabel('AC6 separation [km]')
+        plt.ylabel('Fraction of microbursts')
+        plt.title(f'AC6 Coincident Microburst Probability\n 4 < L < 8')
         return
 
 if __name__ == '__main__':
     sc_id = 'AC6B'
-    microburst_name = 'AC6B_microbursts_v5.txt'
+    microburst_name = 'AC6_coincident_microbursts_v8.txt' #'AC6B_microbursts_v5.txt'
+    microburst_catalog_dir = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
+                              'coincident_microbursts_catalogues')
     # coincident_catalog_name = 'AC6_coincident_microbursts_sorted_Brady_v6.txt'
     coincident_catalog_name = 'AC6_coincident_microbursts_sorted_v6.txt'
 
-    mf = MicroburstFraction(sc_id, microburst_name, coincident_catalog_name)
+    mf = MicroburstFraction(sc_id, microburst_name, coincident_catalog_name, 
+                            microburst_catalog_dir=microburst_catalog_dir)
     mf.make_microburst_fraction()
     mf.plot_fraction()
     plt.show()

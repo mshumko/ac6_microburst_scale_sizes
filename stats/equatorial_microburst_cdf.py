@@ -163,7 +163,7 @@ class Microburst_Equatorial_CDF:
         return np.rad2deg(np.arcsin(d/(2*(Re+alt))))
 
     def map2equator(self, lat, lon, alt, time, d):
-        """ Maps to magnetix equator assuming d is soly in latitude. """
+        """ Maps to magnetic equator assuming d is soly in latitude. """
         # Define the coordinates of the two spacecraft.
         dLat = self.deltaLat(d, alt)
         X1 = {'x1':alt, 'x2':lat-dLat, 'x3':lon, 'dateTime':time}

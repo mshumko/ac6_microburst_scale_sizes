@@ -6,8 +6,11 @@ import dateutil.parser
 import os
 
 import mission_tools.ac6.read_ac_data as read_ac_data
+import IRBEM
 
-class MicroburstFraction:
+Re = 6371 # Earth radius, km
+
+class LeoMicroburstFraction:
     def __init__(self, sc_id, microburst_catalog_name, c_microburst_catalog_name,
                 microburst_catalog_dir=None, c_microburst_catalog_dir=None):
         """
@@ -78,7 +81,6 @@ class MicroburstFraction:
             # Now find the number of detections made by one AC6 unit and NOT
             # the other.
             n[i] = filtered_catalog.shape[0]
-            #n[i] = self.mutually_exclusive_detections(filtered_catalog)
             n_c[i] = np.sum(
                         (self.c_microburst_catalog.Dist_Total > bin_i) &
                         (self.c_microburst_catalog.Dist_Total < bin_f)
@@ -95,54 +97,119 @@ class MicroburstFraction:
                                 )
         return
 
-    def mutually_exclusive_detections(self, catalog):
-        """ 
-        For each detection, check if the other spacecraft had data. Returns
-        the number of microburst detections in the catalog AND other sc had
-        data at that time.
-        """
-        n = 0
-        current_date = datetime.min
-        dt = timedelta(seconds=0.5)
-        # Determine the other spacecraft
-        if self.sc_id.upper() == 'AC6A':
-            other_sc_id = 'B'
-        else:
-            other_sc_id = 'A'
-
-        for _, row in catalog.iterrows():
-            t0 = dateutil.parser.parse(row.dateTime)
-            # If the current date is not loaded, load it in and set current_date
-            if t0.date != current_date:
-                try:
-                    self.ac6_10hz = read_ac_data.read_ac_data_wrapper(other_sc_id, 
-                                    t0, dType='10Hz')
-                    current_date = t0.date()
-                
-                # Move on if there is something wrong with the file (does not 
-                # exist, or empty)
-                except AssertionError as err:
-                    if (str(err) == 'File is empty!') or ('None or > 1 AC6 files found' in str(err)):
-                        continue
-                    else:
-                        raise
-
-            ac6_data_flt = self.ac6_10hz[
-                                        (self.ac6_10hz.dateTime > t0-dt) & 
-                                        (self.ac6_10hz.dateTime < t0+dt)
-                                        ]
-            if ac6_data_flt.shape[0]:
-                n += 1
-        return n
-
     def plot_fraction(self):
         """ Plot fraction of microbursts with steps and vertical bars for error bars."""
-        plt.step(mf.bins[:-1], mf.f, where='post')
-        plt.errorbar(mf.bins[:-2]+self.bin_width/2, mf.f[:-1], ls='', yerr=self.f_err[:-1])
+        plt.step(self.bins[:-1], self.f, where='post')
+        plt.errorbar(self.bins[:-2]+self.bin_width/2, self.f[:-1], ls='', yerr=self.f_err[:-1])
         plt.xlabel('AC6 separation [km]')
         plt.ylabel('Fraction of microbursts')
         plt.title(f'AC6 Coincident Microburst Probability\n 4 < L < 8')
         return
+
+class EquatorialMicroburstFraction(LeoMicroburstFraction):
+    def __init__(self, sc_id, microburst_catalog_name, c_microburst_catalog_name,
+                microburst_catalog_dir=None, c_microburst_catalog_dir=None):
+        """ 
+        Child class of LeoMicroburstFraction except the make_microburst_fraction 
+        and plot_fraction methods are overwritten and map to the magnetic 
+        equator using OPQ magnetic field model.
+        """
+        super().__init__(sc_id, microburst_catalog_name, c_microburst_catalog_name,
+                        microburst_catalog_dir=microburst_catalog_dir, 
+                        c_microburst_catalog_dir=c_microburst_catalog_dir)
+        self.model = IRBEM.MagFields(kext='OPQ77')
+        return
+
+    def make_microburst_fraction(self, key='d_equator',
+                                start_bin=0, end_bin=1000, bin_width=100):
+        """ 
+        Overwritten class where all of the detections are first mapped 
+        to the magnetic equator.
+        """
+        # First map all events to the magnetic equator.
+        if not 'd_equator' in self.microburst_catalog.columns:
+            self.microburst_catalog.loc[:, 'd_equator'] = np.array([
+                        self._map2equator(row.lat, row.lon, row.alt, 
+                                        row.dateTime, row.Dist_Total) 
+                        for _, row in self.microburst_catalog.iterrows()])
+        # Then map the coincident events to the magnetic equator.
+        if not 'd_equator' in self.c_microburst_catalog.columns:
+            self.c_microburst_catalog.loc[:, 'd_equator'] = np.array([
+                        self._map2equator(row.lat, row.lon, row.alt, 
+                                        row.dateTime, row.Dist_Total) 
+                        for _, row in self.c_microburst_catalog.iterrows()])
+        # Calculate fraction
+        self.bin_width = bin_width
+        self.bins = np.arange(start_bin, end_bin+1, bin_width)
+        self._microburst_fraction(key=key)
+        return
+
+    def plot_fraction(self):
+        """ Plot fraction of microbursts with steps and vertical bars for error bars."""
+        plt.step(self.bins[:-1], self.f, where='post')
+        plt.errorbar(self.bins[:-2]+self.bin_width/2, self.f[:-1], ls='', yerr=self.f_err[:-1])
+        plt.xlabel('AC6 equatorial separation [km]')
+        plt.ylabel('Fraction of microbursts')
+        plt.title(f'Equatorial AC6 Coincident Microburst Probability\n 4 < L < 8')
+        plt.xlim(self.bins[0], self.bins[-1])
+        return
+
+    def _map2equator(self, lat, lon, alt, time, d):
+        """ Maps to magnetic equator assuming d is soly in latitude. """
+        # Define the coordinates of the two spacecraft.
+        dLat = self._deltaLat(d, alt)
+        X1 = {'x1':alt, 'x2':lat-dLat, 'x3':lon, 'dateTime':time}
+        X2 = {'x1':alt, 'x2':lat+dLat, 'x3':lon, 'dateTime':time}
+        # Run IRBEM
+        X1_equator = self.model.find_magequator(X1, None)['XGEO']
+        X2_equator = self.model.find_magequator(X2, None)['XGEO']
+        # Calculate the separations.
+        self.d_equator = Re*np.linalg.norm(X1_equator-X2_equator)
+        return self.d_equator
+
+    def _deltaLat(self, d, alt):
+        """
+        Calculate the half of the change in angle for a spacecraft at
+        an altitude alt and separated by a distance d.
+        """
+        return np.rad2deg(np.arcsin(d/(2*(Re+alt))))
+
+    def _microburst_fraction(self, key='d_equator'):
+        """ 
+        This method calculates the fraction of coincident to all 
+        microbursts in separation bins defined by the bin attribute. The
+        separations are estimated using the key kwarg
+        """
+        n = np.nan*np.ones(len(self.bins)-1)
+        n_c = np.nan*np.ones(len(self.bins)-1)
+
+        # Loop over the separation bins and calculate the number of total 
+        # and coincident microburst events.
+        for i, (bin_i, bin_f) in enumerate(zip(self.bins[:-1], self.bins[1:])):
+            # Filter the full catalog in separation and L shell.
+            filtered_catalog = self.microburst_catalog[
+                (self.microburst_catalog[key] > bin_i) &
+                (self.microburst_catalog[key] < bin_f) &
+                (self.microburst_catalog.Lm_OPQ > 4) &
+                (self.microburst_catalog.Lm_OPQ < 8) &
+                # There is a valid temporal CC value (data exists for both spacecraft)
+                (~np.isnan(self.microburst_catalog.time_cc)) 
+                ]
+            # Now find the number of detections made by one AC6 unit and NOT
+            # the other.
+            n[i] = filtered_catalog.shape[0]
+            n_c[i] = np.sum(
+                        (self.c_microburst_catalog[key] > bin_i) &
+                        (self.c_microburst_catalog[key] < bin_f)
+                        )
+        self.f = n_c/n
+        # Need to check how the uncertanity is calculated.
+        # Fraction error propagation eq. from wiki 
+        # https://en.wikipedia.org/wiki/Propagation_of_uncertainty
+        self.f_err = self.f*np.sqrt( 1/n_c + 1/n )
+        return self.f, self.f_err
+ 
+
 
 if __name__ == '__main__':
     sc_id = 'AC6B'
@@ -152,8 +219,8 @@ if __name__ == '__main__':
     # coincident_catalog_name = 'AC6_coincident_microbursts_sorted_Brady_v6.txt'
     coincident_catalog_name = 'AC6_coincident_microbursts_sorted_v6.txt'
 
-    mf = MicroburstFraction(sc_id, microburst_name, coincident_catalog_name, 
-                            microburst_catalog_dir=microburst_catalog_dir)
-    mf.make_microburst_fraction()
+    mf = EquatorialMicroburstFraction(sc_id, microburst_name, coincident_catalog_name, 
+                                    microburst_catalog_dir=microburst_catalog_dir)
+    mf.make_microburst_fraction(start_bin=0, end_bin=2000, bin_width=100)
     mf.plot_fraction()
     plt.show()

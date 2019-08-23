@@ -532,6 +532,35 @@ Dietrich, S.%
 
 \bibitem [\protect \citeauthoryear {%
 Douma%
+\ \protect \BOthers {.}}{%
+Douma%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2019}}%
+}]{%
+Douma2019}
+\APACinsertmetastar {%
+Douma2019}%
+\begin{APACrefauthors}%
+Douma, E.%
+, Rodger, C.%
+, Blum, L.%
+, O'Brien, T.%
+, Clilverd, M.%
+\BCBL {}\ \BBA {} Blake, J.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2019}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Characteristics of relativistic microburst intensity
+  from SAMPEX observations} {Characteristics of relativistic microburst
+  intensity from sampex observations}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Journal of Geophysical Research: Space Physics}{}{}{}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Douma%
 , Rodger%
 , Blum%
 \BCBL {}\ \BBA {} Clilverd%

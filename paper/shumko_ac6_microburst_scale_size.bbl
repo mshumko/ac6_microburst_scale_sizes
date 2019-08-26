@@ -532,35 +532,6 @@ Dietrich, S.%
 
 \bibitem [\protect \citeauthoryear {%
 Douma%
-\ \protect \BOthers {.}}{%
-Douma%
-\ \protect \BOthers {.}}{%
-{\protect \APACyear {2019}}%
-}]{%
-Douma2019}
-\APACinsertmetastar {%
-Douma2019}%
-\begin{APACrefauthors}%
-Douma, E.%
-, Rodger, C.%
-, Blum, L.%
-, O'Brien, T.%
-, Clilverd, M.%
-\BCBL {}\ \BBA {} Blake, J.%
-\end{APACrefauthors}%
-\unskip\
-\newblock
-\APACrefYearMonthDay{2019}{}{}.
-\newblock
-{\BBOQ}\APACrefatitle {Characteristics of relativistic microburst intensity
-  from SAMPEX observations} {Characteristics of relativistic microburst
-  intensity from sampex observations}.{\BBCQ}
-\newblock
-\APACjournalVolNumPages{Journal of Geophysical Research: Space Physics}{}{}{}.
-\PrintBackRefs{\CurrentBib}
-
-\bibitem [\protect \citeauthoryear {%
-Douma%
 , Rodger%
 , Blum%
 \BCBL {}\ \BBA {} Clilverd%
@@ -1277,6 +1248,39 @@ Sharma, S.%
 \newblock
 \APACjournalVolNumPages{Annual Review of Astronomy and
   Astrophysics}{55}{}{213--259}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
+Shen%
+, Li%
+, Ma%
+, Agapitov%
+\BCBL {}\ \BBA {} Nishimura%
+}{%
+Shen%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2019}}%
+}]{%
+Shen2019}
+\APACinsertmetastar {%
+Shen2019}%
+\begin{APACrefauthors}%
+Shen, X\BHBI C.%
+, Li, W.%
+, Ma, Q.%
+, Agapitov, O.%
+\BCBL {}\ \BBA {} Nishimura, Y.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2019}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Statistical Analysis of Transverse Size of Lower Band
+  Chorus Waves Using Simultaneous Multisatellite Observations} {Statistical
+  analysis of transverse size of lower band chorus waves using simultaneous
+  multisatellite observations}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Geophysical Research Letters}{46}{11}{5725--5734}.
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%

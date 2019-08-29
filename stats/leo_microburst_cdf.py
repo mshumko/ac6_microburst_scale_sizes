@@ -1,4 +1,5 @@
 import os 
+import string
 import pandas as pd
 import numpy as np
 import scipy.integrate
@@ -198,6 +199,9 @@ class Microburst_CDF:
         ax[2].set_ylabel(r'Samples Per Bin x $10^4$')
         ax[2].set_ylim(bottom=0)
         ax[2].set_xticks(np.arange(min(self.sep_bins), max(self.sep_bins)+1, 10))
+
+        self._label_subpplots(ax)
+
         plt.tight_layout()
         plt.show()
         return
@@ -211,6 +215,14 @@ class Microburst_CDF:
                           index=self.sep_bins[:-2])
         df.to_csv(path)
         return
+
+    def _label_subpplots(self, ax):
+        """ Add subplot labels to each subplot """
+        for i, ax_i in enumerate(ax):
+            ax_i.text(0, 1, f'({string.ascii_lowercase[i]})', 
+                    transform=ax_i.transAxes, va='top', fontsize=15)
+        return
+
 
 if __name__ == "__main__":
     catalog_version = 6

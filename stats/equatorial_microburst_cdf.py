@@ -2,6 +2,7 @@ import numpy as np
 import scipy.integrate
 import matplotlib.pyplot as plt
 import os
+import string
 
 import pandas as pd
 
@@ -120,6 +121,7 @@ class Microburst_Equatorial_CDF:
         ax[1].set_ylabel('Microburst Size Histogram')
         ax[-1].set_xlabel('AC6 Equatorial Separation [km]')
         ax[-1].set_ylabel(r'Samples Per Bin x $10^5$')
+        self._label_subpplots(ax)
         plt.tight_layout()
         plt.show()
         return
@@ -153,6 +155,13 @@ class Microburst_Equatorial_CDF:
             # Replace the consecutive indicies with [0, bin_width, 2*bin_width...] 
             self.norm = self.norm.set_index(
                         np.arange(sep_min, sep_max+1, bin_width))
+        return
+
+    def _label_subpplots(self, ax):
+        """ Add subplot labels to each subplot """
+        for i, ax_i in enumerate(ax):
+            ax_i.text(0, 1, f'({string.ascii_lowercase[i]})', 
+                    transform=ax_i.transAxes, va='top', fontsize=15)
         return
 
     def deltaLat(self, d, alt):

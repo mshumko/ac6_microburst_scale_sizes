@@ -195,9 +195,14 @@ class EquatorialMicroburstFraction(LeoMicroburstFraction):
                 # There is a valid temporal CC value (data exists for both spacecraft)
                 (~np.isnan(self.microburst_catalog.time_cc)) 
                 ]
-            # Now find the number of detections made by one AC6 unit and NOT
-            # the other.
-            n[i] = filtered_catalog.shape[0]
+
+            # Now find the number of microbursts observed by AC6B only.
+            n = 0
+            for _, row in filtered_catalog.iterrows():
+                if row.dateTime == row.time_spatial_B:
+                    n += 1
+
+            #n[i] = filtered_catalog.shape[0]
             n_c[i] = np.sum(
                         (self.c_microburst_catalog[key] > bin_i) &
                         (self.c_microburst_catalog[key] < bin_f)

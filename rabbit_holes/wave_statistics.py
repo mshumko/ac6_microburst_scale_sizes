@@ -1,5 +1,8 @@
 # This script loads and plots the Agapitov et al., 2018 THEMIS chorus
-# dataset using scipy.io.readsav()
+# dataset using scipy.io.readsav() and looks at the distribution of
+# chorus correlations as a function of THEMIS separation. Also calculates
+# the median and 95% confidence interval by undoing Oleksiy's frequency 
+# tables.
 
 """
 *** DATA DESCRIPTION FROM OLEKSIY ***
@@ -23,7 +26,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors
 import scipy.io
-#import copy
 import os
 
 f_dir = '/home/mike/research/ac6_microburst_scale_sizes/data'
@@ -31,7 +33,7 @@ f_dir = '/home/mike/research/ac6_microburst_scale_sizes/data'
 # JGR2018_F_Fig4_Hchorus_BW_gt_lt_10.sav
 f_name = 'JGR2018_F_Fig4_Hchorus_BW_gt_lt_10.sav' 
 d = scipy.io.readsav(os.path.join(f_dir, f_name))
-dataset_key = 'h_chorus_bwgt10'
+dataset_key = 'h_chorus_bwlt10'
 
 x = np.arange(301)*50 + 25 # 50 km separation bin labels
 y = np.arange(81)/40.-0.9999 # cross-correlation labels from -1 to 1.

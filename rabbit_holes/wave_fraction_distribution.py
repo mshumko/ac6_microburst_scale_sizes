@@ -30,8 +30,8 @@ gt_fraction = np.sum(wave_data[gt_key][idc:, :], axis=0)/np.sum(wave_data[gt_key
 lt_fraction = np.sum(wave_data[lt_key][idc:, :], axis=0)/np.sum(wave_data[lt_key], axis=0)
 
 # Normalize to max of 1
-# gt_fraction /= np.nanmax(gt_fraction)
-# lt_fraction /= np.nanmax(lt_fraction)
+gt_fraction /= np.nanmax(gt_fraction)
+lt_fraction /= np.nanmax(lt_fraction)
 
 gt_fraction_err = gt_fraction*(1-gt_fraction)/np.sqrt(np.sum(wave_data[gt_key][idc:, :], axis=0))
 lt_fraction_err = lt_fraction*(1-lt_fraction)/np.sqrt(np.sum(wave_data[lt_key][idc:, :], axis=0))

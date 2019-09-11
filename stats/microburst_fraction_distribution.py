@@ -154,6 +154,16 @@ class EquatorialMicroburstFraction(LeoMicroburstFraction):
         plt.xlim(self.bins[0], self.bins[-1])
         return
 
+    def save_fraction(self, file_path=None):
+        """ Saves the microburst fraction and errors to csv file. """
+        if file_path is None:
+            file_dir = '/home/mike/research/ac6_microburst_scale_sizes/data'
+            file_name = 'equatorial_microburst_fraction.csv'
+            file_path = os.path.join(file_dir, file_name)
+        df = pd.DataFrame({'f':self.f, 'f_err':self.f_err})
+        df.to_csv(file_path, index=False)
+        return
+
     def _map2equator(self, lat, lon, alt, time, d):
         """ Maps to magnetic equator assuming d is soly in latitude. """
         # Define the coordinates of the two spacecraft.
@@ -227,5 +237,6 @@ if __name__ == '__main__':
     mf = EquatorialMicroburstFraction(sc_id, microburst_name, coincident_catalog_name, 
                                     microburst_catalog_dir=microburst_catalog_dir)
     mf.make_microburst_fraction(start_bin=0, end_bin=2000, bin_width=100)
+    mf.save_fraction()
     mf.plot_fraction()
     plt.show()

@@ -160,7 +160,7 @@ class EquatorialMicroburstFraction(LeoMicroburstFraction):
             file_dir = '/home/mike/research/ac6_microburst_scale_sizes/data'
             file_name = 'equatorial_microburst_fraction.csv'
             file_path = os.path.join(file_dir, file_name)
-        df = pd.DataFrame({'f':self.f, 'f_err':self.f_err})
+        df = pd.DataFrame({'s':self.bins[:-1], 'f':self.f, 'f_err':self.f_err})
         df.to_csv(file_path, index=False)
         return
 

@@ -21,6 +21,7 @@ Oleksiy
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors
 import scipy.io
 import os
 
@@ -29,7 +30,20 @@ f_dir = '/home/mike/research/ac6_microburst_scale_sizes/data'
 # JGR2018_F_Fig4_Hchorus_BW_gt_lt_10.sav
 f_name = 'JGR2018_F_Fig4_Hchorus_BW_gt_lt_10.sav' 
 d = scipy.io.readsav(os.path.join(f_dir, f_name))
-print(d.keys())
+dataset_key = 'h_chorus_bwgt10'
 
 x = np.arange(301)*50 + 25 # 50 km separation bin labels
 y = np.arange(81)/40.-0.9999 # cross-correlation labels from -1 to 1.
+
+# Normlize the h_chorus_bwgt10 histrogram in the separation dimension
+max_det = np.sum(d[dataset_key], axis=0) # max detections in each separation bin.
+np.tile(max_det, 81).reshape(*d[dataset_key].shape)
+d[f'{dataset_key}_density'] = d[dataset_key]/np.tile(max_det, 81).reshape(*d[dataset_key].shape)
+
+p = plt.pcolormesh(x, y, d[f'{dataset_key}_density'], vmax=0.1, vmin=0.01, norm=matplotlib.colors.LogNorm())
+    #cmap=matplotlib.colors.Colormap('Greens'))
+plt.colorbar(p)
+plt.xscale('log')
+plt.xlim(100, 1E4)
+plt.ylim(0, 1)
+plt.show()

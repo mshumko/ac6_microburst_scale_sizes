@@ -30,3 +30,6 @@ f_dir = '/home/mike/research/ac6_microburst_scale_sizes/data'
 f_name = 'JGR2018_F_Fig4_Hchorus_BW_gt_lt_10.sav' 
 d = scipy.io.readsav(os.path.join(f_dir, f_name))
 print(d.keys())
+
+x = np.arange(301)*50 + 25 # 50 km separation bin labels
+y = np.arange(81)/40.-0.9999 # cross-correlation labels from -1 to 1.

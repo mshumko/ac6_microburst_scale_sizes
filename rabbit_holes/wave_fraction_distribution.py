@@ -24,7 +24,7 @@ microburst_fraction = pd.read_csv(file_path, index_col='s')
 gt_key = 'h_chorus_bwgt10'
 lt_key = 'h_chorus_bwlt10'
 n_c, n_s = wave_data[gt_key].shape
-cc_thresh = 0.7
+cc_thresh = 0.8
 
 # Oleksiy's bins
 x = np.arange(n_s)*50 + 25 # 50 km separation bin labels
@@ -46,10 +46,10 @@ gt_fraction_err = gt_fraction*(1-gt_fraction)/np.sqrt(np.sum(wave_data[gt_key][i
 lt_fraction_err = lt_fraction*(1-lt_fraction)/np.sqrt(np.sum(wave_data[lt_key][idc:, :], axis=0))
 
 
-plt.errorbar(x, gt_fraction, yerr=gt_fraction_err, c='r', label='bw > 10 pT')
-plt.errorbar(x, lt_fraction, yerr=lt_fraction_err, c='b', label='bw < 10 pT')
+plt.errorbar(x, gt_fraction, yerr=gt_fraction_err, c='r', label=r'$B_w > 10$ pT')
+plt.errorbar(x, lt_fraction, yerr=lt_fraction_err, c='b', label=r'$B_w < 10$ pT')
 plt.errorbar(microburst_fraction.index, microburst_fraction.f, 
-            yerr=microburst_fraction.f_err, c='k', label='microbursts')
+            yerr=microburst_fraction.f_err, c='k', label='microburst')
 plt.legend()
 plt.xlim(100, 1E3)
 plt.ylim(0, 1)

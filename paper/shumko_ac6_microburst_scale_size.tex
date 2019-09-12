@@ -338,24 +338,18 @@ percentile (\%) & c & $r_0$ & $\lambda$ \\
 \end{table}
 
 \section{Comparison of microburst to whistler mode chorus $\bar{F}(s)$} \label{appendixc}
-In this appendix we compare the equatorial distribution of microbursts sizes to the distribution of lower band whistler mode chorus waves near the magnetic equator. The wave data was obtained with the Time History of Events and Macroscale Interactions during Substorms (THEMIS) spacecraft over a 10 year period. Here we provide a brief overview of the procedure used identify chorus waves which is described in more detail in \citeA{Agapitov2018}. The THEMIS search coil magnetometer instrument was used to make magnetic field measurements in six logarithmically-spaced frequency channels between 1-4 kHz. This data was then used to cross-correlate the wave amplitudes between pairs of THEMIS spacecraft, to create a dataset of chorus waves simultaneously observed by THEMIS.
+In this appendix we compare the equatorial distribution of microbursts sizes to the distribution of lower band whistler mode chorus waves near the magnetic equator. The wave data was obtained with the Time History of Events and Macroscale Interactions during Substorms (THEMIS) spacecraft from 2007 to 2017. Here we provide a brief overview of the procedure used to identify chorus waves which is described in more detail in \citeA{Agapitov2018}. The THEMIS search coil magnetometer instrument was used to make magnetic field measurements in six logarithmically-spaced frequency channels between 1-4 kHz. This data was then used to cross-correlate the chorus wave amplitudes between pairs of THEMIS spacecraft, and a chorus wave dataset was made.
 
-The spatial distribution of waves was found by first discarding wave detections with a cross-correlation less than $0.8$. Then the wave dataset was split up into a low and high wave amplitude subsets with a $10$ pT threshold. For each 75 km \textcolor{red}{(rerun with 100 km)} THEMIS separation bin, the probability of observing a coincident wave between a pair of THEMIS spacecraft was estimated. This probability is defined as the number of coincident low (high) amplitude waves observed, divided by the total number of low (high) amplitude waves observed. The result of this analysis is shown in Fig. \ref{fig_appendixc_1}. 
+For this exploratory study, the spatial distribution of chorus waves was explored as a function of low and high wave amplitudes (10 pT threshold). In each 50 km THEMIS separation (perpendicular to the background magnetic field) bin, the probability of observing a highly correlated chorus wave was calculated. Highly correlated waves had a cross-correlation grater than 0.8. This probability is defined as the number of correlated low (high) amplitude waves, divided by the total number of low (high) amplitude waves observed. The low and high amplitude chorus wave distributions are shown in the red and blue curves in  Fig. \ref{fig_appendixc_1}. 
 
-The AC6 equatorial microburst dataset was analyzed in the same way to make a direct comparison. The probability of observing a coincident microburst for each equatorial separation bin (the cumulative estimates were not used) is shown in Fig. \ref{fig_appendixc_2}. The equatorial AC6 microburst probability has a similar shape to Fig. \ref{fig4}. Compared to the way that the coincident microburst dataset was analyzed and verified with $\bar{F}(s)$ in the main text, this approach has an unknown contribution from false positive detections in the denominator. Assuming the rate of false detections is not dependent on separation, this should have the effect of reducing the coincident probability evenly across all separations. This approach was not used in the main text because it is infeasible to clean the $8 \times 10^4$ total events in the dataset.
+The AC6 equatorial microburst dataset was analyzed in the same way to make a direct comparison. The probability of observing a coincident microburst in each equatorial separation bin (the cumulative estimates were not used) is shown with the black trace in Fig. \ref{fig_appendixc_1}.
 
-\textcolor{red}{Include a brief discussion from the plots.}
+Figure \ref{fig_appendixc_1} shows a trend with a rapid probability drop off for $> 10$ pT waves and microbursts within the first few hundred km. The $< 10$ pT wave probabilities also initially drop off and then remain relatively high at higher THEMIS separations. There are a few systematic biases that may be effecting these results that should be considered in a future study. A few biases include the magnetic field mapping error for the AC6 microbursts and much wider MLT coverage of THEMIS compared to AC6. With these biases in mind, these results hint that the microburst probability distribution more closely tracks higher amplitude lower band whistler mode chorus wave distribution. A similar analysis can also be applied to other wave modes to investigate the 
 
 \begin{figure}
-\includegraphics[width=\textwidth]{appendixc_equatorial_wave_distribution_oleksiy.png}
-\caption{\textcolor{red}{Placeholder for Oleksiy's plot from his 2018 paper.}} 
+\includegraphics[width=\textwidth]{appendixc_compare_chorus_microburst_fraction_cc_thresh_8.png}
+\caption{Comparison of the highly correlated lower band whistler mode chorus wave distribution estimated by \citeA{Agapitov2018} to the AC6 equatorial microburst distribution. The chorus waves were split up by wave amplitude into a low ($B_w < 10$ pT) and high amplitude ($B_w > 10$ pT) subsets. The blue and red curves show the probability of observing low or high amplitude, highly correlated chorus waves in each THEMIS separation bin. The black curve shows the AC6 equatorial microburst distribution in the same format.}
 \label{fig_appendixc_1}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=\textwidth]{appendixc_equatorial_microburst_fraction_for_oleksiy.png}
-\caption{\textcolor{red}{Placeholder. Plan to merge these two figures into one once I have access to Oleksiy's list of wave events.}} 
-\label{fig_appendixc_2}
 \end{figure}
 
 

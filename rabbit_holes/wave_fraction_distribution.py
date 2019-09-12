@@ -45,11 +45,15 @@ microburst_fraction.f_err /= np.max(microburst_fraction.f)
 gt_fraction_err = gt_fraction*(1-gt_fraction)/np.sqrt(np.sum(wave_data[gt_key][idc:, :], axis=0))
 lt_fraction_err = lt_fraction*(1-lt_fraction)/np.sqrt(np.sum(wave_data[lt_key][idc:, :], axis=0))
 
-
-plt.errorbar(x, gt_fraction, yerr=gt_fraction_err, c='r', label=r'$B_w > 10$ pT')
-plt.errorbar(x, lt_fraction, yerr=lt_fraction_err, c='b', label=r'$B_w < 10$ pT')
-plt.errorbar(microburst_fraction.index, microburst_fraction.f, 
+# plt.step(x, gt_fraction, c='r', label=r'$B_w > 10$ pT')
+# plt.step(x, lt_fraction, c='b', label=r'$B_w < 10$ pT')
+# plt.step(microburst_fraction.index, microburst_fraction.f, c='k', label='microburst')
+ac6_bin_width = (microburst_fraction.index[1] - microburst_fraction.index[0])/2
+plt.errorbar(x, lt_fraction, yerr=lt_fraction_err, c='r', label=r'$B_w < 10$ pT')
+plt.errorbar(x, gt_fraction, yerr=gt_fraction_err, c='b', label=r'$B_w > 10$ pT')
+plt.errorbar(microburst_fraction.index+ac6_bin_width, microburst_fraction.f, 
             yerr=microburst_fraction.f_err, c='k', label='microburst')
+
 plt.legend()
 plt.xlim(100, 1E3)
 plt.ylim(0, 1)

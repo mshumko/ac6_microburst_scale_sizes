@@ -1280,6 +1280,39 @@ Sharma, S.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
+Shen%
+, Li%
+, Ma%
+, Agapitov%
+\BCBL {}\ \BBA {} Nishimura%
+}{%
+Shen%
+\ \protect \BOthers {.}}{%
+{\protect \APACyear {2019}}%
+}]{%
+Shen2019}
+\APACinsertmetastar {%
+Shen2019}%
+\begin{APACrefauthors}%
+Shen, X\BHBI C.%
+, Li, W.%
+, Ma, Q.%
+, Agapitov, O.%
+\BCBL {}\ \BBA {} Nishimura, Y.%
+\end{APACrefauthors}%
+\unskip\
+\newblock
+\APACrefYearMonthDay{2019}{}{}.
+\newblock
+{\BBOQ}\APACrefatitle {Statistical Analysis of Transverse Size of Lower Band
+  Chorus Waves Using Simultaneous Multisatellite Observations} {Statistical
+  analysis of transverse size of lower band chorus waves using simultaneous
+  multisatellite observations}.{\BBCQ}
+\newblock
+\APACjournalVolNumPages{Geophysical Research Letters}{46}{11}{5725--5734}.
+\PrintBackRefs{\CurrentBib}
+
+\bibitem [\protect \citeauthoryear {%
 Shumko%
 \ \protect \BOthers {.}}{%
 Shumko%

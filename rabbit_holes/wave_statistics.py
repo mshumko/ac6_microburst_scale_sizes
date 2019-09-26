@@ -53,7 +53,9 @@ for i in range(data_array_density.shape[1]):
     v = np.concatenate([y[i]*np.ones(int(v_i)) for i, v_i in enumerate(data_array[:, i])])
     if len(v):
         detection_stats[:, i] = np.percentile(v, [2.5, 50, 97.5])
+        #detection_stats[1, i] = np.median(v)
 
+# Colormaps attempted Greens, Plasma
 p = plt.pcolormesh(x, y, data_array_density, vmax=0.1, vmin=0.01, 
     norm=matplotlib.colors.LogNorm(), cmap=plt.get_cmap("Greens"))
 plt.colorbar(p, label='Coincidence probability')

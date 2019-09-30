@@ -38,13 +38,10 @@ dataset_key = 'h_chorus_bwlt10'
 x = np.arange(301)*50 + 25 # 50 km separation bin labels
 y = np.arange(81)/40.-0.9999 # cross-correlation labels from -1 to 1.
 
-# Convert bins with 0 detections to np.nan
 data_array = d[dataset_key].copy()
+# Estimate the probability density in each separation bin.
+data_array_density = data_array/np.nansum(data_array, axis=0)
 
-# Normlize the h_chorus_bwgt10 histrogram in the separation dimension
-max_det = np.nansum(d[dataset_key], axis=0) # max detections in each separation bin.
-np.tile(max_det, 81).reshape(*data_array.shape)
-data_array_density = data_array/np.tile(max_det, 81).reshape(*data_array.shape)
 
 # Calculate the median and 95% confidence interval of the density
 #detection_stats = np.nanpercentile(data_array_density, [2.5, 50, 97.5], axis=0)
@@ -59,7 +56,7 @@ for i in range(data_array_density.shape[1]):
 p = plt.pcolormesh(x, y, data_array_density, vmax=0.1, vmin=0.01, 
     norm=matplotlib.colors.LogNorm(), cmap=plt.get_cmap("Greens"))
 plt.colorbar(p, label='Coincidence probability')
-plt.errorbar(x, detection_stats[1, :], errorevery=1, c='k')
+plt.errorbar(x, detection_stats[1, :], errorevery=1, c='k', fmt='.')
             # yerr=[detection_stats[1, :]-detection_stats[0, :], 
             #     detection_stats[-1, :]-detection_stats[1, :]])
 plt.title(dataset_key); plt.xlabel(r'THEMIS $|\Delta r|$ [km]'); plt.ylabel('correlation')

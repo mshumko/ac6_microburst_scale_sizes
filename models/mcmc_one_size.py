@@ -179,9 +179,8 @@ if __name__ == '__main__':
         ax[1] = plt.subplot(gs[1, 0])
 
         post_bins = np.arange(0, 200)
-        post, _ = np.histogram(df.d, bins=post_bins)
-        post = post/np.sum(post)
-        # Open posterior histgram 
+        post, _ = np.histogram(df.d, bins=post_bins, density=True)
+        # Unfilled posterior histgram 
         ax[0].step(post_bins[:-1], post, color='k', 
                     label='_nolegend_')
         # Shaded posterior representing 95% CI

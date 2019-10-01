@@ -254,24 +254,43 @@ if __name__ == '__main__':
         colors = ['r', 'g', 'b']
         quartiles = [2.5, 50, 97.5]
 
+        a_bins = np.arange(0, 1, 0.01)
+        d0_bins = np.arange(0, 200, 5)
+        d1_bins = np.arange(0, 200, 3)
+
+        # # Calculate histograms of each parameter
+        H_a, _  = np.histogram(df.a, bins=a_bins, density=True)
+        H_d0, _ = np.histogram(df.d0, bins=d0_bins, density=True)
+        H_d1, _ = np.histogram(df.d1, bins=d1_bins, density=True)
+
+        # # Calculate quantiles for each parameter
+        # quantiles = df.quantile(q=[0.025, 0.975])
+        # print(quantiles)
+
         ax[0,0].get_yaxis().set_ticks([])
-        ax[0,0].hist(df.a, density=True, bins=np.linspace(0, 1, num=100), color='k')
-        ax[0,0].plot(np.linspace(0, 1), prior[0].pdf(np.linspace(0, 1)))
-        ax[0,0].set(xlabel=r'$d_0/d_1$ mixing ratio, a', xlim=(0, 0.1), ylabel='Posterior PDF')
+        ax[0, 0].step(a_bins[:-1], H_a, color='k')
+        # ids = np.where((a_bins >= quantiles.loc[0.025, 'a']) & (a_bins <= quantiles.loc[0.975, 'a']))[0]
+        # ax[0,0].fill_between(a_bins[ids], H_a[ids], color='k', alpha=0.3, step='pre')
+        #ax[0,0].hist(df.a, density=True, bins=a_bins, color='k', histtype='step')
+        #ax[0,0].plot(np.linspace(0, 1), prior[0].pdf(np.linspace(0, 1)), 'k')
+        ax[0,0].set(xlabel=r'$d_0/d_1$ mixing ratio, a', ylabel='Posterior PDF',
+                    xlim=(0, 0.1), ylim=(None, 20))
 
         ax[0,1].get_yaxis().set_ticks([])
-        ax[0,1].hist(df.d0, density=True, bins=np.linspace(0, 200), color='k')
-        ax[0,1].plot(np.linspace(0, 200), prior[1].pdf(np.linspace(0, 200)))
+        ax[0, 1].step(d0_bins[:-1], H_d0, color='k')
+        #ax[0,1].hist(df.d0, density=True, bins=d0_bins, color='k', histtype='step')
+        #ax[0,1].plot(np.linspace(0, 200), prior[1].pdf(np.linspace(0, 200)), 'k')
         ax[0,1].set(xlabel=r'microburst diamater, $d_0$ [km]', xlim=(63, 168))
 
         ax[0,2].get_yaxis().set_ticks([])
-        ax[0,2].hist(df.d1, density=True, bins=np.linspace(0, 200), color='k')
-        ax[0,2].plot(np.linspace(0, 200), prior[2].pdf(np.linspace(0, 200)))
+        ax[0, 2].step(d1_bins[:-1], H_d1, color='k')
+        #ax[0,2].hist(df.d1, density=True, bins=d1_bins, color='k', histtype='step')
+        #ax[0,2].plot(np.linspace(0, 200), prior[2].pdf(np.linspace(0, 200)), 'k')
         ax[0,2].set(xlabel=r'microburst diamater, $d_1$ [km]', xlim=(9, 48))
 
 
         # Pick 1000 traces to analyze further to make plots.
-        rand_ind = np.random.choice(np.arange(N), size=1000)
+        rand_ind = np.random.choice(np.arange(N), size=1000) # DONT FORGET TO INCREASE TO 1000.
         y_model = np.nan*np.zeros((len(rand_ind), 
                                 len(cdf_data['Separation [km]'])))
 
@@ -290,24 +309,23 @@ if __name__ == '__main__':
                                     n_bursts=niter)
             j += 1
 
-        # for i in range(N_plot):
-        #     bx.plot(cdf_data['Separation [km]'], y_model[i,:], c='grey', alpha=0.3)
         bx.plot(cdf_data['Separation [km]'], 100*cdf_data['CDF'], c='k', label='AC6')
 
         # Find the mean and 95% interval of the 1000 curves.
-        y_quartile = np.percentile(y_model, quartiles, axis=0)
+        y_quartile = np.percentile(y_model, quartiles, axis=0).T
 
-        for i, q in enumerate(y_quartile):
-            bx.plot(cdf_data['Separation [km]'], 100*q, c=colors[i], 
-                    label=f'{quartiles[i]} %')
+        # for i, q in enumerate(y_quartile):
+        #     bx.plot(cdf_data['Separation [km]'], 100*q, c=colors[i], 
+        #             label=f'{quartiles[i]} %')
 
-        # ax[0, 1].set_title('Two microburst sizes MCMC model\n'
-        #                 r'$pdf = a \delta(s-d_0) + (1-a) \delta(s-d_1)$')
+        bx.fill_between(cdf_data['Separation [km]'], 100*y_quartile[:, 0], 100*y_quartile[:, 2], 
+                        color='k', alpha=0.3, label=f'95% CI')
+        bx.plot(cdf_data['Separation [km]'], 100*y_quartile[:, 1], 'k--', label=f'median')
         ax[0, 1].set_title('Two microburst sizes model')
         bx.set(xlabel='AC6 separation [km]', ylabel='Percent of Microbursts Above AC6 Separation', xlim=(0, 90))
         bx.legend()
         ax[0, 0].text(0.0, 0.95, '(a)', transform=ax[0, 0].transAxes, 
-                    va='top', fontsize=15, color='w')
+                    va='top', fontsize=15)
         ax[0, 1].text(0.01, 0.95, '(b)', transform=ax[0, 1].transAxes, 
                     va='top', fontsize=15)
         ax[0, 2].text(0.01, 0.95, '(c)', transform=ax[0, 2].transAxes, 

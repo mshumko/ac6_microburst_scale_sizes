@@ -1,21 +1,11 @@
 I didn’t have much of substance.
 
- 
+--DONE-- In the 3rd key point, change “At” to “Mapped to”
 
-In the 3rd key point, change “At” to “Mapped to”
-
- 
-
-On line 150, express the units of the burst parameter threshold. I think it’s counts per 100 ms?
-
- 
+--DONE-- On line 150, express the units of the burst parameter threshold. I think it’s counts per 100 ms?
 
 In Figures 6d and 7d, consider replacing the red/green/blue curves instead as gray shading with a dashed black line at the 50% level.
 
- 
-
 In equation B3, did you mean to have absolute value around |(r-r0)/lambda|? Otherwise, you have negative numbers raised to the c power or c-1 power, when r<r0. This is an offset Weibull. Normally, a Weibull has r0=0, and only has 2 parameters.
-
- 
 
 -paul

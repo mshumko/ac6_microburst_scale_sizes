@@ -163,6 +163,13 @@ if __name__ == '__main__':
         plt.tight_layout()
         plt.show()
     else:
+        # Calculate the quantiles
+        quantiles = np.percentile(df.d, [2.5, 50, 97.5])
+        quantile_f = np.nan*np.ones((len(cdf_data['Separation [km]']), 3))
+
+        for i, q in enumerate(quantiles):
+            quantile_f[:, i] = 100*mc_brute_vectorized(q, bins=cdf_data['Separation [km]'])
+
         colors = ['r', 'g', 'b']
         labels = ['2.5 %', '50 %', "97.5 %"]
         fig = plt.figure(figsize=(7, 6))
@@ -171,9 +178,17 @@ if __name__ == '__main__':
         ax[0] = plt.subplot(gs[0, 0])
         ax[1] = plt.subplot(gs[1, 0])
 
-        #_, ax = plt.subplots(2, 1, figsize=(7, 5))
-        ax[0].hist(df.d, density=True, bins=np.arange(0, 200), color='k', label='_nolegend_')
-        ax[0].plot(np.linspace(0, 200), prior[0].pdf(np.linspace(0, 200)), c='c')
+        post_bins = np.arange(0, 200)
+        post, _ = np.histogram(df.d, bins=post_bins)
+        post = post/np.sum(post)
+        # Open posterior histgram 
+        ax[0].step(post_bins[:-1], post, color='k', 
+                    label='_nolegend_')
+        # Shaded posterior representing 95% CI
+        ids = np.where((post_bins > quantiles[0]) & (post_bins < quantiles[2]))[0]
+        ax[0].fill_between(post_bins[ids], post[ids], color='k', alpha=0.3, step='pre',
+                    label='_nolegend_')
+        ax[0].plot(np.linspace(0, 200), prior[0].pdf(np.linspace(0, 200)), c='k')
 
         # Plot 100 random traces on top of the data.
         N_plot = 100
@@ -181,24 +196,17 @@ if __name__ == '__main__':
         y_model = np.nan*np.zeros((len(rand_ind), 
                                 len(cdf_data['Separation [km]'])))
 
-        # for _, row in df.loc[rand_ind, :].iterrows():
-        #     burst_diameters = row.d
-        #     y_model = mc_brute_vectorized(burst_diameters, 
-        #                             bins=cdf_data['Separation [km]'])
-        #     ax[1].plot(cdf_data['Separation [km]'], y_model, c='grey', alpha=0.3)
-
         # plot the AC6 data
         ax[1].plot(cdf_data['Separation [km]'], 100*cdf_data['CDF'], c='k', label='AC6')
-        # Plot the quantiles
-        for i, size in enumerate(np.percentile(df.d, [2.5, 50, 97.5])):
-            ax[1].plot(cdf_data['Separation [km]'], 
-                        100*mc_brute_vectorized(size, bins=cdf_data['Separation [km]']), 
-                        c=colors[i], label=labels[i])
-            ax[0].axvline(size, c=colors[i])
-
+        # Plot median
+        ax[0].axvline(quantiles[1], color='k', ls='--')
+        ax[1].plot(cdf_data['Separation [km]'], quantile_f[:, 1], 'k--', label=f'median') 
+        # Plot 95% CI
+        ax[1].fill_between(cdf_data['Separation [km]'], quantile_f[:, 0], quantile_f[:, 2], color='k', alpha=0.3, label=f'95% CI')
+        
         ax[0].set_title('Single microburst size model')
-        #ax[0].get_yaxis().set_ticks([])
-        ax[0].set(xlabel='Microburst diameter [km]', ylabel='Posterior PDF', xlim=(26, 140)); 
+        ax[0].set(xlabel='Microburst diameter [km]', ylabel='Posterior PDF', xlim=(26, 140), ylim=(0, None)); 
+        #ax[0].legend()
         ax[1].legend()
         ax[1].set(xlabel='AC6 separation [km]', 
                     ylabel=r'Percent of Microbursts Above Separation', xlim=(0, 90))

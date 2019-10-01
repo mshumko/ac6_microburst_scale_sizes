@@ -64,7 +64,7 @@
 \begin{keypoints}
 \item The dual AeroCube-6 CubeSats simultaneously observed $> 35$ keV microbursts at a variety of spatial separations ranging from $2$ to $\approx 100$ km.
 \item In low Earth orbit the majority of microbursts have a size on the order of a few tens of km.
-\item At the magnetic equator, the size of most microbursts corresponds to the size of whistler-mode chorus wave packets.
+\item Mapped to the magnetic equator, the size of most microbursts corresponds to the size of whistler-mode chorus wave packets.
 \end{keypoints}
 
 %% ------------------------------------------------------------------------ %%
@@ -111,7 +111,7 @@ Each AC6 unit is equipped with three Aerospace microdosimeters (licensed to Tele
 
 \section{Methodology} 
 \subsection{Microburst Detection} \label{microburst_detection}
-The first step to find microbursts observed simultaneously by AC6 is to identify them on each individual spacecraft. The detection method used to make the microburst dataset is the burst parameter \cite{O'Brien2003}. This algorithm has been successfully used in other microburst studies, mainly with the microbursts observed by SAMPEX \cite<e.g.>{O'Brien2003, Blum2015, Douma2017, Douma2019}. For AC6, a burst parameter threshold of 5 was determined to have a good trade-off between false positive and false negative microburst detections. %Another microburst dataset was made using a microburst detection algorithm based on wavelet spectra frequency filtering. The two detection methods yielded similar lists of microbursts.
+The first step to find microbursts observed simultaneously by AC6 is to identify them on each individual spacecraft. The detection method used to make the microburst dataset is the burst parameter \cite{O'Brien2003}. This algorithm has been successfully used in other microburst studies, mainly with the microbursts observed by SAMPEX \cite<e.g.>{O'Brien2003, Blum2015, Douma2017, Douma2019}. For AC6, a burst parameter threshold of $5 \ \mathrm{counts}^{1/2}$ was determined to have a good trade-off between false positive and false negative microburst detections. %Another microburst dataset was made using a microburst detection algorithm based on wavelet spectra frequency filtering. The two detection methods yielded similar lists of microbursts.
 
 With the microburst datasets from each AC6 unit in hand, data cleaning to remove microburst-like transmitter noise was necessary. The transmitters on AC6 can cause unphysical count impulses in the dosimeters that resembles periodic trains of microbursts. One source of transmitter noise was observed when AC6 was in contact with the ground stations above the US for data downloads and commanding, thus the microburst detections made above the US (that were mostly at low L) were discarded. 
 
@@ -211,7 +211,7 @@ Other, continuous PDFs were tested including: Maxwellian (Maxwell -- Boltzmann),
 
 \begin{figure}
 \includegraphics[width=\textwidth]{fig6.pdf}
-\caption{Range of plausible microburst sizes assuming all microbursts are one fixed size. Panel (a) shows the posterior probability density function of microburst diameters in black. The red, green, and blue vertical lines at 38, 73, and 129 km represent the 2.5, 50, and 97.5 posterior percentiles, respectively. A uniform prior between 0 and 200 km was assumed for this MCMC run and is shown in cyan. Panel (b) shows the $\bar{F}(s)$ from AC6 in black. The red, green, and blue curves in Panel (b) show the modeled   $\bar{F}(s)$ using the 2.5, 50 and 97.5 percentile sizes from the posterior.} 
+\caption{Range of plausible microburst sizes assuming all microbursts are one fixed size. Panel (a) shows the posterior probability density function of microburst diameters with the black curve. The gray shaded posterior region highlights the 38-129 km range of sizes corresponding to the 95\% credible interval. The vertical dashed black line at 73 km is the median size. A uniform prior between 0 and 200 km was assumed for this MCMC run and is shown with the horizontal black line. Panel (b) shows the $\bar{F}(s)$ curve from the AC6 data in black, and the range of $\bar{F}(s)$ curves from the posterior. The median $\bar{F}(s)$ is shown with the dashed black curve and the gray shaded region corresponds to the 95\% credible interval.} 
 \label{fig6}
 \end{figure}
 

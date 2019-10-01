@@ -26,7 +26,7 @@ class Microburst_CDF:
         # Load catalog.
         self.microburst_catalog = pd.read_csv(catalog_path)
         self.max_sep = 100
-        print(f'Number of microbursts {self.microburst_catalog.shape[0]}')
+        #print(f'Number of microbursts {self.microburst_catalog.shape[0]}')
         return
 
     def _load_sample_file_(self, path, sum_N=5, offset=0):
@@ -50,7 +50,7 @@ class Microburst_CDF:
 
         self.bin_width = self.samples.index[1] - self.samples.index[0]
         self.sep_bins = self.samples.loc[0:self.max_sep].index
-        print('Sample normalization bins:', self.sep_bins.values)
+        #print('Sample normalization bins:', self.sep_bins.values)
         return
             
     def n_i(self, di, df, data=None):
@@ -158,15 +158,15 @@ class Microburst_CDF:
                 ax[0].fill_between(self.sep_bins[:-1], C-C_err, C+C_err, facecolor='k', 
                                     alpha=0.5)
                 ax[1].fill_between(self.sep_bins[:-2], P-P_err, P+P_err, facecolor='k',
-                        label=f'all', lw=3, alpha=0.5)
+                                    lw=3, alpha=0.5)
             else:
                 ax[0].fill_between(self.sep_bins[:-1], C_err[0], C_err[1], facecolor='k', 
                                     alpha=0.5)
-                ax[1].fill_between(self.sep_bins[:-2], P_err[0], P_err[1], facecolor='k',
-                        label=f'all', lw=3, alpha=0.5)
+                ax[1].fill_between(self.sep_bins[:-2], P_err[0], P_err[1], facecolor='k', 
+                                    lw=3, alpha=0.5)
 
             ax[0].plot(self.sep_bins[:-1], C, c='k', 
-                        label=f'all', lw=3, alpha=0.5)
+                        label=f'all', lw=3, alpha=1)
             ax[1].plot(self.sep_bins[:-2], P, c='k', lw=3)
             ax[2].step(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c='k')
             

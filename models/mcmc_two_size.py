@@ -280,13 +280,13 @@ if __name__ == '__main__':
         ax[0, 1].step(d0_bins[:-1], H_d0, color='k')
         #ax[0,1].hist(df.d0, density=True, bins=d0_bins, color='k', histtype='step')
         #ax[0,1].plot(np.linspace(0, 200), prior[1].pdf(np.linspace(0, 200)), 'k')
-        ax[0,1].set(xlabel=r'microburst diamater, $d_0$ [km]', xlim=(63, 168))
+        ax[0,1].set(xlabel=r'microburst diameter, $d_0$ [km]', xlim=(63, 168))
 
         ax[0,2].get_yaxis().set_ticks([])
         ax[0, 2].step(d1_bins[:-1], H_d1, color='k')
         #ax[0,2].hist(df.d1, density=True, bins=d1_bins, color='k', histtype='step')
         #ax[0,2].plot(np.linspace(0, 200), prior[2].pdf(np.linspace(0, 200)), 'k')
-        ax[0,2].set(xlabel=r'microburst diamater, $d_1$ [km]', xlim=(9, 48))
+        ax[0,2].set(xlabel=r'microburst diameter, $d_1$ [km]', xlim=(9, 48))
 
 
         # Pick 1000 traces to analyze further to make plots.

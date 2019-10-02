@@ -233,9 +233,9 @@ Barcus, J.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
-J.~Blake%
+Blake%
 \ \protect \BOthers {.}}{%
-J.~Blake%
+Blake%
 \ \protect \BOthers {.}}{%
 {\protect \APACyear {1996}}%
 }]{%
@@ -243,9 +243,9 @@ Blake1996}
 \APACinsertmetastar {%
 Blake1996}%
 \begin{APACrefauthors}%
-Blake, J.%
-, Looper, M.%
-, Baker, D.%
+Blake, J\BPBI B.%
+, Looper, M\BPBI D.%
+, Baker, D\BPBI N.%
 , Nakamura, R.%
 , Klecker, B.%
 \BCBL {}\ \BBA {} Hovestadt, D.%
@@ -270,10 +270,10 @@ Blake, J.%
 \PrintBackRefs{\CurrentBib}
 
 \bibitem [\protect \citeauthoryear {%
-J\BPBI B.~Blake%
+Blake%
 \ \BBA {} O'Brien%
 }{%
-J\BPBI B.~Blake%
+Blake%
 \ \BBA {} O'Brien%
 }{%
 {\protect \APACyear {2016}}%

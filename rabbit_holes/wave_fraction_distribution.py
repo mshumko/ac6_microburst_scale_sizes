@@ -49,12 +49,12 @@ lt_fraction_err = lt_fraction*(1-lt_fraction)/np.sqrt(np.sum(wave_data[lt_key][i
 # plt.step(x, lt_fraction, c='b', label=r'$B_w < 10$ pT')
 # plt.step(microburst_fraction.index, microburst_fraction.f, c='k', label='microburst')
 ac6_bin_width = (microburst_fraction.index[1] - microburst_fraction.index[0])/2
-plt.errorbar(x, lt_fraction, yerr=lt_fraction_err, c='r', label=r'$B_w < 10$ pT')
-plt.errorbar(x, gt_fraction, yerr=gt_fraction_err, c='b', label=r'$B_w > 10$ pT')
+plt.errorbar(x, lt_fraction, yerr=lt_fraction_err, c='r', lw=3, label=r'$B_w < 10$ pT')
+plt.errorbar(x, gt_fraction, yerr=gt_fraction_err, c='b', lw=3, ls=':', label=r'$B_w > 10$ pT')
 plt.errorbar(microburst_fraction.index+ac6_bin_width, microburst_fraction.f, 
-            yerr=microburst_fraction.f_err, c='k', label='microburst')
+            yerr=microburst_fraction.f_err, c='k', ls='--', lw=3, label='microburst')
 
-plt.legend()
+plt.legend(handlelength=4)
 plt.xlim(100, 1E3)
 plt.ylim(0, 1)
 plt.title(f'Coincident probability of chorus waves vs microbursts\ncc_thresh = {cc_thresh}')

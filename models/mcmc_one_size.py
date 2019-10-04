@@ -141,7 +141,11 @@ if __name__ == '__main__':
     if not PAPER_PLOT:
         colors = ['r', 'g', 'b']
         labels = ['2.5%', '50%', "97.5%"]
-        _, ax = plt.subplots(3, 1, figsize=(8, 9))
+
+        fig = plt.figure(figsize=(9, 7))
+        gs = gridspec.GridSpec(2, 1, height_ratios=[1, 2])
+        ax = [plt.subplot(gs[i, :]) for i in range(2)]
+
         ax[0].plot(df.d, c='k')
         ax[1].hist(df.d, density=True, bins=np.arange(0, 200), color='k', label='posterior')
         ax[1].plot(np.linspace(0, 200), prior[0].pdf(np.linspace(0, 200)), c='c', label='prior')
@@ -172,11 +176,9 @@ if __name__ == '__main__':
 
         colors = ['r', 'g', 'b']
         labels = ['2.5 %', '50 %', "97.5 %"]
-        fig = plt.figure(figsize=(7, 6))
+        fig = plt.figure(figsize=(9, 7))
         gs = gridspec.GridSpec(2, 1, height_ratios=[1, 2])
-        ax = np.zeros(2, dtype=object)
-        ax[0] = plt.subplot(gs[0, 0])
-        ax[1] = plt.subplot(gs[1, 0])
+        ax = [plt.subplot(gs[i, :]) for i in range(2)]
 
         post_bins = np.arange(0, 200)
         post, _ = np.histogram(df.d, bins=post_bins, density=True)
@@ -184,9 +186,9 @@ if __name__ == '__main__':
         ax[0].step(post_bins[:-1], post, color='k', 
                     label='_nolegend_')
         # Shaded posterior representing 95% CI
-        ids = np.where((post_bins > quantiles[0]) & (post_bins < quantiles[2]))[0]
-        ax[0].fill_between(post_bins[ids], post[ids], color='k', alpha=0.3, step='pre',
-                    label='_nolegend_')
+        # ids = np.where((post_bins > quantiles[0]) & (post_bins < quantiles[2]))[0]
+        # ax[0].fill_between(post_bins[ids], post[ids], color='k', alpha=0.3, step='pre',
+        #             label='_nolegend_')
         ax[0].plot(np.linspace(0, 200), prior[0].pdf(np.linspace(0, 200)), c='k')
 
         # Plot 100 random traces on top of the data.
@@ -198,7 +200,7 @@ if __name__ == '__main__':
         # plot the AC6 data
         ax[1].plot(cdf_data['Separation [km]'], 100*cdf_data['CDF'], c='k', label='AC6')
         # Plot median
-        ax[0].axvline(quantiles[1], color='k', ls='--')
+        #ax[0].axvline(quantiles[1], color='k', ls='--')
         ax[1].plot(cdf_data['Separation [km]'], quantile_f[:, 1], 'k--', label=f'median') 
         # Plot 95% CI
         ax[1].fill_between(cdf_data['Separation [km]'], quantile_f[:, 0], quantile_f[:, 2], color='k', alpha=0.3, label=f'95% CI')
@@ -214,6 +216,8 @@ if __name__ == '__main__':
                     va='top', fontsize=15)
         ax[1].text(0.01, 0.98, '(b)', transform=ax[1].transAxes, 
                     va='top', fontsize=15)
-
-        plt.tight_layout()
+        gs.update(wspace=0.025, hspace=0.2, 
+                left=0.10, right=0.98, 
+                top=0.95, bottom=0.1)
+        #plt.tight_layout()
         plt.show()

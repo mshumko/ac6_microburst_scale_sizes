@@ -14,7 +14,7 @@ AC6_DATA_PATH = lambda sc_id: ('/home/mike/research/ac6/ac6{}/'
 PLOT_SAVE_DIR = '/home/mike/Desktop/ac6_microburst_validation'
 
 class PlotMicrobursts:
-    def __init__(self, catalog_version, plot_width=5, 
+    def __init__(self, catalog_version, plot_width=5, catalog_name=None,
                 plot_save_dir=None, plot_width_flag=True, 
                 make_plt_dir_flag=True, load_sorted_catalog=True):
         """
@@ -24,6 +24,7 @@ class PlotMicrobursts:
         filterDict.
         """
         self.plot_width = timedelta(seconds=plot_width)
+        self.catalog_name = catalog_name
         if plot_save_dir is None:
             self.plot_save_dir = PLOT_SAVE_DIR
         else:
@@ -92,10 +93,13 @@ class PlotMicrobursts:
         dateTime, time_spatial_A, and time_spatial_B.
         """
         # Load a catalog that has been sorted by a person or not.
-        if self.load_sorted_catalog: 
-            catalog_name = f'AC6_coincident_microbursts_sorted_v{catalog_version}.txt'
+        if self.catalog_name is None:
+            if self.load_sorted_catalog: 
+                catalog_name = f'AC6_coincident_microbursts_sorted_v{catalog_version}.txt'
+            else:
+                catalog_name = f'AC6_coincident_microbursts_v{catalog_version}.txt'
         else:
-            catalog_name = f'AC6_coincident_microbursts_v{catalog_version}.txt'
+            catalog_name = self.catalog_name
 
         catalog_path = os.path.join(CATALOG_DIR, catalog_name)
         self.catalog = pd.read_csv(catalog_path)
@@ -225,11 +229,11 @@ class PlotMicrobursts:
         return df_time_a, df_time_b, df_space_a, df_space_b
 
 if __name__ == '__main__':
-    p = PlotMicrobursts(6)
-    p.filter_catalog(filterDict={'Dist_Total':[0, 50]})
+    p = PlotMicrobursts(6, catalog_name='AC6_coincident_microbursts_sorted_Brady_v6.txt')
+    p.filter_catalog(filterDict={'Dist_Total':[60, 70]})
     # p.catalog = p.catalog[np.isclose(p.catalog['peak_width_A'], 
     #                       p.catalog['peak_width_B'], rtol=0.1)]
-    p.loop(mean_subtracted=False)
+    p.loop(mean_subtracted=True)
 
     # p = PlotMicrobursts(6)
     # p.filter_catalog(filterDict={'Dist_Total':[60, 200]})

@@ -45,7 +45,7 @@ class PlotExamples(PlotMicrobursts):
             # Make plots for that day.
             self.make_plot(row, savefig=False, ax=self.ax[:, i], plot_legend=False,
                             mean_subtracted=False, plot_dos2_and_dos3=False)
-            self.ax[1, i].xaxis.set_major_locator(matplotlib.dates.SecondLocator(interval=2))
+            self.ax[1, i].xaxis.set_major_locator(matplotlib.dates.SecondLocator(interval=3))
             self.ax[1, i].xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%H:%M:%S'))
 
             # Add text to each subplot
@@ -62,7 +62,7 @@ class PlotExamples(PlotMicrobursts):
         """
         Helper method to set up the plotting environment.
         """
-        self.fig, self.ax = plt.subplots(2, len(self.t0_times), figsize=(14, 6))
+        self.fig, self.ax = plt.subplots(2, len(self.t0_times), figsize=(14, 5))
 
         for i in range(len(self.t0_times)):
             self.ax[0, i].get_xaxis().set_visible(False)
@@ -76,7 +76,7 @@ class PlotExamples(PlotMicrobursts):
         for i in range(len(self.t0_times)):
             self.ax[0, i].set_title(f'{self.t0_times[i].date()}')
 
-        plt.subplots_adjust(left=0.07, right=0.99, hspace=0.1)
+        plt.subplots_adjust(left=0.07, right=0.97, hspace=0.1)
 
         # subplot labels
         for i in range(len(self.t0_times)):
@@ -87,7 +87,7 @@ class PlotExamples(PlotMicrobursts):
         return
 
 if __name__ == '__main__':
-    plot_width_s = 5
+    plot_width_s = 7
     t0_times = [
                 datetime(2016, 9, 30, 1, 56, 29, 800000),
                 datetime(2016, 11, 23, 4, 46, 46, 600000),

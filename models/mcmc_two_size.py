@@ -309,10 +309,13 @@ if __name__ == '__main__':
                                     n_bursts=niter)
             j += 1
 
-        bx.plot(cdf_data['Separation [km]'], 100*cdf_data['CDF'], c='k', label='AC6')
-
-        # Find the mean and 95% interval of the 1000 curves.
+        # Find the median and 95% interval of the 1000 curves.
         y_quartile = np.percentile(y_model, quartiles, axis=0).T
+        
+        # Calculate the K-S statistic
+        print(scipy.stats.ks_2samp(np.array(y_quartile[:, 1]), np.array(cdf_data['CDF'])))
+
+        bx.plot(cdf_data['Separation [km]'], 100*cdf_data['CDF'], c='k', label='AC6')
 
         # for i, q in enumerate(y_quartile):
         #     bx.plot(cdf_data['Separation [km]'], 100*q, c=colors[i], 

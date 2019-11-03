@@ -52,17 +52,6 @@ class Microburst_CDF:
         self.sep_bins = self.samples.loc[0:self.max_sep].index
         #print('Sample normalization bins:', self.sep_bins.values)
         return
-            
-    def n_i(self, di, df, data=None):
-        """ 
-        Calculates the number of microbursts in data 
-        dataframe between separation di and df.
-        """
-        if data is None:
-            data = self.microburst_catalog
-        n = sum((data['Dist_Total'] >= di) & 
-                (data['Dist_Total'] < df))
-        return  n
 
     def calc_cdf_pdf_stats(self, df, L_lower, L_upper):
         """
@@ -70,9 +59,8 @@ class Microburst_CDF:
         and L shell filtering.
         """
         filtered_catalog = df[(df.Lm_OPQ > L_lower) & (df.Lm_OPQ < L_upper)]
-        # Apply the separation bins to the n_i function to get an array.
-        n = np.array([self.n_i(bi, bf, filtered_catalog) for bi, bf in 
-                    zip(self.sep_bins[:-1], self.sep_bins[1:])]).flatten()
+        # Calculate histogram of all events in Dist_Total separation bins
+        n, _ = np.histogram(filtered_catalog['Dist_Total'], bins=self.sep_bins)
         # Calculate the weights to scale each element in n by.
         weights = (self.samples['Seconds'].loc[0:self.max_sep-self.bin_width].max()/
                     self.samples['Seconds'].loc[0:self.max_sep-self.bin_width].values)
@@ -109,9 +97,8 @@ class Microburst_CDF:
             # one time to get a random sample of microbursts assuming a random false_rate.
             random_flips = np.random.binomial(1, p=1-filtered_catalog.false_rate)
             keep_indicies = filtered_catalog.index[random_flips != 0]
-            # Apply the separation bins to the n_i function to get an array.
-            n = np.array([self.n_i(bi, bf, filtered_catalog.loc[keep_indicies]) for bi, bf in 
-                        zip(self.sep_bins[:-1], self.sep_bins[1:])]).flatten()
+            # Calculate histogram of all events in Dist_Total separation bins
+            n, _ = np.histogram(filtered_catalog.loc[keep_indicies, 'Dist_Total'], bins=self.sep_bins)
             n_weighted = np.multiply(weights, n)
             # Calculate the CDF and PDF
             cdf_array[:, i] = np.array([sum(n_weighted[i:])/sum(n_weighted) for i in range(len(n))])

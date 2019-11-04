@@ -6,7 +6,7 @@ import scipy.integrate
 import matplotlib.pyplot as plt
 
 class Microburst_CDF:
-    def __init__(self, catalog_version=None, catalog_path=None):
+    def __init__(self, catalog_version=None, catalog_path=None, max_sep=105):
         """
         This class calculates the microburst CDF (and PDF) 
         distrbutions. This class essentially takes the 
@@ -25,11 +25,14 @@ class Microburst_CDF:
                         f'Brady_v{catalog_version}.txt')
         # Load catalog.
         self.microburst_catalog = pd.read_csv(catalog_path)
-        self.max_sep = 100
+        self.max_sep = max_sep
+        self.data_dir = ('/home/mike/research/ac6_microburst_scale_sizes/data')
+        self.norm_dir = os.path.join(self.data_dir, 'norm')
+
         #print(f'Number of microbursts {self.microburst_catalog.shape[0]}')
         return
 
-    def _load_sample_file_(self, path, sum_N=5, offset=0):
+    def _load_sample_file_(self, path, sum_N=1, offset=0):
         """
         Loads the samples vs. separation CSV file. The sum_N and offset kwargs 
         rebins the sample file. sum_N comnines N separations bins into 1. The
@@ -76,121 +79,27 @@ class Microburst_CDF:
         pdf_std = np.sqrt(cdf_std[1:]**2 + cdf_std[:-1]**2)/self.bin_width
         return 100*cdf, pdf, 100*cdf_std, pdf_std, filtered_catalog.shape[0]
 
-    def calc_cdf_pdf_resample(self, df, L_lower, L_upper, N_resample=int(100)):
+    def plot_cdf_pdf_all(self, L_array=[4, 5, 6, 7, 8], plot_full_L_range=True, 
+                     plot_L=True, sample_name='ac6_norm_all_cdf.csv'):
+        """ 
+        Plots the CDF and PDF values for the entire radiation belt range and 
+        for each L shell bin defined by the L_array argument. 
         """
-        This method calculates the pdf and cdf and errors from a dataframe
-        and L shell filtering. The CDF and PDF curves are estimated in the 
-        same way as self.calc_cdf_pdf_stats, but here we resample the 
-        microbursts using a MC method and recalculate the CDF and get 
-        uncertanities as a function of separation.
-        """
-        filtered_catalog = df[(df.Lm_OPQ > L_lower) & (df.Lm_OPQ < L_upper)]
-        # Calculate the weights to scale each element in n by.
-        weights = (self.samples['Seconds'].loc[0:self.max_sep-self.bin_width].max()/
-                    self.samples['Seconds'].loc[0:self.max_sep-self.bin_width].values)
+        _, self.ax = plt.subplots(3, figsize=(8, 8), sharex=True)
+        colors=['r', 'b', 'g', 'm', 'c']
 
-        cdf_array = np.nan*np.ones((len(self.sep_bins)-1, N_resample))
-        pdf_array = np.nan*np.ones((len(self.sep_bins)-2, N_resample))
+        if (plot_L==False) and (plot_full_L_range==False):
+            raise  AttributeError("The specified kwargs will not plot anything.")
 
-        for i in range(N_resample):
-            # Resample the catalog by "flippiping" filtered_catalog.shape[0] number of "coins"
-            # one time to get a random sample of microbursts assuming a random false_rate.
-            random_flips = np.random.binomial(1, p=1-filtered_catalog.false_rate)
-            keep_indicies = filtered_catalog.index[random_flips != 0]
-            # Calculate histogram of all events in Dist_Total separation bins
-            n, _ = np.histogram(filtered_catalog.loc[keep_indicies, 'Dist_Total'], bins=self.sep_bins)
-            n_weighted = np.multiply(weights, n)
-            # Calculate the CDF and PDF
-            cdf_array[:, i] = np.array([sum(n_weighted[i:])/sum(n_weighted) for i in range(len(n))])
-            pdf_array[:, i] = np.convolve([-1, 1], cdf_array[:, i], mode='valid')/self.bin_width
+        # Plot everything
+        if plot_full_L_range: self._plot_full_L_range()
 
-        # Calculate the CDF and PDF
-        cdf = np.mean(cdf_array, axis=1)
-        pdf = np.mean(pdf_array, axis=1)
-        # Calculate PDF and CDF standard deviations.
-        # cdf_err = np.std(cdf_array, axis=1)
-        # pdf_err = np.std(pdf_array, axis=1)
-        # Calculate the 95% confidence intervals
-        cdf_err = np.percentile(cdf_array, [2.5, 97.5], axis=1)
-        pdf_err = np.percentile(pdf_array, [2.5, 97.5], axis=1)
-        print(cdf_err[1] - cdf_err[0])
-        return 100*cdf, pdf, 100*cdf_err, pdf_err, filtered_catalog.shape[0]
-
-    def plot_cdf_pdf(self, L_array=[4, 5, 6, 7, 8], plot_all=True, 
-                     err_mode='stats', plot_L=False, 
-                     sample_name='ac6_norm_all_cdf.csv'):
-        """ Plots the CDF and PDF values. """
-        _, ax = plt.subplots(3, figsize=(8, 8), sharex=True)
-        c=['r', 'b', 'g', 'm']
-        sample_file_dir = ('/home/mike/research/ac6_microburst'
-                            '_scale_sizes/data/norm')
-        # Running average parameter. Set to 1 to not average.
-        n = 1
-        if plot_all:
-            # Plot the CDF over all L shells in the belts.
-            self._load_sample_file_(
-                os.path.join(sample_file_dir, sample_name)
-                )
-            if err_mode == 'stats':
-                C, P, C_err, P_err, N = self.calc_cdf_pdf_stats(self.microburst_catalog, 
-                                                        4, 8)
-                P = np.convolve(np.ones(n)/n, P, mode='same')
-            else: 
-                C, P, C_err, P_err, N = self.calc_cdf_pdf_resample(self.microburst_catalog, 
-                                                        4, 8)
-                P = np.convolve(np.ones(n)/n, P, mode='same')
-
-            # If the errors are symmetric about the mean (standard deviation). 
-            if len(C_err.shape) == 1:
-                ax[0].fill_between(self.sep_bins[:-1], C-C_err, C+C_err, facecolor='k', 
-                                    alpha=0.5)
-                ax[1].fill_between(self.sep_bins[:-2], P-P_err, P+P_err, facecolor='k',
-                                    lw=3, alpha=0.5)
-            else:
-                ax[0].fill_between(self.sep_bins[:-1], C_err[0], C_err[1], facecolor='k', 
-                                    alpha=0.5)
-                ax[1].fill_between(self.sep_bins[:-2], P_err[0], P_err[1], facecolor='k', 
-                                    lw=3, alpha=0.5)
-
-            ax[0].plot(self.sep_bins[:-1], C, c='k', 
-                        label=f'all', lw=3, alpha=1)
-            ax[1].plot(self.sep_bins[:-2], P, c='k', lw=3)
-            ax[2].step(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c='k')
-            
+        # Plot the L shell bins
         if plot_L:
-            for i, (lower_L, upper_L) in enumerate(zip(L_array[:-1], L_array[1:])):
-                self._load_sample_file_(
-                    os.path.join(sample_file_dir, f'ac6_norm_{lower_L}_L_{upper_L}_5km_bins.csv')
-                    )
-                if err_mode == 'stats':
-                    C, P, C_std, P_std, N = self.calc_cdf_pdf_stats(self.microburst_catalog, 
-                                                            lower_L, upper_L)
-                else:
-                    C, P, C_std, P_std, N = self.calc_cdf_pdf_resample(self.microburst_catalog, 
-                                                            4, 8)
-                # Running average on the PDF
-                P = np.convolve(np.ones(n)/n, P, mode='same')
-                ax[0].errorbar(self.sep_bins[:-1], C, c=c[i],
-                            label=f'{lower_L} < L < {upper_L}', capsize=5)
-                ax[1].errorbar(self.sep_bins[:-2], P, c=c[i])
-                ax[2].step(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c=c[i])
-            
-        ax[0].legend()
-        ax[0].set_xlim(left=0, right=90)
-        ax[0].set_ylim(bottom=0)
-        ax[1].set_ylim(bottom=0)
-        ax[0].set_title('AC6 microburst size distribution in low Earth orbit')
-        ax[0].set_ylabel('Percent of Microbursts Larger')
-        ax[1].set_ylabel('Microburst Size Histogram')
-        ax[2].set_xlabel('AC6 Separation [km]')
-        ax[2].set_ylabel(r'Samples Per Bin x $10^4$')
-        ax[2].set_ylim(bottom=0)
-        ax[2].set_xticks(np.arange(min(self.sep_bins), max(self.sep_bins)+1, 10))
+            for (Li, Lf, color) in zip(L_array[:-1], L_array[1:], colors):
+                self._plot_L_bin(Li, Lf, color)
 
-        self._label_subpplots(ax)
-
-        plt.tight_layout()
-        plt.show()
+        self._label_and_adjust_subplots()
         return
         
     def save_data(self, path):
@@ -203,11 +112,68 @@ class Microburst_CDF:
         df.to_csv(path)
         return
 
-    def _label_subpplots(self, ax):
-        """ Add subplot labels to each subplot """
-        for i, ax_i in enumerate(ax):
+    def _plot_full_L_range(self, dist_file='microburst_cdf_pdf_v4.csv', 
+                            norm_name='ac6_norm_all_cdf.csv'):
+        """ Plots the CDF and pdf curves for the full L shell range. """
+        # Load the file full of number of samples
+        self._load_sample_file_(os.path.join(self.norm_dir, norm_name))
+
+        # Load the file containing the pre-calculated cdf and pdf distribution values.
+        dist_data = pd.read_csv(os.path.join(self.data_dir, dist_file), index_col=0)
+
+        # Plot the PDF and CDF curves assuming the errors are symmetric about the mean. 
+        # The fill_between higlights the 95% CI (2 standard deviations)
+        self.ax[0].fill_between(dist_data.index, dist_data['cdf']-2*dist_data['cdf_err'], 
+                                            dist_data['cdf']+2*dist_data['cdf_err'], 
+                                            facecolor='k', alpha=0.5)
+        self.ax[1].fill_between(dist_data.index, dist_data['pdf']-2*dist_data['pdf_err'], 
+                                            dist_data['pdf']+2*dist_data['pdf_err'], 
+                                            facecolor='k', alpha=0.5)
+
+        self.ax[0].plot(dist_data.index, dist_data['cdf'], c='k', 
+                    label=f'all', lw=4, alpha=1)
+        self.ax[1].plot(dist_data.index, dist_data['pdf'], c='k', lw=4)
+        self.ax[2].step(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c='k')
+        return
+
+    def _plot_L_bin(self, Li, Lf, color):
+        """ Plots the CDF and pdf curves for one particular L bin. """
+        if Li > Lf: Li, Lf = Lf, Li # Reverse order if passed reversed L shells.
+
+        # Load the L-dependent sample file
+        self._load_sample_file_(
+                os.path.join(self.norm_dir, f'ac6_norm_{Li}_L_{Lf}_5km_bins.csv')
+                )
+        # Calculate the cdf and pdf values
+        C, P, _, _, N = self.calc_cdf_pdf_stats(self.microburst_catalog, Li, Lf)
+        # Make CDF, PDF, and sample plots.
+        self.ax[0].plot(self.sep_bins[:-1], C, c=color,
+                    label=f'{Li} < L < {Lf}')
+        self.ax[1].plot(self.sep_bins[:-2], P, c=color)
+        self.ax[2].step(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c=color)
+        return
+
+    def _label_and_adjust_subplots(self):
+        """ 
+        Helper function to make the 1000 various adjustments to the subplots 
+        """
+        self.ax[0].legend()
+        self.ax[0].set_xlim(0, 100)
+        self.ax[0].set_ylim(bottom=0)
+        self.ax[1].set_ylim(bottom=0)
+        self.ax[0].set_title('AC6 microburst size distribution in low Earth orbit')
+        self.ax[0].set_ylabel('Percent of Microbursts Larger')
+        self.ax[1].set_ylabel('Microburst Size Histogram')
+        self.ax[2].set_xlabel('AC6 Separation [km]')
+        self.ax[2].set_ylabel(r'Samples Per Bin x $10^4$')
+        self.ax[2].set_ylim(bottom=0)
+        self.ax[2].set_xticks(np.arange(min(self.sep_bins), max(self.sep_bins)+1, 10))
+
+        # Add subplot labels (A), (B), (C)
+        for i, ax_i in enumerate(self.ax):
             ax_i.text(0, 1, f'({string.ascii_lowercase[i]})', 
                     transform=ax_i.transAxes, va='top', fontsize=15)
+        plt.tight_layout()
         return
 
 
@@ -219,6 +185,10 @@ if __name__ == "__main__":
                         'AC6_coincident_microbursts_sorted'
                         f'_err_v{catalog_version}.txt')
     m = Microburst_CDF(catalog_version=None, catalog_path=catalog_path)
-    m.plot_cdf_pdf(err_mode='stats', plot_L=True, sample_name='ac6_norm_all_1km_bins.csv')
+    #_, ax = plt.subplots(3, figsize=(8, 8), sharex=True)
+    #m._plot_full_L_range(ax=ax)
+    m.plot_cdf_pdf_all()
+    # m.plot_cdf_pdf_all(plot_full_L_range=True, plot_L=True, sample_name='ac6_norm_all_1km_bins.csv')
     # m.save_data('/home/mike/research/ac6_microburst_scale_sizes/'
     #             'data/microburst_cdf_pdf_norm_v3.csv')
+    plt.show()

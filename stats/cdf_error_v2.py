@@ -9,7 +9,9 @@ NORM = True
 PLOT_STEP = True
 SAVE_DATA = True
 
-s_bins_km = np.arange(0, 105, 5)
+s_max = 100
+bin_width = 5
+s_bins_km = np.arange(0, s_max+bin_width*2, bin_width)
 
 # Load microburst catalog
 catalog_version = 6
@@ -76,9 +78,9 @@ if SAVE_DATA:
     save_data[:, 1] = H # Raw number of detections as a function of separation.
     save_data[:, 2] = norm
     save_data[:, 3] = cdf
-    save_data[:, 4] = (H*norm)/sum(H*norm) # pdf of the normalized counts.
+    save_data[:, 4] = H/(sum(H)*bin_width) # pdf of the normalized counts.
     save_data[:, 5] = (cdf_q[1,:]-cdf_q[0,:])/4 # standard deviation
-    save_data[:, 6] = (pdf_q[1,:]-pdf_q[0,:])/4 # standard deviation
+    save_data[:, 6] = (pdf_q[1,:]-pdf_q[0,:])/(4*sum(H*norm)) # standard deviation
     df = pd.DataFrame(data=save_data, columns=columns)
     df.to_csv(os.path.join(save_dir, save_name), index=False)
 

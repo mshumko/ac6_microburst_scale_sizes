@@ -159,7 +159,7 @@ class Microburst_Equatorial_CDF:
         self.ax[0].set_xlim(left=1, right=self.norm.index[-3])
         self.ax[0].set_ylim(bottom=0)
         self.ax[1].set_ylim(bottom=0)
-        self.ax[0].set_title('AC6 Equatorial Microburst Size Distribution')
+        self.ax[0].set_title('AC6 equatorial separation distribution of > 35 keV microbursts')
         self.ax[0].set_ylabel('Percent of Microbursts Larger')
         self.ax[1].set_ylabel('Microburst Size Histogram')
         self.ax[-1].set_xlabel('AC6 Equatorial Separation [km]')

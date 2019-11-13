@@ -39,14 +39,16 @@ dataset_key = 'h_chorus_bwgt10'
 x = np.arange(301)*50 + 25 # 50 km separation bin labels
 y = np.arange(81)/40.-0.9999 # cross-correlation labels from -1 to 1.
 
+MAX_SEP = 2000
+max_idx = np.where(x > MAX_SEP)[0][0]
+
 data_array = d[dataset_key].copy()
 # Estimate the probability density in each separation bin.
 data_array_density = data_array/np.nansum(data_array, axis=0)
-# print(data_array_density, data_array_density.shape, data_array_density[:, 1])
 
-for i in range(20):
-    plt.plot(y, data_array_density[:, i])
-plt.show()
+# for i in range(max_idx):
+#     plt.plot(y, data_array_density[:, i])
+# plt.show()
 
 def gaus(x,a,x0,sigma):
     """ 
@@ -55,35 +57,25 @@ def gaus(x,a,x0,sigma):
     return a*np.exp(-(x-x0)**2/(2*sigma**2))
 
 # Now fit the profile with Gaussians.
-p = np.nan*np.zeros((x.shape[0], 3)) # Array to store all Gaus parameters
-for i, row in enumerate(data_array_density.T):
-    #print(row, row == 'nan')
+p = np.nan*np.zeros((max_idx, 3)) # Array to store all Gaus parameters
+for i, row in enumerate(data_array_density[:, :max_idx].T):
+    # Don't try to fit NaNs
     if np.any(np.isnan(row)):
-        print(i)
         continue
     p[i, :], _ = scipy.optimize.curve_fit(gaus, y, row, p0=[0.05, 0.7, 0.2])
 
-
-# Calculate the median and 95% confidence interval of the density
-#detection_stats = np.nanpercentile(data_array_density, [2.5, 50, 97.5], axis=0)
-# detection_stats = np.nan*np.zeros((3, data_array_density.shape[1]))
-# for i in range(data_array_density.shape[1]):
-#     v = np.concatenate([y[i]*np.ones(int(v_i)) for i, v_i in enumerate(data_array[:, i])])
-#     if len(v):
-#         detection_stats[:, i] = np.percentile(v, [2.5, 50, 97.5])
-#         #detection_stats[1, i] = np.median(v)
 print(p)
+
+
+######################## PLOTTING ##########################
 # Colormaps attempted Greens, Plasma
 pcolormesh = plt.pcolormesh(x, y, data_array_density, vmax=0.1, vmin=0.01, 
     norm=matplotlib.colors.LogNorm(), cmap=plt.get_cmap("Greens"))
 plt.colorbar(pcolormesh, label='Coincidence probability')
 #plt.errorbar(x, p[:, 1], yerr='none', fmt='ko')
-plt.scatter(x-(x[1]-x[0])/2, p[:,1], color='k', s=3)
-# plt.errorbar(x, detection_stats[1, :], errorevery=1, c='k', fmt='.')
-            # yerr=[detection_stats[1, :]-detection_stats[0, :], 
-            #     detection_stats[-1, :]-detection_stats[1, :]])
+plt.scatter(x[:max_idx]-(x[1]-x[0])/2, p[:,1], color='k', s=3)
 plt.title(dataset_key); plt.xlabel(r'THEMIS $|\Delta r|$ [km]'); plt.ylabel('correlation')
-plt.xscale('log')
-plt.xlim(90, 2E3)
+# plt.xscale('log')
+plt.xlim(90, MAX_SEP)
 plt.ylim(0, 1)
 plt.show()

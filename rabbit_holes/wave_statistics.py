@@ -26,6 +26,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors
 import scipy.io
+import scipy.optimize
 import os
 
 f_dir = '/home/mike/research/ac6_microburst_scale_sizes/data'
@@ -42,25 +43,41 @@ data_array = d[dataset_key].copy()
 # Estimate the probability density in each separation bin.
 data_array_density = data_array/np.nansum(data_array, axis=0)
 
+def gaus(x,a,x0,sigma):
+    """ 
+    Gaussian profile to fit.
+    """
+    return a*np.exp(-(x-x0)**2/(2*sigma**2))
+
+# Now fit the profile with Gaussians.
+p = np.nan*np.zeros((x.shape[0], 3)) # Array to store all Gaus parameters
+for i, row in enumerate(data_array_density.T):
+    p[i, :], _ = scipy.optimize.curve_fit(gaus, y, row, p0=[0.05, 0.7, 0.2])
+
+for i in range(20):
+    plt.plot(y, data_array_density[:, i])
+plt.show()
 
 # Calculate the median and 95% confidence interval of the density
 #detection_stats = np.nanpercentile(data_array_density, [2.5, 50, 97.5], axis=0)
-detection_stats = np.nan*np.zeros((3, data_array_density.shape[1]))
-for i in range(data_array_density.shape[1]):
-    v = np.concatenate([y[i]*np.ones(int(v_i)) for i, v_i in enumerate(data_array[:, i])])
-    if len(v):
-        detection_stats[:, i] = np.percentile(v, [2.5, 50, 97.5])
-        #detection_stats[1, i] = np.median(v)
-
+# detection_stats = np.nan*np.zeros((3, data_array_density.shape[1]))
+# for i in range(data_array_density.shape[1]):
+#     v = np.concatenate([y[i]*np.ones(int(v_i)) for i, v_i in enumerate(data_array[:, i])])
+#     if len(v):
+#         detection_stats[:, i] = np.percentile(v, [2.5, 50, 97.5])
+#         #detection_stats[1, i] = np.median(v)
+print(p)
 # Colormaps attempted Greens, Plasma
-p = plt.pcolormesh(x, y, data_array_density, vmax=0.1, vmin=0.01, 
+pcolormesh = plt.pcolormesh(x, y, data_array_density, vmax=0.1, vmin=0.01, 
     norm=matplotlib.colors.LogNorm(), cmap=plt.get_cmap("Greens"))
-plt.colorbar(p, label='Coincidence probability')
-plt.errorbar(x, detection_stats[1, :], errorevery=1, c='k', fmt='.')
+plt.colorbar(pcolormesh, label='Coincidence probability')
+#plt.errorbar(x, p[:, 1], yerr='none', fmt='ko')
+plt.scatter(x-(x[1]-x[0])/2, p[:,1], color='k', s=3)
+# plt.errorbar(x, detection_stats[1, :], errorevery=1, c='k', fmt='.')
             # yerr=[detection_stats[1, :]-detection_stats[0, :], 
             #     detection_stats[-1, :]-detection_stats[1, :]])
 plt.title(dataset_key); plt.xlabel(r'THEMIS $|\Delta r|$ [km]'); plt.ylabel('correlation')
 plt.xscale('log')
-plt.xlim(100, 1E4)
+plt.xlim(90, 2E3)
 plt.ylim(0, 1)
 plt.show()

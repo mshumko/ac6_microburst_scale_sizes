@@ -34,7 +34,7 @@ f_dir = '/home/mike/research/ac6_microburst_scale_sizes/data'
 # JGR2018_F_Fig4_Hchorus_BW_gt_lt_10.sav
 f_name = 'JGR2018_F_Fig4_Hchorus_BW_gt_lt_10.sav' 
 d = scipy.io.readsav(os.path.join(f_dir, f_name))
-dataset_key = 'h_chorus_bwgt10'
+dataset_key = 'h_chorus_bwlt10'
 
 x = np.arange(301)*50 + 25 # 50 km separation bin labels
 y = np.arange(81)/40.-0.9999 # cross-correlation labels from -1 to 1.
@@ -71,11 +71,17 @@ print(p)
 # Colormaps attempted Greens, Plasma
 pcolormesh = plt.pcolormesh(x, y, data_array_density, vmax=0.1, vmin=0.01, 
     norm=matplotlib.colors.LogNorm(), cmap=plt.get_cmap("Greens"))
-plt.colorbar(pcolormesh, label='Coincidence probability')
+plt.colorbar(pcolormesh, label='Chorus coincidence probability')
 #plt.errorbar(x, p[:, 1], yerr='none', fmt='ko')
 plt.scatter(x[:max_idx]-(x[1]-x[0])/2, p[:,1], color='k', s=3)
-plt.title(dataset_key); plt.xlabel(r'THEMIS $|\Delta r|$ [km]'); plt.ylabel('correlation')
+
+if 'bwgt' in dataset_key:
+    plt.title(r'$B_w > $ 10 pT'); 
+if 'bwlt' in dataset_key:
+    plt.title(r'$B_w < $ 10 pT'); 
+
+plt.xlabel(r'THEMIS $|\Delta r|$ [km]'); plt.ylabel('correlation')
 # plt.xscale('log')
-plt.xlim(90, MAX_SEP)
+plt.xlim(100, MAX_SEP)
 plt.ylim(0, 1)
 plt.show()

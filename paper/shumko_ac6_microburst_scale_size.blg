@@ -1,59 +1,57 @@
 This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
 Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: shumko_ac6_microburst_scale_size.aux
-The style file: apacite.bst
-Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
-Reallocated global_strs (elt_size=20001) to 20 items from 10.
-Reallocated glb_str_end (elt_size=4) to 20 items from 10.
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Reallocated wiz_functions (elt_size=4) to 9000 items from 6000.
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Database file #1: /home/mike/Dropbox/0_firebird_research/A_presentations/refs.bib
-apacite.bst [2013/07/21 v6.03 APA bibliography style]
-Warning--No journal in Hastings1970
-Warning--No address in O'brien2016
+I couldn't open style file apacite.bst
+---line 3 of file shumko_ac6_microburst_scale_size.aux
+ : \bibstyle{apacite
+ :                  }
+I'm skipping whatever remains of this command
+I couldn't open database file /home/mike/Dropbox/0_firebird_research/A_presentations/refs.bib
+---line 243 of file shumko_ac6_microburst_scale_size.aux
+ : \bibdata{/home/mike/Dropbox/0_firebird_research/A_presentations/refs
+ :                                                                     }
+I'm skipping whatever remains of this command
+I found no database files---while reading file shumko_ac6_microburst_scale_size.aux
+I found no style file---while reading file shumko_ac6_microburst_scale_size.aux
 You've used 48 entries,
-            6951 wiz_defined-function locations,
-            1639 strings with 22350 characters,
-and the built_in function-call counts, 113117 in all, are:
-= -- 13385
-> -- 1077
-< -- 5999
-+ -- 6516
-- -- 100
-* -- 7901
-:= -- 21338
-add.period$ -- 188
-call.type$ -- 48
-change.case$ -- 822
+            0 wiz_defined-function locations,
+            180 strings with 1599 characters,
+and the built_in function-call counts, 0 in all, are:
+= -- 0
+> -- 0
+< -- 0
++ -- 0
+- -- 0
+* -- 0
+:= -- 0
+add.period$ -- 0
+call.type$ -- 0
+change.case$ -- 0
 chr.to.int$ -- 0
-cite$ -- 98
-duplicate$ -- 3412
-empty$ -- 4051
-format.name$ -- 2004
-if$ -- 20406
+cite$ -- 0
+duplicate$ -- 0
+empty$ -- 0
+format.name$ -- 0
+if$ -- 0
 int.to.chr$ -- 0
-int.to.str$ -- 144
+int.to.str$ -- 0
 missing$ -- 0
-newline$ -- 1419
-num.names$ -- 384
-pop$ -- 1551
-preamble$ -- 1
-purify$ -- 196
+newline$ -- 0
+num.names$ -- 0
+pop$ -- 0
+preamble$ -- 0
+purify$ -- 0
 quote$ -- 0
-skip$ -- 6516
+skip$ -- 0
 stack$ -- 0
-substring$ -- 7000
-swap$ -- 1910
-text.length$ -- 130
+substring$ -- 0
+swap$ -- 0
+text.length$ -- 0
 text.prefix$ -- 0
-top$ -- 1
-type$ -- 3968
-warning$ -- 2
-while$ -- 671
+top$ -- 0
+type$ -- 0
+warning$ -- 0
+while$ -- 0
 width$ -- 0
-write$ -- 1879
-(There were 2 warnings)
+write$ -- 0
+(There were 4 error messages)

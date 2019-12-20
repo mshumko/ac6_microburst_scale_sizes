@@ -14,7 +14,7 @@ import functools
 import mission_tools.ac6.read_ac_data as read_ac_data
 
 class CumulativeDist:
-    def __init__(self, catV, catPath=None, cc_width=1, cc_overlap=2, verbose=True):
+    def __init__(self, catV, catPath=None, cc_width=1, cc_overlap=0.2, verbose=True):
         """
         NAME: CumulativeDist
         USE:  For each day, the loop method calculates the 
@@ -261,7 +261,7 @@ class CumulativeDist:
                                 center time if sc_id == A.
         """
         dt = timedelta(seconds=self.cc_width/2)
-        overlapW = timedelta(seconds=self.cc_overlap/20)
+        overlapW = timedelta(seconds=self.cc_overlap/2)
         # Find the correct center time from either AC6A or B.
         if sc_id.upper() == 'A':
             t0 = self.catA['dateTime'][i]
@@ -326,12 +326,12 @@ if __name__ == '__main__':
     import time
     start_time = time.time()
     catalog_version = 4
-    c = CumulativeDist(catalog_version)
+    c = CumulativeDist(catalog_version, cc_width=2)
     try:
         c.loop()
     finally:
         saveDir = './../data/coincident_microbursts_catalogues'
-        saveName = 'AC6_coincident_microbursts_v8.txt'
+        saveName = 'AC6_coincident_microbursts_2scc_v9.txt'
         c.save_catalog(savePath=os.path.join(saveDir, saveName))
         print("Ran in {} s".format(time.time() - start_time))
         #pass

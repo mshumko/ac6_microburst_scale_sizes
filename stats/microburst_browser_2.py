@@ -11,7 +11,7 @@ catalog_save_dir = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
                     'coincident_microbursts_catalogues')
 
 class Browser(PlotMicrobursts):
-    def __init__(self, catalog_version, plot_width=5, 
+    def __init__(self, catalog_version, catalog_name=None, plot_width=5, 
                 catalog_save_name=None, width_tol=0.1, filterDict={}, 
                 jump_to_latest=True):
         """
@@ -20,7 +20,8 @@ class Browser(PlotMicrobursts):
         to mark the event as a microburst.
         """
         PlotMicrobursts.__init__(self, catalog_version, plot_width=plot_width, 
-                                plot_width_flag=False, make_plt_dir_flag=False)
+                                plot_width_flag=False, make_plt_dir_flag=False, 
+                                catalog_name=catalog_name)
         self.filter_catalog(filterDict=filterDict)
         # Filter out events with widths whithin a width_tol.
         if width_tol is not None:
@@ -238,7 +239,8 @@ class Browser(PlotMicrobursts):
         return
 
 
-callback = Browser(8, width_tol=None, filterDict={})
+callback = Browser(8, catalog_name='AC6_coincident_microbursts_2scc_v9.txt', 
+                   width_tol=None, filterDict={})
 # Initialize the GUI
 plt.show()
 # Save the catalog.

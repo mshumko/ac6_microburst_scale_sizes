@@ -15,3 +15,4 @@ data/binned_counts_old/
 .vscode/ipch/*
 *.tex.bak
 *~lock.*
+/.vscode/*

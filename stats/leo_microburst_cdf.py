@@ -179,11 +179,15 @@ class Microburst_CDF:
 
 if __name__ == "__main__":
     catalog_version = 6
+    # catalog_path = (f'/home/mike/research/'
+    #                     'ac6_microburst_scale_sizes'
+    #                     '/data/coincident_microbursts_catalogues/'
+    #                     'AC6_coincident_microbursts_sorted'
+    #                     f'_err_v{catalog_version}.txt')
     catalog_path = (f'/home/mike/research/'
                         'ac6_microburst_scale_sizes'
                         '/data/coincident_microbursts_catalogues/'
-                        'AC6_coincident_microbursts_sorted'
-                        f'_err_v{catalog_version}.txt')
+                        'AC6_coincident_microbursts_2scc_v9_sorted.txt')
     m = Microburst_CDF(catalog_version=None, catalog_path=catalog_path)
     #_, ax = plt.subplots(3, figsize=(8, 8), sharex=True)
     #m._plot_full_L_range(ax=ax)

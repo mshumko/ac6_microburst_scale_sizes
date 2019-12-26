@@ -1,57 +1,58 @@
-This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
-Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
-The top-level auxiliary file: shumko_ac6_microburst_scale_size.aux
-I couldn't open style file apacite.bst
----line 3 of file shumko_ac6_microburst_scale_size.aux
- : \bibstyle{apacite
- :                  }
-I'm skipping whatever remains of this command
+This is BibTeX, Version 0.99dThe top-level auxiliary file: shumko_ac6_microburst_scale_size.aux
+The style file: apacite.bst
 I couldn't open database file /home/mike/Dropbox/0_firebird_research/A_presentations/refs.bib
----line 243 of file shumko_ac6_microburst_scale_size.aux
+---line 120 of file shumko_ac6_microburst_scale_size.aux
  : \bibdata{/home/mike/Dropbox/0_firebird_research/A_presentations/refs
  :                                                                     }
 I'm skipping whatever remains of this command
 I found no database files---while reading file shumko_ac6_microburst_scale_size.aux
-I found no style file---while reading file shumko_ac6_microburst_scale_size.aux
-You've used 48 entries,
-            0 wiz_defined-function locations,
-            180 strings with 1599 characters,
-and the built_in function-call counts, 0 in all, are:
-= -- 0
-> -- 0
-< -- 0
-+ -- 0
-- -- 0
-* -- 0
-:= -- 0
-add.period$ -- 0
-call.type$ -- 0
-change.case$ -- 0
-chr.to.int$ -- 0
-cite$ -- 0
-duplicate$ -- 0
-empty$ -- 0
-format.name$ -- 0
-if$ -- 0
-int.to.chr$ -- 0
-int.to.str$ -- 0
-missing$ -- 0
-newline$ -- 0
-num.names$ -- 0
-pop$ -- 0
-preamble$ -- 0
-purify$ -- 0
-quote$ -- 0
-skip$ -- 0
-stack$ -- 0
-substring$ -- 0
-swap$ -- 0
-text.length$ -- 0
-text.prefix$ -- 0
-top$ -- 0
-type$ -- 0
-warning$ -- 0
-while$ -- 0
-width$ -- 0
-write$ -- 0
-(There were 4 error messages)
+Warning--I didn't find a database entry for "Allen1959"
+Warning--I didn't find a database entry for "Vernov1960"
+Warning--I didn't find a database entry for "Abel1998_1"
+Warning--I didn't find a database entry for "Meredith2002"
+Warning--I didn't find a database entry for "Horne2003"
+Warning--I didn't find a database entry for "Thorne2005"
+Warning--I didn't find a database entry for "Millan2007"
+Warning--I didn't find a database entry for "Bortnik2008"
+Warning--I didn't find a database entry for "Li2009"
+Warning--I didn't find a database entry for "Li2009b"
+Warning--I didn't find a database entry for "Anderson1964"
+Warning--I didn't find a database entry for "Lorentzen2001a"
+Warning--I didn't find a database entry for "O'Brien2003"
+Warning--I didn't find a database entry for "Tsurutani2013"
+Warning--I didn't find a database entry for "Woodger2015"
+Warning--I didn't find a database entry for "Crew2016"
+Warning--I didn't find a database entry for "Breneman2017"
+Warning--I didn't find a database entry for "Mozer2018"
+Warning--I didn't find a database entry for "Greeley2019"
+Warning--I didn't find a database entry for "Douma2017"
+Warning--I didn't find a database entry for "Lorentzen2001b"
+Warning--I didn't find a database entry for "O'Brien2004"
+Warning--I didn't find a database entry for "Douma2019"
+Warning--I didn't find a database entry for "Brown1965_2"
+Warning--I didn't find a database entry for "Trefall1966"
+Warning--I didn't find a database entry for "Barcus1966"
+Warning--I didn't find a database entry for "Parks1967"
+Warning--I didn't find a database entry for "Blake1996"
+Warning--I didn't find a database entry for "Dietrich2010"
+Warning--I didn't find a database entry for "Shumko2018a"
+Warning--I didn't find a database entry for "O'brien2016"
+Warning--I didn't find a database entry for "Blum2015"
+Warning--I didn't find a database entry for "Blake2016"
+Warning--I didn't find a database entry for "Joy2002"
+Warning--I didn't find a database entry for "Olson1982"
+Warning--I didn't find a database entry for "irbem"
+Warning--I didn't find a database entry for "Agapitov2018"
+Warning--I didn't find a database entry for "Metropolis1953"
+Warning--I didn't find a database entry for "Hastings1970"
+Warning--I didn't find a database entry for "Sambridge2006"
+Warning--I didn't find a database entry for "Sharma2017"
+Warning--I didn't find a database entry for "Gurnett1979"
+Warning--I didn't find a database entry for "Santolik2003"
+Warning--I didn't find a database entry for "Turner2017"
+Warning--I didn't find a database entry for "Agapitov2010"
+Warning--I didn't find a database entry for "Agapitov2011b"
+Warning--I didn't find a database entry for "Agapitov2017a"
+Warning--I didn't find a database entry for "Shen2019"
+apacite.bst [2013/07/21 v6.03 APA bibliography style]
+(There were 2 error messages)

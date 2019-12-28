@@ -113,7 +113,7 @@ class Microburst_CDF:
         return
 
     def _plot_full_L_range(self, dist_file='microburst_cdf_pdf_v4.csv', 
-                            norm_name='ac6_norm_all_cdf.csv'):
+                            norm_name='ac6_norm_all_cdf.csv', bin_offset=True):
         """ Plots the CDF and pdf curves for the full L shell range. """
         # Load the file full of number of samples
         self._load_sample_file_(os.path.join(self.norm_dir, norm_name))
@@ -121,22 +121,26 @@ class Microburst_CDF:
         # Load the file containing the pre-calculated cdf and pdf distribution values.
         dist_data = pd.read_csv(os.path.join(self.data_dir, dist_file), index_col=0)
 
+        if bin_offset:
+            bin_offset = self.bin_width/2
+        else:
+            bin_offset = 0
         # Plot the PDF and CDF curves assuming the errors are symmetric about the mean. 
         # The fill_between higlights the 95% CI (2 standard deviations)
-        self.ax[0].fill_between(dist_data.index, dist_data['cdf']-2*dist_data['cdf_err'], 
+        self.ax[0].fill_between(dist_data.index+bin_offset, dist_data['cdf']-2*dist_data['cdf_err'], 
                                             dist_data['cdf']+2*dist_data['cdf_err'], 
                                             facecolor='k', alpha=0.5)
-        self.ax[1].fill_between(dist_data.index, dist_data['pdf']-2*dist_data['pdf_err'], 
+        self.ax[1].fill_between(dist_data.index+bin_offset, dist_data['pdf']-2*dist_data['pdf_err'], 
                                             dist_data['pdf']+2*dist_data['pdf_err'], 
                                             facecolor='k', alpha=0.5)
 
-        self.ax[0].plot(dist_data.index, dist_data['cdf'], c='k', 
+        self.ax[0].plot(dist_data.index+bin_offset, dist_data['cdf'], c='k', 
                     label=f'all', lw=4, alpha=1)
-        self.ax[1].plot(dist_data.index, dist_data['pdf'], c='k', lw=4)
+        self.ax[1].plot(dist_data.index+bin_offset, dist_data['pdf'], c='k', lw=4)
         self.ax[2].step(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c='k')
         return
 
-    def _plot_L_bin(self, Li, Lf, color):
+    def _plot_L_bin(self, Li, Lf, color, bin_offset=True):
         """ Plots the CDF and pdf curves for one particular L bin. """
         if Li > Lf: Li, Lf = Lf, Li # Reverse order if passed reversed L shells.
 
@@ -144,12 +148,17 @@ class Microburst_CDF:
         self._load_sample_file_(
                 os.path.join(self.norm_dir, f'ac6_norm_{Li}_L_{Lf}_5km_bins.csv')
                 )
+        if bin_offset:
+            bin_offset = self.bin_width/2
+        else:
+            bin_offset = 0
+
         # Calculate the cdf and pdf values
         C, P, _, _, N = self.calc_cdf_pdf_stats(self.microburst_catalog, Li, Lf)
         # Make CDF, PDF, and sample plots.
-        self.ax[0].plot(self.sep_bins[:-1], C, c=color,
+        self.ax[0].plot(self.sep_bins[:-1]+bin_offset, C, c=color,
                     label=f'{Li} < L < {Lf}')
-        self.ax[1].plot(self.sep_bins[:-2], P, c=color)
+        self.ax[1].plot(self.sep_bins[:-2]+bin_offset, P, c=color)
         self.ax[2].step(self.sep_bins, self.samples.loc[:m.max_sep]/10000, c=color)
         return
 
@@ -179,15 +188,15 @@ class Microburst_CDF:
 
 if __name__ == "__main__":
     catalog_version = 6
-    # catalog_path = (f'/home/mike/research/'
-    #                     'ac6_microburst_scale_sizes'
-    #                     '/data/coincident_microbursts_catalogues/'
-    #                     'AC6_coincident_microbursts_sorted'
-    #                     f'_err_v{catalog_version}.txt')
     catalog_path = (f'/home/mike/research/'
                         'ac6_microburst_scale_sizes'
                         '/data/coincident_microbursts_catalogues/'
-                        'AC6_coincident_microbursts_2scc_v9_sorted.txt')
+                        'AC6_coincident_microbursts_sorted'
+                        f'_err_v{catalog_version}.txt')
+    # catalog_path = (f'/home/mike/research/'
+    #                     'ac6_microburst_scale_sizes'
+    #                     '/data/coincident_microbursts_catalogues/'
+    #                     'AC6_coincident_microbursts_2scc_v9_sorted.txt')
     m = Microburst_CDF(catalog_version=None, catalog_path=catalog_path)
     #_, ax = plt.subplots(3, figsize=(8, 8), sharex=True)
     #m._plot_full_L_range(ax=ax)

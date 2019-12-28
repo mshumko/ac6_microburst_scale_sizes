@@ -71,25 +71,29 @@ class Microburst_Equatorial_CDF:
         cdf_std, pdf_std = self._calc_errors(n, weights)
         return 100*cdf, pdf, 100*cdf_std, pdf_std, total_detections
 
-    def plot_cdf_pdf(self, L_array=[4, 5, 6, 7, 8], plot_all=True):
+    def plot_cdf_pdf(self, L_array=[4, 5, 6, 7, 8], plot_all=True, bin_offset_flag=True, bin_width=100):
         """ Plots the CDF and PDF values. """
         _, self.ax = plt.subplots(3, figsize=(8, 8), sharex=True)
         c=['r', 'b', 'g', 'm']
-        # sample_file_dir = ('/home/mike/research/ac6_microburst'
-        #                     '_scale_sizes/data/norm') 
+        
+        if bin_offset_flag: 
+            bin_offset = bin_width/2
+        else:
+            bin_offset = 0
+
         if plot_all:
             # Plot the CDF over all L shells in the belts.
             cdf, pdf, cdf_std, pdf_std, N = self.calc_cdf_pdf(
                                                     self.microburst_catalog, 
-                                                    4, 8)
+                                                    4, 8, bin_width=bin_width)
             # Plot just the line
-            self.ax[0].errorbar(self.norm.index[:-1], cdf, c='k',
+            self.ax[0].errorbar(self.norm.index[:-1]+bin_offset, cdf, c='k',
                         label=f'all', lw=2, capsize=2)
-            self.ax[1].errorbar(self.norm.index[:-1], pdf, c='k', lw=2)
+            self.ax[1].errorbar(self.norm.index[:-1]+bin_offset, pdf, c='k', lw=2)
             # Try using fill_between for errors
-            self.ax[0].fill_between(self.norm.index[:-1:1], cdf[::1]-2*cdf_std[::1], 
+            self.ax[0].fill_between(self.norm.index[:-1:1]+bin_offset, cdf[::1]-2*cdf_std[::1], 
                         cdf[::1]+2*cdf_std[::1], facecolor='k', alpha=0.5)
-            self.ax[1].fill_between(self.norm.index[:-1:1], pdf[::1]-2*pdf_std[::1], 
+            self.ax[1].fill_between(self.norm.index[:-1:1]+bin_offset, pdf[::1]-2*pdf_std[::1], 
                         pdf[::1]+2*pdf_std[::1], facecolor='k', alpha=0.5)
             # Plot the number of samples.
             all_samples = np.zeros_like(self.norm.index)
@@ -102,9 +106,9 @@ class Microburst_Equatorial_CDF:
                                                     self.microburst_catalog, 
                                                     lower_L, upper_L)
             # Plot just the line
-            self.ax[0].errorbar(self.norm.index[:-1], cdf, c=c[i],
+            self.ax[0].errorbar(self.norm.index[:-1]+bin_offset, cdf, c=c[i],
                         label=f'{lower_L} < L < {upper_L}', capsize=5)
-            self.ax[1].errorbar(self.norm.index[:-1], pdf, c=c[i], 
+            self.ax[1].errorbar(self.norm.index[:-1]+bin_offset, pdf, c=c[i], 
                         label=f'{lower_L} < L < {upper_L}')
             self.ax[2].step(self.norm.index, self.norm[str(float(lower_L))]/1E5, c[i])
         self._label_and_adjust_subplots()

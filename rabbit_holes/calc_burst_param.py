@@ -13,22 +13,20 @@ from matplotlib.dates import date2num
 sys.path.insert(0, '/home/mike/research/microburst-detection/burst_parameter')
 import burst_parameter
 
-catalog_dir = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
-                'coincident_microbursts_catalogues')
-catalog_name = 'AC6_coincident_microbursts_sorted_Brady_v6.txt'
 AC6_DATA_PATH = lambda sc_id: ('/home/mike/research/ac6/ac6{}/'
                                 'ascii/level2'.format(sc_id))
 
 class Microburst_Burst_Parameter:
-    def __init__(self):
-
+    def __init__(self, catalog_dir, catalog_name):
+        self.catalog_dir = catalog_dir
+        self.catalog_name = catalog_name
         return
 
     def load_catalog(self):
         """
         Load the catalog to loop over.
         """
-        catalog_path = os.path.join(catalog_dir, catalog_name)
+        catalog_path = os.path.join(self.catalog_dir, self.catalog_name)
         self.catalog = pd.read_csv(catalog_path)
         # Convert the catalog times to datetime objects
         for timeKey in ['dateTime', 'time_spatial_A', 'time_spatial_B']:
@@ -67,6 +65,13 @@ class Microburst_Burst_Parameter:
                 self.bp[i, 1] = day_bp_B[idtb[0]]
         return
 
+    def save_catalog(self):
+        """ Overwrites the input catalog with the burst paramater appended. """
+        self.catalog['bp_max'] = self.bp.max(axis=1)
+        catalog_path = os.path.join(self.catalog_dir, self.catalog_name)
+        self.catalog.to_csv(catalog_path, index=False)
+        return
+
     def load_ten_hz_data(self, day):
         """
         Load the 10 Hz AC6 data from both spacecraft on date.
@@ -84,12 +89,16 @@ class Microburst_Burst_Parameter:
         return
 
 if __name__ == '__main__':
-    m = Microburst_Burst_Parameter()
+    catalog_dir = ('/home/mike/research/ac6_microburst_scale_sizes/data/'
+                'coincident_microbursts_catalogues')
+    catalog_name = 'AC6_coincident_microbursts_sorted_Brady_v6.txt'
+    catalog_path = os.path.join(catalog_dir, catalog_name)
+
+    m = Microburst_Burst_Parameter(catalog_dir, catalog_name)
     m.load_catalog()
     m.loop()
-    df = pd.DataFrame(m.bp)
-    df.to_csv('test.csv', index=False)
+    m.save_catalog()
 
-    df = pd.read_csv('test.csv')
+    df = pd.read_csv(catalog_path)
     plt.hist(df.max(axis=1), bins=np.arange(0, 40))
     plt.show()

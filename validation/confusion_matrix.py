@@ -8,8 +8,8 @@ import sys
 #import pandas as pd
 
 sys.path.insert(0, '/home/mike/research/'
-                    'ac6-microburst-scale-sizes/'
-                    'microburst-detection')
+                    'ac6_microburst_scale_sizes/'
+                    'microburst_detection')
 import microburst_detection
 
 class ConfusionMatrix(microburst_detection.FindMicrobursts):
@@ -150,9 +150,9 @@ class ConfusionMatrix(microburst_detection.FindMicrobursts):
         return goodInd
 
 if __name__ == '__main__':
-    dKwargs = {'method':'wavelet', 'thresh':0.01, 'maxWidth':0.3,
-                'SIGNIF_LEVEL':0.2}
-    #dKwargs = {'method':'obrien', 'n':0.1, 'a':0.5, 'thresh':5}
+    # dKwargs = {'method':'wavelet', 'thresh':0.01, 'maxWidth':0.3,
+    #             'SIGNIF_LEVEL':0.2}
+    dKwargs = {'method':'obrien', 'n':0.1, 'a':0.5, 'thresh':5}
     c = ConfusionMatrix('A', datetime(2016, 10, 14))
     c.find_microbursts(**dKwargs)
     #c.corrFlag()

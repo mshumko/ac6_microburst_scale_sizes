@@ -105,11 +105,6 @@ The AC6 mission consists of a pair of 0.5U (10x10x5 cm) CubeSats built by The Ae
 
 Each AC6 unit is equipped with three Aerospace microdosimeters (licensed to Teledyne Microelectronics, Inc). The dosimeter used for this study, dos1, is identical on both AC6 units and has a $35$ keV electron threshold. All AC6 dosimeters sample at 1 Hz in survey mode, and 10 Hz in burst mode in the radiation belts  \cite{O'brien2016}. Since microburst duration is less than a second, only the 10 Hz data was used to identify microbursts. 
 
-\begin{figure}
-\includegraphics[width=\textwidth]{fig1.pdf}
-\caption{AC6 mission properties for (a) spacecraft separation and (b) number of simultaneous quality 10 Hz samples as a function of L and MLT.} \label{fig1}
-\end{figure}
-
 \section{Methodology} 
 \subsection{Microburst Detection} \label{microburst_detection}
 The first step to find microbursts observed simultaneously by AC6 is to identify them on each individual spacecraft. The detection method used to make the microburst dataset is the burst parameter developed by \cite{O'Brien2003} \add{and defined as $(n_{100} - a_{500})/\sqrt{1 + a_{500}}$, where $n_{100}$ is the number of counts observed in 100 ms, and $n_{500}$ is the 500 ms center running average. This definition is chosen because it balances the linear $(n - a)$ and logarithmic $(n/a)$ burstiness in a count time series. } This algorithm has been successfully used in other microburst studies, mainly to study microbursts observed by SAMPEX \cite<e.g.>{O'Brien2003, Blum2015, Douma2017, Douma2019}. For AC6, a burst parameter threshold of $5 \ \mathrm{counts}^{1/2}$ was determined, \add{by manual inspection of microbursts observed on an activate day on 14 October 2016,} to have a good trade-off between false positive and false negative microburst detections.
@@ -120,14 +115,7 @@ Another source of noise is crosslink transmissions between AC6-A and AC6-B. Thes
 
 Microbursts observed individually by AC6 were then merged into a dataset of temporally correlated microbursts, i.e. microbursts that were observed simultaneously by both AC6 units, with the following procedure. The general idea is that a microburst detected by one spacecraft will cross-correlate well with the time series from the other spacecraft if it observed a similar microburst, and poorly if there was no microburst observed by the other spacecraft. Thus each microburst detection made by either spacecraft was cross-correlated with the time series from the other spacecraft whether or not a microburst was observed by the other spacecraft. \change{Cross-correlation windows with 1 and 1.2 s widths were chosen. The slightly different window sizes to account for random count variation due to Poisson noise.}{Cross-correlation windows with 1 and 1.2 s widths, containing on the microburst peak, were used and three correlations calculated: two with the window start and end times aligned, and one with the windows centered. The correlation assigned to each microburst was the maximum of the three.} Microbursts detections that had a cross-correlation greater than $0.8$ were considered temporally coincident. This CC threshold was chosen as it is low enough to accept user-identified coincident microbursts superposed with noise, and high enough to reject most non-coincident events. Figure \ref{fig2}, panels (a), (c), (e), and (g) show examples of microbursts observed by both AC6 units when they were separated by 5, 16, 37, and 69 km, respectively. 
 
-We also applied an additional criteria to eliminate stationary structures from the dataset. These stationary structures are sometimes narrow in latitude, e.g. curtains \cite{Blake2016}, and may be misidentified as microbursts. This criteria requires that the temporal CC must be greater than the spatial CC + 0.3. The spatial CC was calculated by shifting one spacecraft's time series by the in-track lag to cross-correlate at the same latitude. The 0.3 threshold was chosen so that the spatial correlation is much lower than the temporal correlation. Figure \ref{fig2}, panels (b), (d), (f), and (h) show the shifted time series to confirm that there were no spatially correlated, non-microburst structures present. Lastly, each event in the merged microburst dataset was visually checked by two authors to remove poorly correlated events. After filtering out transmitter noise and applying the CC criteria, 662 simultaneous microburst detections were found and used in this study.
-
-\begin{figure}
-\includegraphics[width=\textwidth]{fig2.pdf}
-\caption{Examples of $>35$ keV microbursts observed simultaneously by AC6-A in red and AC6-B in blue. Panels (a), (c), (e), and (g) show the temporally-aligned time series when AC6 were separated by $s=$ 5, 16, 37, and 69 km, respectively. The corresponding panels (b), (d), (f), and (h) show the spatially-aligned time series which is made by shifting the AC6-A time series in the above panels by the in-track lag (annotated with $dt$) that would show any spatially correlated structures. The clear temporal correlation and lack of spatial correlation demonstrates that these events are microbursts.} 
-\label{fig2}
-\end{figure}
-	
+We also applied an additional criteria to eliminate stationary structures from the dataset. These stationary structures are sometimes narrow in latitude, e.g. curtains \cite{Blake2016}, and may be misidentified as microbursts. This criteria requires that the temporal CC must be greater than the spatial CC + 0.3. The spatial CC was calculated by shifting one spacecraft's time series by the in-track lag to cross-correlate at the same latitude. The 0.3 threshold was chosen so that the spatial correlation is much lower than the temporal correlation. Figure \ref{fig2}, panels (b), (d), (f), and (h) show the shifted time series to confirm that there were no spatially correlated, non-microburst structures present. Lastly, each event in the merged microburst dataset was visually checked by two authors to remove poorly correlated events. After filtering out transmitter noise and applying the CC criteria, 662 simultaneous microburst detections were found and used in this study.	
 
 \subsection{Microburst Size Distribution in LEO and Magnetic Equator}\label{microburst_distribution}
 The temporally coincident microbursts, which from now on will be referred to as microbursts, were used to estimate the fraction of microbursts observed above AC6 separation, $s$. When AC6 observes a microburst at $s$, the microburst's size must be greater than $s$. This fact, along with the arguments presented in Section 4 in \citeA{Joy2002} who studied the most probable Jovian magnetopause and bow shock stand off distances, are used to investigate the dependence of the number of microbursts observed above $s$, as a function of $s$. This dependence is the microburst complementary cumulative distribution function $\bar{F}(s)$. 
@@ -149,18 +137,6 @@ To identify the wave properties responsible for scattering microbursts, the spat
 
 The results in Figs. \ref{fig3} and \ref{fig4} show the fraction of microbursts observed above a spacecraft separation and do not fully represent the microbursts size distribution due to the compounding effects from the range of microburst sizes and random locations of microbursts near AC6. In other words, even if the microburst size is much larger than the AC6 separation, some fraction of those microbursts will be only observed by one AC6 spacecraft. Thus modeling is necessary to capture the compounding influence of these statistical effects on AC6.
 
-\begin{figure}
-\includegraphics[width=\textwidth]{fig3_v2.pdf}
-\caption{Microburst size distribution in low Earth orbit. Panel (a) shows the percent of microbursts observed above that separation after normalizing for the uneven AC6 sampling in separation. Panel (b) shows the microburst probability density (size histogram) as a function of separation. Lastly, panel (c) shows the normalization, i.e. number of simultaneous samples AC6 observed as a function of separation. The colored lines show the distributions binned by L, and the thick black curve for the entire radiation belt ($4 < L < 8$). The gray shading around the black curve shows the 95\% confidence interval uncertainty due to counting statistics, estimated and propagated from the unnormalized microburst detections. The uncertainty for the colored curves is larger since there are less events in those distributions, and are omitted for clarity.}
-\label{fig3}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=\textwidth]{fig4_v2.pdf}
-\caption{AC6 separation distribution of microburst sizes mapped to the magnetic equator in the same format as Fig. \ref{fig3}.} 
-\label{fig4}
-\end{figure}
-
 \section{Modeling the Distribution of Microburst Sizes} \label{model_section}
 \subsection{Monte Carlo and Analytic Models to Calculate $\bar{F}(s)$}
 
@@ -172,13 +148,6 @@ The analytic model, while identical to the MC model, highlights the geometrical 
 \begin{equation} \label{circle_circle_intersect}
 A(r, s) = 2r^2 \cos^{-1}{\Big( \frac{s}{2r} \Big)} - \frac{s}{2} \sqrt{4r^2 - s^2}.
 \end{equation} Example geometries where $A(r, s) > 0$ are shown in Fig. \ref{fig5}b and c. With this conceptual model and $A(r, s)$, the analytic form of $\bar{F}(s)$ can be found and is derived in \ref{appendixb}. \change{The example in Fig. 5d illustrates these random affects with a modeled $\bar{F}(s)$ for a one-size, $d=40$ km microburst population.}{A concrete example is shown in Fig. 5d. Figure 5d compares the observed, $4<L<8$, $\bar{F}(s)$ curve to the Monte Carlo and analytic $\bar{F}(s)$ curves for a 40 km diameter microburst size population in red and dashed blue lines, respectively.}
-
-
-\begin{figure}
-\includegraphics[width=\textwidth]{fig5.pdf}
-\caption{Panels A-C show the varying geometries of the analytic model. The two spacecraft are shown as black dots. The enclosing black circle around each spacecraft bounds the area where a microburst will be observed by at least one AC6 spacecraft if the microburst's center lies inside the circle. Panel (A) shows the case where microburst diameter is smaller than the AC6 separation and all microbursts will be observed by either unit A or B and never simultaneously. Panel (B) shows the intermediate case where the microburst diameter is comparable to the AC6 separation and some fraction of microbursts, proportional to the circle intersection area $A(r, s)$, will be observed simultaneously. Panel (C) shows the extreme case where nearly all microbursts will be observed by both spacecraft. Lastly panel (D) shows $\bar{F}(s)$ from the AC6 data with a solid black line, and modeled MC and analytic $\bar{F}(s)$ curves for a single-sized, $d = 40$ km,  microburst population.} 
-\label{fig5}
-\end{figure}
 
 \subsection{Methods for estimating optimal $\theta$ parameters}
 At this stage we have all of the ingredients to model $\bar{F}(s)$ given a prescribed $p(d | \theta)$. For each $p(d | \theta)$ tested, the optimal $\theta$ parameters were estimated using traditional least squares regression and Bayesian inference. While we report the $\theta$ parameters that minimize least squares, this section focuses on Bayesian inference because it seamlessly incorporates statistical uncertainty in the data. The uncertainty in the data is passed on to uncertainty in $\theta$ which is then no longer an optimal value, rather a distribution of values that is consistent with the observations and its uncertainty. 
@@ -208,18 +177,6 @@ p(d | d_0, d_1, a) = a \delta(d-d_0) + (1-a)\delta(d-d_1)
 
 Other, continuous PDFs were tested including: Maxwellian (Maxwell -- Boltzmann), log-normal, and Weibull. The range of model parameters that are consistent with the observed $\bar{F}(s)$ are presented in \ref{appendixc}. These distributions were chosen because they have the following realistic properties: they are continuous, can be symmetrical or asymmetrical, and approach 0 in the limit as $r \rightarrow 0$ (lower bound microburst size is ultimately limited by the electron gyroradius). Qualitatively, the two-size model fits the observations the best out of all $p(d)$ tested.
 
-\begin{figure}
-\includegraphics[width=\textwidth]{fig6.pdf}
-\caption{Range of plausible microburst sizes assuming all microbursts are one fixed size. Panel (a) shows the posterior probability density function of microburst diameters with the black curve. The posterior median microburst diameter is 73 km and the 95\% credible interval is 38-129 km. A uniform prior between 0 and 200 km was assumed for this MCMC run and is shown with the horizontal black line. Panel (b) shows the $\bar{F}(s)$ curve from the AC6 data in black, and the range of $\bar{F}(s)$ curves from the posterior. The median $\bar{F}(s)$ is shown with the dashed black curve and the gray shaded region corresponds to the 95\% credible interval.} 
-\label{fig6}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=\textwidth]{fig7.pdf}
-\caption{The range of plausible microburst sizes assuming the microburst size distribution is bimodal and consists of two sizes $d_0$ and $d_1$. The relative fraction of each size is $a$. Panel (a) shows the posterior distribution for $a$ with has a median value of $0.02$. The $a$ prior was uniform between 0 and 0.2. Panel (b) shows the posterior distribution for $d_0$, the larger microburst population, estimated with a uniform prior between 50 and 200 km. The posterior median for $d_0$ is $122$ km. Panel (c) shows the posterior distribution for $d_1$, the smaller microburst population, estimated using a uniform prior between 0 and 50 km with a posterior median diameter of $28$ km. Panel (d) is similar to Fig. \ref{fig6}b and shows the AC6 microburst $\bar{F}(s)$ with the solid black curve. To estimate the range of modeled $\bar{F}(s)$ curves in Panel (d), a set of 1000 random parameter triples ($a$, $d_0$, and $d_1$) were drawn from the posterior and used to generate 1000 $\bar{F}(s)$ curves. At each $s$ the range of consistent $\bar{F}(s)$ were quantified by the median shown with the dashed black curve, and 95\% credible interval shown with the gray shading.} 
-\label{fig7}
-\end{figure}
-
 \section{Discussion} \label{discussion}
 The LEO microburst $\bar{F}(s)$ estimated in section \ref{microburst_distribution} shows that a majority of coincident $>35$ keV microbursts were observed by AC6 when they were separated by less than a few tens of km. The spatial distribution of predominately low energy microbursts determined here can be most directly compared with low energy microburst sizes determined from balloon observations. Our conclusion is most similar to \citeA{Parks1967} who reported that many $> 15$ keV microbursts are less than $40$ km in diameter while others were on average $80 \pm 28$ km in diameter. The relatively small number of large $> 70$ km microbursts observed by AC6 are consistent with the results from \citeA{Brown1965_2} and \citeA{Barcus1966}, although the AC6 separation is mostly latitudinal while \citeA{Brown1965_2} and \citeA{Barcus1966} used data from pairs of balloons that were separated predominantly in longitude. 
 
@@ -241,6 +198,47 @@ More generally, small microburst sizes shows that the waves responsible for scat
 The twin AC6 CubeSats enabled the detailed statistical study of microburst sizes from a two point measurement platform. Roughly $60 \%$ of the $> 35$ keV microbursts were simultaneously observed while AC6 was separated by less than $20$ km and the rest were observed up to $\approx 70$ km separation. Modeling the microburst cumulative distribution function is essential to quantify the relationship between the number of microbursts observed as a function of separation to a hypothesized microburst size distributions. The AC6 microburst data, together with modeling, has hinted at the existence of a bimodal microburst size PDF with the majority of microbursts with a diameter smaller than $40$ km and a rare microburst population with a diameter around $100$ km. The bimodal size hypothesis may be more comprehensively addressed from LEO spacecraft with more simultaneous microburst observations, homogeneous MLT coverage, and differential energy channels. Moreover, to disentangle the compounding effect that affects two-point microburst measurements, a X-ray imager on a high altitude balloon can observe the atmospheric microburst footprint and determine the microburst size, shape, and any spatial correlations with little ambiguity. 
 
 When mapped to the magnetic equator, most microbursts were observed while the mapped AC6 separation was less than $200$ km. This correlates well with the sizes of correlated high amplitude chorus waves and it suggests that the wave properties crucial for scattering microbursts must be correlated over relatively small scales. By comprehensively studying the wave properties that are correlated on a few hundred km scales, the dominant wave scattering modes may be identified.
+
+\begin{figure}
+\includegraphics[width=\textwidth]{fig1.pdf}
+\caption{AC6 mission properties for (a) spacecraft separation and (b) number of simultaneous quality 10 Hz samples as a function of L and MLT.} \label{fig1}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{fig2.pdf}
+\caption{Examples of $>35$ keV microbursts observed simultaneously by AC6-A in red and AC6-B in blue. Panels (a), (c), (e), and (g) show the temporally-aligned time series when AC6 were separated by $s=$ 5, 16, 37, and 69 km, respectively. The corresponding panels (b), (d), (f), and (h) show the spatially-aligned time series which is made by shifting the AC6-A time series in the above panels by the in-track lag (annotated with $dt$) that would show any spatially correlated structures. The clear temporal correlation and lack of spatial correlation demonstrates that these events are microbursts.} 
+\label{fig2}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{fig3_v2.pdf}
+\caption{Microburst size distribution in low Earth orbit. Panel (a) shows the percent of microbursts observed above that separation after normalizing for the uneven AC6 sampling in separation. Panel (b) shows the microburst probability density (size histogram) as a function of separation. Lastly, panel (c) shows the normalization, i.e. number of simultaneous samples AC6 observed as a function of separation. The colored lines show the distributions binned by L, and the thick black curve for the entire radiation belt ($4 < L < 8$). The gray shading around the black curve shows the 95\% confidence interval uncertainty due to counting statistics, estimated and propagated from the unnormalized microburst detections. The uncertainty for the colored curves is larger since there are less events in those distributions, and are omitted for clarity.}
+\label{fig3}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{fig4_v2.pdf}
+\caption{AC6 separation distribution of microburst sizes mapped to the magnetic equator in the same format as Fig. \ref{fig3}.} 
+\label{fig4}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{fig5.pdf}
+\caption{Panels A-C show the varying geometries of the analytic model. The two spacecraft are shown as black dots. The enclosing black circle around each spacecraft bounds the area where a microburst will be observed by at least one AC6 spacecraft if the microburst's center lies inside the circle. Panel (A) shows the case where microburst diameter is smaller than the AC6 separation and all microbursts will be observed by either unit A or B and never simultaneously. Panel (B) shows the intermediate case where the microburst diameter is comparable to the AC6 separation and some fraction of microbursts, proportional to the circle intersection area $A(r, s)$, will be observed simultaneously. Panel (C) shows the extreme case where nearly all microbursts will be observed by both spacecraft. Lastly panel (D) shows $\bar{F}(s)$ from the AC6 data with a solid black line, and modeled MC and analytic $\bar{F}(s)$ curves for a single-sized, $d = 40$ km,  microburst population.} 
+\label{fig5}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{fig6.pdf}
+\caption{Range of plausible microburst sizes assuming all microbursts are one fixed size. Panel (a) shows the posterior probability density function of microburst diameters with the black curve. The posterior median microburst diameter is 73 km and the 95\% credible interval is 38-129 km. A uniform prior between 0 and 200 km was assumed for this MCMC run and is shown with the horizontal black line. Panel (b) shows the $\bar{F}(s)$ curve from the AC6 data in black, and the range of $\bar{F}(s)$ curves from the posterior. The median $\bar{F}(s)$ is shown with the dashed black curve and the gray shaded region corresponds to the 95\% credible interval.} 
+\label{fig6}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{fig7.pdf}
+\caption{The range of plausible microburst sizes assuming the microburst size distribution is bimodal and consists of two sizes $d_0$ and $d_1$. The relative fraction of each size is $a$. Panel (a) shows the posterior distribution for $a$ with has a median value of $0.02$. The $a$ prior was uniform between 0 and 0.2. Panel (b) shows the posterior distribution for $d_0$, the larger microburst population, estimated with a uniform prior between 50 and 200 km. The posterior median for $d_0$ is $122$ km. Panel (c) shows the posterior distribution for $d_1$, the smaller microburst population, estimated using a uniform prior between 0 and 50 km with a posterior median diameter of $28$ km. Panel (d) is similar to Fig. \ref{fig6}b and shows the AC6 microburst $\bar{F}(s)$ with the solid black curve. To estimate the range of modeled $\bar{F}(s)$ curves in Panel (d), a set of 1000 random parameter triples ($a$, $d_0$, and $d_1$) were drawn from the posterior and used to generate 1000 $\bar{F}(s)$ curves. At each $s$ the range of consistent $\bar{F}(s)$ were quantified by the median shown with the dashed black curve, and 95\% credible interval shown with the gray shading.} 
+\label{fig7}
+\end{figure}
 
 \appendix
 
